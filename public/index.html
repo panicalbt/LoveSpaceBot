@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark" data-accent="pink">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LoveSpace</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* CSS Variables */
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            
+            --accent-red: #ef4444;
+            --accent-pink: #ec4899;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            
+            --accent-color: var(--accent-pink);
+            --accent-glow: rgba(236, 72, 153, 0.5);
+        }
+        
+        [data-theme="light"] {
+            --bg-color: #f8fafc;
+            --text-color: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(0, 0, 0, 0.1);
+        }
+        
+        [data-accent="red"] { --accent-color: var(--accent-red); --accent-glow: rgba(239, 68, 68, 0.5); }
+        [data-accent="blue"] { --accent-color: var(--accent-blue); --accent-glow: rgba(59, 130, 246, 0.5); }
+        [data-accent="green"] { --accent-color: var(--accent-green); --accent-glow: rgba(16, 185, 129, 0.5); }
+        [data-accent="pink"] { --accent-color: var(--accent-pink); --accent-glow: rgba(236, 72, 153, 0.5); }
+        
+        /* Reset and base styles */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #particles-canvas {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1; pointer-events: none;
+        }
+
+        /* Layout */
+        .app-container { min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 80px; }
+        .screen { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* UI Elements */
+        .card {
+            background: var(--card-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border); border-radius: 16px; padding: 20px;
+            margin-bottom: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative; overflow: hidden;
+        }
+        
+        .btn {
+            background: var(--accent-color); color: white; border: none; padding: 12px 20px;
+            border-radius: 12px; font-size: 16px; font-weight: 600; width: 100%;
+            cursor: pointer; transition: all 0.2s; box-shadow: 0 0 15px var(--accent-glow);
+            margin-bottom: 10px;
+        }
+        .btn:active { transform: scale(0.98); }
+        
+        .action-btn {
+           background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color);
+           padding: 8px 12px; border-radius: 8px; margin-top: 10px; cursor: pointer; transition: 0.2s;
+           font-weight: bold; width: 48%;
+        }
+        .action-btn.done { background: var(--accent-color); color: white; box-shadow: 0 0 10px var(--accent-glow); }
+        .action-btn.del { border-color: #ef4444; color: #ef4444; }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid var(--card-border); display: flex; justify-content: space-around;
+            padding: 10px 0; z-index: 100; padding-bottom: calc(10px + env(safe-area-inset-bottom));
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; color: var(--text-color);
+            opacity: 0.5; font-size: 12px; transition: opacity 0.2s; cursor: pointer; gap: 4px;
+        }
+        .nav-item.active { opacity: 1; color: var(--accent-color); }
+
+        /* Modals & Bottom Sheets */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+            z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .overlay.active { opacity: 1; pointer-events: all; }
+        .bottom-sheet {
+            position: fixed; bottom: -100%; left: 0; width: 100%;
+            background: var(--card-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-top-left-radius: 24px; border-top-right-radius: 24px;
+            padding: 24px; z-index: 1000; transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.3); border-top: 1px solid var(--card-border);
+            padding-bottom: calc(24px + env(safe-area-inset-bottom));
+        }
+        .bottom-sheet.active { bottom: 0; }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--card-border);
+            color: var(--text-color); padding: 12px; border-radius: 12px; font-size: 16px;
+            margin-bottom: 16px; outline: none; appearance: none;
+        }
+        input:focus, select:focus { border-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-glow); }
+        
+        /* Typography & Colors */
+        h1, h2, h3 { margin-bottom: 12px; }
+        .text-accent { color: var(--accent-color); }
+        .text-glow { text-shadow: 0 0 10px var(--accent-glow); }
+        .color-picker { display: flex; gap: 10px; margin-bottom: 20px; }
+        .color-circle { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
+        .color-circle.active { transform: scale(1.1); border-color: white; }
+
+        /* Avatars */
+        .couple-avatars { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 20px 0; }
+        .avatar {
+            width: 60px; height: 60px; border-radius: 50%; background: var(--card-bg);
+            display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 24px;
+            border: 2px solid var(--accent-color); box-shadow: 0 0 15px var(--accent-glow);
+            text-transform: uppercase;
+        }
+        .heart { font-size: 24px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+    <canvas id="particles-canvas"></canvas>
+    
+    <div class="overlay" id="overlay" onclick="closeModal()"></div>
+    
+    <!-- Modal: Add Task -->
+    <div class="bottom-sheet" id="modal-task">
+        <h3>Новое задание</h3>
+        <input type="text" id="task-title" placeholder="Что нужно сделать?">
+        <input type="number" id="task-points" placeholder="Награда (💎)">
+        <button class="btn" onclick="saveTask()">Сохранить</button>
+    </div>
+
+    <!-- Modal: Add Wish -->
+    <div class="bottom-sheet" id="modal-wish">
+        <h3>Новое желание</h3>
+        <input type="text" id="wish-title" placeholder="Чего вам хочется?">
+        <input type="number" id="wish-points" placeholder="Цена (💎)">
+        <button class="btn" onclick="saveWish()">Сохранить</button>
+    </div>
+
+    <!-- Modal: Add Plan -->
+    <div class="bottom-sheet" id="modal-plan">
+        <h3>Новый план</h3>
+        <select id="plan-type">
+            <option value="day">На день</option>
+            <option value="week">На неделю</option>
+            <option value="month">На месяц</option>
+        </select>
+        <input type="text" id="plan-text" placeholder="Опишите план">
+        <button class="btn" onclick="savePlan()">Сохранить</button>
+    </div>
+    
+    <div class="app-container">
+        <!-- Auth Screen -->
+        <div id="screen-auth" class="screen active">
+            <div style="text-align: center; margin-top: 50px;">
+                <h1 class="text-accent text-glow" style="font-size: 40px;">LoveSpace</h1>
+                <p>Добро пожаловать в ваше личное пространство</p>
+                
+                <div class="card" style="margin-top: 40px;">
+                    <h3>Создать пару</h3>
+                    <button class="btn" onclick="createCouple()">Сгенерировать код</button>
+                    <p id="my-code" style="font-size: 28px; font-weight: bold; letter-spacing: 4px; margin-top: 10px; display: none; color: var(--accent-color);"></p>
+                </div>
+                
+                <div class="card">
+                    <h3>Присоединиться</h3>
+                    <input type="text" id="partner-code-input" placeholder="Введите код (6 символов)" maxlength="6" style="text-transform: uppercase; text-align: center; font-size: 20px; letter-spacing: 2px;">
+                    <button class="btn" onclick="joinCouple()">Объединиться</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Screen -->
+        <div id="screen-dashboard" class="screen">
+            <h2 style="text-align: center;">Привет, <span id="user-name" class="text-accent"></span>!</h2>
+            
+            <div class="couple-avatars">
+                <div class="avatar" id="avatar-me">Я</div>
+                <div class="heart">❤️</div>
+                <div class="avatar" id="avatar-partner" style="border-color: rgba(255,255,255,0.2); box-shadow: none;">П</div>
+            </div>
+
+            <div class="card" style="text-align: center;">
+                <p>Ваш баланс</p>
+                <h1 class="text-accent text-glow" style="font-size: 56px; margin: 10px 0;" id="user-balance">0</h1>
+                <p style="opacity: 0.7;">кристаллов</p>
+            </div>
+            
+            <button class="btn" onclick="tg.showAlert('Код вашей пары: ' + state.couple.code)">Показать код пары</button>
+        </div>
+
+        <!-- Plans Screen -->
+        <div id="screen-plans" class="screen">
+            <h2>Наши Планы</h2>
+            <button class="btn" onclick="openModal('modal-plan')">+ Добавить план</button>
+            <div id="plans-list" style="margin-top: 15px;"></div>
+        </div>
+
+        <!-- Tasks Screen -->
+        <div id="screen-tasks" class="screen">
+            <h2>Задания</h2>
+            <button class="btn" onclick="openModal('modal-task')">+ Дать задание</button>
+            <div id="tasks-list" style="margin-top: 15px;"></div>
+        </div>
+
+        <!-- Wishes Screen -->
+        <div id="screen-wishes" class="screen">
+            <h2>Магазин Желаний</h2>
+            <button class="btn" onclick="openModal('modal-wish')">+ Добавить желание</button>
+            <div id="wishes-list" style="margin-top: 15px;"></div>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="screen-settings" class="screen">
+            <h2>Настройки</h2>
+            <div class="card">
+                <h3>Внешний вид</h3>
+                <div style="margin: 15px 0;">
+                    <p>Тема:</p>
+                    <button class="btn" style="margin-top: 10px;" onclick="toggleTheme()">Переключить тему</button>
+                </div>
+                <div style="margin-top: 20px;">
+                    <p style="margin-bottom: 10px;">Цвет свечения:</p>
+                    <div class="color-picker">
+                        <div class="color-circle" style="background: var(--accent-red);" onclick="setAccent('red')"></div>
+                        <div class="color-circle" style="background: var(--accent-pink);" onclick="setAccent('pink')"></div>
+                        <div class="color-circle" style="background: var(--accent-blue);" onclick="setAccent('blue')"></div>
+                        <div class="color-circle" style="background: var(--accent-green);" onclick="setAccent('green')"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card" style="border-color: rgba(239, 68, 68, 0.3);">
+                <button class="btn" style="background: transparent; border: 1px solid var(--accent-red); color: var(--accent-red); box-shadow: none;" onclick="disconnectCouple()">Разорвать пару</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div id="bottom-nav" class="bottom-nav" style="display: none;">
+        <div class="nav-item active" onclick="nav('dashboard', this)">
+            <span style="font-size: 24px;">🏠</span><span>Главная</span>
+        </div>
+        <div class="nav-item" onclick="nav('plans', this)">
+            <span style="font-size: 24px;">📅</span><span>Планы</span>
+        </div>
+        <div class="nav-item" onclick="nav('tasks', this)">
+            <span style="font-size: 24px;">✅</span><span>Задания</span>
+        </div>
+        <div class="nav-item" onclick="nav('wishes', this)">
+            <span style="font-size: 24px;">🎁</span><span>Желания</span>
+        </div>
+        <div class="nav-item" onclick="nav('settings', this)">
+            <span style="font-size: 24px;">⚙️</span><span>Настройки</span>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+        
+        let state = { user: null, couple: null };
+
+        // --- Modals ---
+        function openModal(id) {
+            tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('overlay').classList.add('active');
+            document.getElementById(id).classList.add('active');
+        }
+        function closeModal() {
+            document.getElementById('overlay').classList.remove('active');
+            document.querySelectorAll('.bottom-sheet').forEach(b => b.classList.remove('active'));
+        }
+
+        // --- Gamification ---
+        function shootConfetti() {
+            tg.HapticFeedback.impactOccurred('heavy');
+            for(let i=0; i<40; i++) {
+                let p = new Particle();
+                p.y = window.innerHeight;
+                p.x = window.innerWidth / 2;
+                p.speedY = -(Math.random() * 8 + 4);
+                p.speedX = (Math.random() - 0.5) * 12;
+                p.size = Math.random() * 4 + 2;
+                particles.push(p);
+                // Remove the extra particle after 2 seconds
+                setTimeout(() => {
+                    const index = particles.indexOf(p);
+                    if(index > -1) particles.splice(index, 1);
+                }, 2000);
+            }
+        }
+
+        // --- API & State ---
+        async function apiCall(endpoint, data = null, method = 'POST') {
+            const options = { method, headers: { 'Content-Type': 'application/json' } };
+            if (data) options.body = JSON.stringify(data);
+            try {
+                const res = await fetch(`/api/${endpoint}`, options);
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.error || 'API Error');
+                return json;
+            } catch (e) {
+                tg.showPopup({ title: 'Ошибка', message: e.message });
+                throw e;
+            }
+        }
+
+        async function initApp() {
+            try {
+                const user = await apiCall('auth', { initData: tg.initData || '' });
+                state.user = user;
+                state.couple = user.couple;
+                applyThemeSettings();
+                updateUI();
+                if (state.couple) loadData();
+            } catch (e) {
+                document.querySelector('.app-container').innerHTML = '<p style="text-align:center;margin-top:50px;">Ошибка подключения к серверу.</p>';
+            }
+        }
+
+        async function createCouple() {
+            tg.HapticFeedback.impactOccurred('medium');
+            const couple = await apiCall('couple', { action: 'create', telegramId: state.user.telegramId });
+            state.user.coupleId = couple.id;
+            state.couple = couple;
+            document.getElementById('my-code').innerText = couple.code;
+            document.getElementById('my-code').style.display = 'block';
+            updateUI();
+            loadData();
+        }
+
+        async function joinCouple() {
+            tg.HapticFeedback.impactOccurred('medium');
+            const code = document.getElementById('partner-code-input').value.toUpperCase();
+            if (code.length === 6) {
+                const couple = await apiCall('couple', { action: 'join', telegramId: state.user.telegramId, code });
+                state.user.coupleId = couple.id;
+                state.couple = couple;
+                updateUI();
+                loadData();
+                tg.showPopup({ title: 'Успех', message: 'Вы успешно объединились!' });
+                shootConfetti();
+            } else {
+                tg.HapticFeedback.notificationOccurred('error');
+                tg.showPopup({ message: 'Код должен состоять из 6 символов' });
+            }
+        }
+
+        async function disconnectCouple() {
+            tg.HapticFeedback.impactOccurred('medium');
+            tg.showConfirm('Вы уверены, что хотите разорвать пару?', async function(confirm) {
+                if(confirm) {
+                    await apiCall('couple', { action: 'leave', telegramId: state.user.telegramId });
+                    state.user.coupleId = null;
+                    state.couple = null;
+                    updateUI();
+                }
+            });
+        }
+
+        // --- Data Logic ---
+        async function loadData() {
+            if (!state.couple) return;
+            const cid = state.couple.id;
+            const [tasks, wishes, plans] = await Promise.all([
+                fetch(`/api/tasks?coupleId=${cid}`).then(r => r.json()),
+                fetch(`/api/wishes?coupleId=${cid}`).then(r => r.json()),
+                fetch(`/api/plans?coupleId=${cid}`).then(r => r.json())
+            ]);
+            renderTasks(tasks);
+            renderWishes(wishes);
+            renderPlans(plans);
+        }
+
+        async function saveTask() {
+            tg.HapticFeedback.impactOccurred('medium');
+            const title = document.getElementById('task-title').value;
+            const points = document.getElementById('task-points').value;
+            if(!title || !points) return;
+            await apiCall('tasks', { action: 'create', coupleId: state.couple.id, title, points });
+            document.getElementById('task-title').value = '';
+            document.getElementById('task-points').value = '';
+            closeModal();
+            loadData();
+        }
+
+        async function completeTask(id) {
+            tg.HapticFeedback.impactOccurred('heavy');
+            await apiCall('tasks', { action: 'complete', coupleId: state.couple.id, taskId: id, telegramId: state.user.telegramId });
+            state.user.balance += parseInt(document.querySelector(`#task-${id}-pts`).innerText);
+            document.getElementById('user-balance').innerText = state.user.balance;
+            shootConfetti();
+            loadData();
+        }
+
+        async function saveWish() {
+            tg.HapticFeedback.impactOccurred('medium');
+            const title = document.getElementById('wish-title').value;
+            const points = document.getElementById('wish-points').value;
+            if(!title || !points) return;
+            await apiCall('wishes', { action: 'create', coupleId: state.couple.id, title, points });
+            document.getElementById('wish-title').value = '';
+            document.getElementById('wish-points').value = '';
+            closeModal();
+            loadData();
+        }
+
+        async function buyWish(id, points) {
+            if (state.user.balance < points) {
+                tg.HapticFeedback.notificationOccurred('error');
+                tg.showPopup({ title: 'Отказ', message: 'Недостаточно кристаллов!' });
+                return;
+            }
+            tg.HapticFeedback.impactOccurred('heavy');
+            await apiCall('wishes', { action: 'buy', coupleId: state.couple.id, wishId: id, telegramId: state.user.telegramId });
+            state.user.balance -= points;
+            document.getElementById('user-balance').innerText = state.user.balance;
+            shootConfetti();
+            loadData();
+        }
+
+        async function savePlan() {
+            tg.HapticFeedback.impactOccurred('medium');
+            const type = document.getElementById('plan-type').value;
+            const text = document.getElementById('plan-text').value;
+            if(!text) return;
+            await apiCall('plans', { action: 'create', coupleId: state.couple.id, type, text });
+            document.getElementById('plan-text').value = '';
+            closeModal();
+            loadData();
+        }
+
+        async function completePlan(id) {
+            tg.HapticFeedback.impactOccurred('medium');
+            await apiCall('plans', { action: 'complete', coupleId: state.couple.id, planId: id });
+            shootConfetti();
+            loadData();
+        }
+
+        async function delItem(endpoint, idField, id) {
+            tg.HapticFeedback.impactOccurred('medium');
+            tg.showConfirm('Удалить?', async (c) => {
+                if(c) {
+                    await apiCall(endpoint, { action: 'delete', coupleId: state.couple.id, [idField]: id });
+                    loadData();
+                }
+            });
+        }
+
+        // --- Renderers ---
+        function renderTasks(tasks) {
+            const list = document.getElementById('tasks-list');
+            if(!tasks || tasks.length === 0) { list.innerHTML = '<p style="opacity:0.7;text-align:center;">Заданий нет</p>'; return; }
+            list.innerHTML = tasks.map(t => `<div class="card" style="padding:15px; margin-bottom:10px;">
+                <h3 style="margin-bottom:5px;">${t.title}</h3>
+                <p style="color:var(--accent-color); font-weight:bold; margin-bottom:10px;">+<span id="task-${t.id}-pts">${t.points}</span> 💎</p>
+                ${t.status === 'done' 
+                    ? `<p style="opacity:0.5;">✅ Выполнено</p>` 
+                    : `<div style="display:flex; justify-content:space-between;">
+                        <button class="action-btn done" onclick="completeTask('${t.id}')">Выполнить</button>
+                        <button class="action-btn del" onclick="delItem('tasks', 'taskId', '${t.id}')">Удалить</button>
+                       </div>`
+                }
+            </div>`).join('');
+        }
+
+        function renderWishes(wishes) {
+            const list = document.getElementById('wishes-list');
+            if(!wishes || wishes.length === 0) { list.innerHTML = '<p style="opacity:0.7;text-align:center;">Желаний нет</p>'; return; }
+            list.innerHTML = wishes.map(w => `<div class="card" style="padding:15px; margin-bottom:10px;">
+                <h3 style="margin-bottom:5px;">${w.title}</h3>
+                <p style="color:var(--accent-color); font-weight:bold; margin-bottom:10px;">-${w.points} 💎</p>
+                ${w.isBought 
+                    ? `<p style="opacity:0.5;">🛍 Куплено</p>` 
+                    : `<div style="display:flex; justify-content:space-between;">
+                        <button class="action-btn done" onclick="buyWish('${w.id}', ${w.points})">Купить</button>
+                        <button class="action-btn del" onclick="delItem('wishes', 'wishId', '${w.id}')">Удалить</button>
+                       </div>`
+                }
+            </div>`).join('');
+        }
+
+        function renderPlans(plans) {
+            const list = document.getElementById('plans-list');
+            if(!plans || plans.length === 0) { list.innerHTML = '<p style="opacity:0.7;text-align:center;">Планов нет</p>'; return; }
+            const types = { 'day': 'На день', 'week': 'На неделю', 'month': 'На месяц' };
+            list.innerHTML = plans.map(p => `<div class="card" style="padding:15px; margin-bottom:10px;">
+                <p style="font-size:12px; opacity:0.6; margin-bottom:5px; text-transform:uppercase;">${types[p.type]}</p>
+                <h3 style="margin-bottom:10px;">${p.text}</h3>
+                ${p.isDone 
+                    ? `<p style="opacity:0.5;">✅ Выполнено</p>` 
+                    : `<div style="display:flex; justify-content:space-between;">
+                        <button class="action-btn done" onclick="completePlan('${p.id}')">Выполнить</button>
+                        <button class="action-btn del" onclick="delItem('plans', 'planId', '${p.id}')">Удалить</button>
+                       </div>`
+                }
+            </div>`).join('');
+        }
+
+        // --- UI & Nav ---
+        function nav(screenId, navElement) {
+            tg.HapticFeedback.impactOccurred('light');
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen-' + screenId).classList.add('active');
+            if (navElement) {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                navElement.classList.add('active');
+            }
+            if(screenId !== 'dashboard' && screenId !== 'settings') loadData();
+        }
+
+        function updateUI() {
+            if (state.couple) {
+                document.getElementById('screen-auth').classList.remove('active');
+                if(!document.querySelector('.screen.active:not(#screen-auth)')) {
+                    document.getElementById('screen-dashboard').classList.add('active');
+                    document.querySelector('.nav-item:first-child').classList.add('active');
+                }
+                document.getElementById('bottom-nav').style.display = 'flex';
+                document.getElementById('user-name').innerText = state.user.firstName;
+                document.getElementById('user-balance').innerText = state.user.balance;
+                document.getElementById('avatar-me').innerText = state.user.firstName.charAt(0).toUpperCase();
+            } else {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById('screen-auth').classList.add('active');
+                document.getElementById('bottom-nav').style.display = 'none';
+            }
+        }
+
+        function applyThemeSettings() {
+            if(!state.user) return;
+            document.documentElement.setAttribute('data-theme', state.user.theme);
+            document.documentElement.setAttribute('data-accent', state.user.accent);
+            try {
+                tg.setHeaderColor(state.user.theme === 'dark' ? '#0f172a' : '#f8fafc');
+                tg.setBackgroundColor(state.user.theme === 'dark' ? '#0f172a' : '#f8fafc');
+            } catch(e) {}
+            document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('active'));
+            const activeCircle = document.querySelector(`.color-circle[style*="var(--accent-${state.user.accent})"]`);
+            if(activeCircle) activeCircle.classList.add('active');
+        }
+
+        async function toggleTheme() {
+            tg.HapticFeedback.impactOccurred('light');
+            state.user.theme = state.user.theme === 'dark' ? 'light' : 'dark';
+            applyThemeSettings();
+            await apiCall('auth', { initData: tg.initData || '', updateData: { theme: state.user.theme } });
+        }
+
+        async function setAccent(color) {
+            tg.HapticFeedback.impactOccurred('light');
+            state.user.accent = color;
+            applyThemeSettings();
+            await apiCall('auth', { initData: tg.initData || '', updateData: { accent: state.user.accent } });
+        }
+
+        // --- Particles ---
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [], gyroX = 0, gyroY = 0;
+
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.baseAlpha = Math.random() * 0.5 + 0.1;
+            }
+            update() {
+                this.x += this.speedX + (gyroY * 0.05);
+                this.y += this.speedY + (gyroX * 0.05);
+                if (this.x > canvas.width) this.x = 0; else if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0; else if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#ec4899';
+                ctx.fillStyle = accentColor;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = accentColor;
+                ctx.globalAlpha = this.baseAlpha;
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < Math.min(window.innerWidth / 10, 80); i++) particles.push(new Particle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateParticles);
+        }
+
+        window.addEventListener('deviceorientation', (e) => {
+            if (e.beta && e.gamma) { gyroX = e.beta; gyroY = e.gamma; }
+        });
+
+        initParticles();
+        animateParticles();
+
+        initApp();
+    </script>
+</body>
+</html>
