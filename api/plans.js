@@ -13,11 +13,11 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === 'POST') {
-      const { type, text, coupleId, action, planId, telegramId } = req.body;
+      const { type, text, coupleId, action, planId, telegramId, date } = req.body;
       
       if (action === 'create') {
         const id = crypto.randomUUID();
-        const plan = { id, type, text, isDone: false, completedBy: [], createdAt: Date.now() };
+        const plan = { id, type, text, date: date || null, isDone: false, completedBy: [], createdAt: Date.now() };
         await redis.hset(`plans:${coupleId}`, { [id]: plan });
         return res.status(200).json(plan);
       }
@@ -35,7 +35,6 @@ module.exports = async (req, res) => {
         }
         
         const couple = await redis.get(`couple:${coupleId}`);
-        // If both unique users have completed it
         if (couple && plan.completedBy.length >= couple.users.length) {
             plan.isDone = true;
         }

@@ -24,30 +24,58 @@ module.exports = async (req, res) => {
     const tgid = String(userData.id);
     let user = await redis.get(`user:${tgid}`);
     
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+
     if (!user) {
       user = {
         id: crypto.randomUUID(),
         telegramId: tgid,
         firstName: userData.first_name,
+        photoUrl: userData.photo_url || null,
         theme: 'dark',
         accent: 'pink',
         balance: 0,
-        coupleId: null
+        coupleId: null,
+        streak: 1,
+        lastActiveDate: today
       };
+      await redis.set(`user:${tgid}`, user);
+    } else {
+      // Update streak
+      if (user.lastActiveDate !== today) {
+         const yesterdayDate = new Date(now);
+         yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+         const yesterday = yesterdayDate.toISOString().split('T')[0];
+         
+         if (user.lastActiveDate === yesterday) {
+             user.streak = (user.streak || 1) + 1;
+         } else {
+             user.streak = 1;
+         }
+         user.lastActiveDate = today;
+      }
+      
+      // Update photo if changed
+      if (userData.photo_url && user.photoUrl !== userData.photo_url) {
+         user.photoUrl = userData.photo_url;
+      }
       await redis.set(`user:${tgid}`, user);
     }
     
     let couple = null;
     if (user.coupleId) {
       couple = await redis.get(`couple:${user.coupleId}`);
+      // Sync partner's photoUrl to couple
+      if (couple) {
+          if (!couple.partnerData) couple.partnerData = {};
+          if (!couple.partnerData[user.id]) couple.partnerData[user.id] = {};
+          couple.partnerData[user.id].photoUrl = user.photoUrl;
+          couple.partnerData[user.id].streak = user.streak;
+          await redis.set(`couple:${user.coupleId}`, couple);
+      }
     }
     
-    // Support frontend updates (theme/accent)
-    if (req.body.updateData) {
-      user = { ...user, ...req.body.updateData };
-      await redis.set(`user:${tgid}`, user);
-    }
-
     res.status(200).json({ ...user, couple });
   } catch (error) {
     console.error(error);

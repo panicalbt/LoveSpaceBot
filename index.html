@@ -63,10 +63,10 @@
 
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .overlay.active { opacity: 1; pointer-events: all; }
-        .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--bg-color); border-top-left-radius: 28px; border-top-right-radius: 28px; padding: 28px; z-index: 1000; transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 -10px 40px rgba(0,0,0,0.3); border-top: 1px solid var(--card-border); padding-bottom: calc(28px + env(safe-area-inset-bottom)); }
+        .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--bg-color); border-top-left-radius: 28px; border-top-right-radius: 28px; padding: 28px; z-index: 1000; transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 -10px 40px rgba(0,0,0,0.3); border-top: 1px solid var(--card-border); padding-bottom: calc(28px + env(safe-area-inset-bottom)); max-height: 85vh; overflow-y: auto;}
         .bottom-sheet.active { bottom: 0; }
 
-        input[type="text"], input[type="number"], select { width: 100%; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-color); padding: 16px; border-radius: 14px; font-size: 16px; margin-bottom: 16px; outline: none; appearance: none; transition: border-color 0.2s, box-shadow 0.2s; }
+        input[type="text"], input[type="number"], input[type="date"], select { width: 100%; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-color); padding: 16px; border-radius: 14px; font-size: 16px; margin-bottom: 16px; outline: none; appearance: none; transition: border-color 0.2s, box-shadow 0.2s; }
         input:focus, select:focus { border-color: var(--accent-color); box-shadow: 0 0 0 3px var(--accent-glow); }
         
         h1, h2, h3 { margin-bottom: 16px; font-weight: 700; }
@@ -80,13 +80,18 @@
 
         .couple-avatars { display: flex; justify-content: center; align-items: center; gap: 16px; margin: 30px 0; }
         .avatar-wrapper { position: relative; display: flex; flex-direction: column; align-items: center; }
-        .avatar { width: 70px; height: 70px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 28px; border: 2px solid var(--accent-color); box-shadow: 0 0 25px var(--accent-glow); text-transform: uppercase; color: var(--text-color); backdrop-filter: blur(10px); }
+        .avatar { width: 70px; height: 70px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 28px; border: 2px solid var(--accent-color); box-shadow: 0 0 25px var(--accent-glow); text-transform: uppercase; color: var(--text-color); backdrop-filter: blur(10px); background-size: cover; background-position: center; }
         .status-bubble { position: absolute; bottom: -10px; background: var(--bg-color); border: 1px solid var(--card-border); border-radius: 12px; padding: 4px 10px; font-size: 12px; white-space: nowrap; font-weight: 600; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; transition: transform 0.2s; z-index: 10;}
         .status-bubble:active { transform: scale(0.9); }
         
+        .streak-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border-radius: 10px; padding: 2px 6px; font-size: 11px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 5; display: flex; align-items: center; gap: 2px;}
+
         .heart-icon { width: 32px; height: 32px; color: var(--accent-color); animation: pulse 1.5s infinite; filter: drop-shadow(0 0 10px var(--accent-glow)); }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
         
+        .level-bar-bg { width: 100%; height: 8px; background: rgba(0,0,0,0.2); border-radius: 4px; overflow: hidden; margin-top: 10px; }
+        .level-bar-fill { height: 100%; background: var(--accent-color); box-shadow: 0 0 10px var(--accent-glow); transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
         svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     </style>
 </head>
@@ -128,6 +133,10 @@
         <h3>Новое желание</h3>
         <input type="text" id="wish-title" placeholder="Чего вам хочется?">
         <input type="number" id="wish-points" placeholder="Цена (💎)">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+            <input type="checkbox" id="wish-secret" style="width:20px; height:20px; margin-bottom:0;">
+            <label for="wish-secret" style="font-size:16px;">Секретное желание 🎁</label>
+        </div>
         <button class="btn" onclick="saveWish()">
             <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
             Сохранить
@@ -141,7 +150,9 @@
             <option value="day">На день</option>
             <option value="week">На неделю</option>
             <option value="month">На месяц</option>
+            <option value="date">Точная дата 🗓</option>
         </select>
+        <input type="date" id="plan-date" style="display:none;">
         <input type="text" id="plan-text" placeholder="Опишите план">
         <button class="btn" onclick="savePlan()">
             <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
@@ -181,6 +192,7 @@
             
             <div class="couple-avatars">
                 <div class="avatar-wrapper">
+                    <div class="streak-badge" id="streak-me" style="display:none;">🔥 1</div>
                     <div class="avatar" id="avatar-me">Я</div>
                     <div class="status-bubble" id="status-me" onclick="openModal('modal-status')">💭 Статус</div>
                 </div>
@@ -188,13 +200,33 @@
                 <svg class="heart-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                 
                 <div class="avatar-wrapper">
+                    <div class="streak-badge" id="streak-partner" style="display:none;">🔥 1</div>
                     <div class="avatar" id="avatar-partner" style="border-color: var(--card-border); box-shadow: none; opacity: 0.8;">П</div>
                     <div class="status-bubble" id="status-partner" style="border-color: var(--card-border); opacity: 0.8;">💤 Офлайн</div>
                 </div>
             </div>
 
+            <!-- Balance and Level -->
+            <div class="card" style="text-align: center; padding: 30px 20px;">
+                <p style="font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 2px; opacity: 0.7;">Уровень любви <span id="love-level" style="color:var(--accent-color); font-weight:bold;">1</span></p>
+                <div class="level-bar-bg"><div class="level-bar-fill" id="love-level-fill" style="width: 0%"></div></div>
+                
+                <h1 class="text-accent text-glow" style="font-size: 56px; margin: 20px 0 10px 0;" id="user-balance">0</h1>
+                <p style="font-size: 16px; font-weight: 500;">Кристаллов 💎</p>
+            </div>
+
+            <!-- Question of the Day -->
+            <div class="card" style="border-color: var(--accent-blue); background: rgba(59, 130, 246, 0.05);">
+                <h3 style="font-size: 18px; display: flex; align-items: center; gap: 8px; color: var(--accent-blue);">
+                    <svg viewBox="0 0 24 24" style="color:var(--accent-blue); width:20px; height:20px;"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    Вопрос дня
+                </h3>
+                <p id="qotd-text" style="font-size: 16px; font-weight: 500; margin-top: 10px; margin-bottom: 15px;">Загрузка вопроса...</p>
+                <div id="qotd-action"></div>
+            </div>
+
             <!-- Partner's Daily Note -->
-            <div class="card" style="border-color: var(--accent-color); background: rgba(236, 72, 153, 0.05); margin-top:30px;">
+            <div class="card" style="border-color: var(--accent-color); background: rgba(236, 72, 153, 0.05);">
                 <h3 style="font-size: 18px; display: flex; align-items: center; gap: 8px;">
                     <svg viewBox="0 0 24 24" style="color:var(--accent-color); width:20px; height:20px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                     Послание от партнера
@@ -213,13 +245,6 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Balance -->
-            <div class="card" style="text-align: center; padding: 30px 20px;">
-                <p style="font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 2px; opacity: 0.7;">Баланс пары</p>
-                <h1 class="text-accent text-glow" style="font-size: 56px; margin: 10px 0;" id="user-balance">0</h1>
-                <p style="font-size: 16px; font-weight: 500;">Кристаллов 💎</p>
-            </div>
             
             <button class="btn" style="background: transparent; border: 1px solid var(--card-border); color: var(--text-color); box-shadow: none;" onclick="tg.showAlert('Код вашей пары: ' + state.couple.code)">
                 <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
@@ -231,7 +256,7 @@
         <div id="screen-plans" class="screen">
             <h2 style="font-size: 28px; display: flex; align-items: center; gap: 10px;">
                 <svg viewBox="0 0 24 24" style="color: var(--accent-color)"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                Планы
+                Планы и Даты
             </h2>
             <button class="btn" onclick="openModal('modal-plan')" style="margin-top: 10px;">+ Добавить план</button>
             <div id="plans-list" style="margin-top: 20px;"></div>
@@ -255,7 +280,7 @@
         <div id="screen-wishes" class="screen">
             <h2 style="font-size: 28px; display: flex; align-items: center; gap: 10px;">
                 <svg viewBox="0 0 24 24" style="color: var(--accent-color)"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
-                Желания
+                Магазин Желаний
             </h2>
             <button class="btn" onclick="openModal('modal-wish')" style="margin-top: 10px;">+ Добавить желание</button>
             <div id="wishes-list" style="margin-top: 20px;"></div>
@@ -329,7 +354,10 @@
         window.cachedTasks = [];
         window.cachedPlans = [];
 
-        // --- Modals ---
+        document.getElementById('plan-type').addEventListener('change', function(e) {
+            document.getElementById('plan-date').style.display = e.target.value === 'date' ? 'block' : 'none';
+        });
+
         function openModal(id) {
             tg.HapticFeedback.impactOccurred('light');
             document.getElementById('overlay').classList.add('active');
@@ -340,25 +368,18 @@
             document.querySelectorAll('.bottom-sheet').forEach(b => b.classList.remove('active'));
         }
 
-        // --- Gamification ---
         function shootConfetti() {
             tg.HapticFeedback.impactOccurred('heavy');
             for(let i=0; i<50; i++) {
                 let p = new Particle();
-                p.y = window.innerHeight - 100;
-                p.x = window.innerWidth / 2;
-                p.speedY = -(Math.random() * 10 + 6);
-                p.speedX = (Math.random() - 0.5) * 16;
+                p.y = window.innerHeight - 100; p.x = window.innerWidth / 2;
+                p.speedY = -(Math.random() * 10 + 6); p.speedX = (Math.random() - 0.5) * 16;
                 p.size = Math.random() * 5 + 3;
                 particles.push(p);
-                setTimeout(() => {
-                    const index = particles.indexOf(p);
-                    if(index > -1) particles.splice(index, 1);
-                }, 2000);
+                setTimeout(() => { const index = particles.indexOf(p); if(index > -1) particles.splice(index, 1); }, 2000);
             }
         }
 
-        // --- API & State ---
         async function apiCall(endpoint, data = null, method = 'POST') {
             const options = { method, headers: { 'Content-Type': 'application/json' } };
             if (data) options.body = JSON.stringify(data);
@@ -389,12 +410,9 @@
         async function createCouple() {
             tg.HapticFeedback.impactOccurred('medium');
             const couple = await apiCall('couple', { action: 'create', telegramId: state.user.telegramId });
-            state.user.coupleId = couple.id;
-            state.couple = couple;
-            document.getElementById('my-code').innerText = couple.code;
-            document.getElementById('my-code').style.display = 'block';
-            updateUI();
-            loadData();
+            state.user.coupleId = couple.id; state.couple = couple;
+            document.getElementById('my-code').innerText = couple.code; document.getElementById('my-code').style.display = 'block';
+            updateUI(); loadData();
         }
 
         async function joinCouple() {
@@ -402,15 +420,11 @@
             const code = document.getElementById('partner-code-input').value.toUpperCase();
             if (code.length === 6) {
                 const couple = await apiCall('couple', { action: 'join', telegramId: state.user.telegramId, code });
-                state.user.coupleId = couple.id;
-                state.couple = couple;
-                updateUI();
-                loadData();
-                tg.showPopup({ title: 'Успех', message: 'Вы успешно объединились!' });
-                shootConfetti();
+                state.user.coupleId = couple.id; state.couple = couple;
+                updateUI(); loadData();
+                tg.showPopup({ title: 'Успех', message: 'Вы успешно объединились!' }); shootConfetti();
             } else {
-                tg.HapticFeedback.notificationOccurred('error');
-                tg.showPopup({ message: 'Код должен состоять из 6 символов' });
+                tg.HapticFeedback.notificationOccurred('error'); tg.showPopup({ message: 'Код должен состоять из 6 символов' });
             }
         }
 
@@ -419,21 +433,16 @@
             tg.showConfirm('Вы уверены, что хотите разорвать пару?', async function(confirm) {
                 if(confirm) {
                     await apiCall('couple', { action: 'leave', telegramId: state.user.telegramId });
-                    state.user.coupleId = null;
-                    state.couple = null;
-                    updateUI();
+                    state.user.coupleId = null; state.couple = null; updateUI();
                 }
             });
         }
 
-        // --- Status & Notes ---
         async function setStatus(statusText) {
             if(!statusText) return;
             tg.HapticFeedback.impactOccurred('light');
-            state.user.status = statusText;
-            document.getElementById('status-me').innerText = statusText;
-            document.getElementById('custom-status').value = '';
-            closeModal();
+            state.user.status = statusText; document.getElementById('status-me').innerText = statusText;
+            document.getElementById('custom-status').value = ''; closeModal();
             await apiCall('user', { telegramId: state.user.telegramId, status: statusText });
             tg.showPopup({message: "Статус обновлен!"});
         }
@@ -441,45 +450,36 @@
         async function saveNote() {
             const noteText = document.getElementById('my-note-input').value;
             if(!noteText) return;
-            tg.HapticFeedback.impactOccurred('light');
-            state.user.dailyNote = noteText;
+            tg.HapticFeedback.impactOccurred('light'); state.user.dailyNote = noteText;
             await apiCall('user', { telegramId: state.user.telegramId, dailyNote: noteText });
             tg.showPopup({message: "Послание сохранено и скоро появится у партнера!"});
         }
 
-        // --- Data Logic ---
         async function loadData() {
             if (!state.couple) return;
             const cid = state.couple.id;
             
-            // Refresh auth to get latest partner status
             fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ initData: tg.initData || '' }) })
-                .then(r => r.json()).then(u => {
-                    state.user = u;
-                    state.couple = u.couple;
-                    updateUI();
-                });
+                .then(r => r.json()).then(u => { state.user = u; state.couple = u.couple; updateUI(); });
 
-            const [tasks, wishes, plans] = await Promise.all([
+            const [tasks, wishes, plans, qotd] = await Promise.all([
                 fetch(`/api/tasks?coupleId=${cid}`).then(r => r.json()),
                 fetch(`/api/wishes?coupleId=${cid}`).then(r => r.json()),
-                fetch(`/api/plans?coupleId=${cid}`).then(r => r.json())
+                fetch(`/api/plans?coupleId=${cid}`).then(r => r.json()),
+                fetch(`/api/questions?coupleId=${cid}`).then(r => r.json())
             ]);
-            renderTasks(tasks);
-            renderWishes(wishes);
-            renderPlans(plans);
+            renderTasks(tasks); renderWishes(wishes); renderPlans(plans); renderQotd(qotd);
         }
 
+        // --- Tasks ---
         async function saveTask() {
             tg.HapticFeedback.impactOccurred('medium');
             const title = document.getElementById('task-title').value;
             const points = document.getElementById('task-points').value;
             if(!title || !points) return;
             await apiCall('tasks', { action: 'create', coupleId: state.couple.id, title, points, telegramId: state.user.telegramId });
-            document.getElementById('task-title').value = '';
-            document.getElementById('task-points').value = '';
-            closeModal();
-            loadData();
+            document.getElementById('task-title').value = ''; document.getElementById('task-points').value = '';
+            closeModal(); loadData();
         }
 
         async function taskAction(id, action) {
@@ -491,123 +491,121 @@
         }
 
         function switchTaskTab(tab) {
-            tg.HapticFeedback.impactOccurred('light');
-            currentTaskTab = tab;
-            const btnPartner = document.getElementById('tab-partner');
-            const btnMine = document.getElementById('tab-mine');
-            
+            tg.HapticFeedback.impactOccurred('light'); currentTaskTab = tab;
+            const btnPartner = document.getElementById('tab-partner'); const btnMine = document.getElementById('tab-mine');
             btnPartner.style.background = tab === 'partner' ? 'var(--accent-color)' : 'rgba(0,0,0,0.2)';
             btnPartner.style.color = tab === 'partner' ? 'white' : 'var(--text-color)';
-            btnPartner.style.boxShadow = tab === 'partner' ? '0 4px 20px var(--accent-glow)' : 'none';
             btnPartner.style.border = tab === 'partner' ? 'none' : '1px solid var(--card-border)';
-            
             btnMine.style.background = tab === 'mine' ? 'var(--accent-color)' : 'rgba(0,0,0,0.2)';
             btnMine.style.color = tab === 'mine' ? 'white' : 'var(--text-color)';
-            btnMine.style.boxShadow = tab === 'mine' ? '0 4px 20px var(--accent-glow)' : 'none';
             btnMine.style.border = tab === 'mine' ? 'none' : '1px solid var(--card-border)';
-
             renderTasks(window.cachedTasks || []);
         }
 
+        // --- Wishes ---
         async function saveWish() {
             tg.HapticFeedback.impactOccurred('medium');
             const title = document.getElementById('wish-title').value;
             const points = document.getElementById('wish-points').value;
+            const isSecret = document.getElementById('wish-secret').checked;
             if(!title || !points) return;
-            await apiCall('wishes', { action: 'create', coupleId: state.couple.id, title, points });
-            document.getElementById('wish-title').value = '';
-            document.getElementById('wish-points').value = '';
-            closeModal();
-            loadData();
+            await apiCall('wishes', { action: 'create', coupleId: state.couple.id, title, points, isSecret, telegramId: state.user.telegramId });
+            document.getElementById('wish-title').value = ''; document.getElementById('wish-points').value = ''; document.getElementById('wish-secret').checked = false;
+            closeModal(); loadData();
         }
 
         async function buyWish(id, points) {
-            if (state.user.balance < points) {
-                tg.HapticFeedback.notificationOccurred('error');
-                tg.showPopup({ title: 'Отказ', message: 'Недостаточно кристаллов!' });
-                return;
-            }
+            if (state.user.balance < points) { tg.HapticFeedback.notificationOccurred('error'); return tg.showPopup({ title: 'Отказ', message: 'Недостаточно кристаллов!' }); }
             tg.HapticFeedback.impactOccurred('heavy');
             await apiCall('wishes', { action: 'buy', coupleId: state.couple.id, wishId: id, telegramId: state.user.telegramId });
-            state.user.balance -= points;
-            document.getElementById('user-balance').innerText = state.user.balance;
-            shootConfetti();
-            loadData();
+            state.user.balance -= points; document.getElementById('user-balance').innerText = state.user.balance;
+            shootConfetti(); loadData();
         }
 
+        // --- Plans ---
         async function savePlan() {
             tg.HapticFeedback.impactOccurred('medium');
             const type = document.getElementById('plan-type').value;
             const text = document.getElementById('plan-text').value;
+            const date = document.getElementById('plan-date').value;
             if(!text) return;
-            await apiCall('plans', { action: 'create', coupleId: state.couple.id, type, text });
-            document.getElementById('plan-text').value = '';
-            closeModal();
-            loadData();
+            await apiCall('plans', { action: 'create', coupleId: state.couple.id, type, text, date });
+            document.getElementById('plan-text').value = ''; document.getElementById('plan-date').value = '';
+            closeModal(); loadData();
         }
 
         async function completePlan(id) {
             tg.HapticFeedback.impactOccurred('medium');
             await apiCall('plans', { action: 'complete', coupleId: state.couple.id, planId: id, telegramId: state.user.telegramId });
-            shootConfetti();
-            loadData();
+            shootConfetti(); loadData();
         }
 
         async function delItem(endpoint, idField, id) {
             tg.HapticFeedback.impactOccurred('medium');
             tg.showConfirm('Точно удалить?', async (c) => {
-                if(c) {
-                    await apiCall(endpoint, { action: 'delete', coupleId: state.couple.id, [idField]: id });
-                    loadData();
-                }
+                if(c) { await apiCall(endpoint, { action: 'delete', coupleId: state.couple.id, [idField]: id }); loadData(); }
             });
+        }
+        
+        // --- Question of the day ---
+        async function submitQotd() {
+            const answer = document.getElementById('qotd-answer').value;
+            if(!answer) return;
+            await apiCall('questions', { telegramId: state.user.telegramId, coupleId: state.couple.id, answer });
+            loadData();
         }
 
         // --- Renderers ---
-        function renderTasks(tasks) {
-            window.cachedTasks = tasks;
-            const list = document.getElementById('tasks-list');
+        function renderQotd(qotd) {
+            document.getElementById('qotd-text').innerText = qotd.text;
+            const container = document.getElementById('qotd-action');
+            const myAnswer = qotd.answers && qotd.answers[state.user.id];
             
-            const sorted = tasks.sort((a,b) => {
-                if (a.status === 'done' && b.status !== 'done') return 1;
-                if (a.status !== 'done' && b.status === 'done') return -1;
-                return b.createdAt - a.createdAt;
-            });
+            let partnerId = null;
+            if (state.couple && state.couple.users) partnerId = state.couple.users.find(u => u !== state.user.id);
+            const partnerAnswer = partnerId && qotd.answers && qotd.answers[partnerId];
 
-            const filtered = sorted.filter(t => {
-                if (currentTaskTab === 'mine') return t.creatorId === state.user.id;
-                return t.creatorId !== state.user.id;
-            });
+            if (!myAnswer) {
+                container.innerHTML = `
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="qotd-answer" placeholder="Ваш ответ..." style="margin-bottom:0; padding:12px;">
+                        <button class="btn" style="width:auto; margin-bottom:0;" onclick="submitQotd()">Ответить</button>
+                    </div>
+                `;
+            } else if (myAnswer && !partnerAnswer) {
+                container.innerHTML = `<p style="opacity:0.7; font-style:italic;">Вы ответили! Ждем ответа партнера, чтобы открыть результаты 🙈</p>`;
+            } else if (myAnswer && partnerAnswer) {
+                let partnerName = 'Партнер';
+                if (state.couple.partnerData && state.couple.partnerData[partnerId]) partnerName = state.couple.partnerData[partnerId].firstName;
+                container.innerHTML = `
+                    <div style="background: rgba(0,0,0,0.2); padding:12px; border-radius:12px; margin-bottom:10px;">
+                        <span style="font-size:12px; opacity:0.7;">Вы:</span><br/><b>${myAnswer}</b>
+                    </div>
+                    <div style="background: rgba(236, 72, 153, 0.1); padding:12px; border-radius:12px; border: 1px solid var(--accent-color);">
+                        <span style="font-size:12px; opacity:0.7; color:var(--accent-color);">${partnerName}:</span><br/><b>${partnerAnswer}</b>
+                    </div>
+                `;
+            }
+        }
 
-            if(!filtered || filtered.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px;"><svg viewBox="0 0 24 24" style="width:48px; height:48px; margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><p>В этой категории заданий нет</p></div>'; return; }
+        function renderTasks(tasks) {
+            window.cachedTasks = tasks; const list = document.getElementById('tasks-list');
+            const sorted = tasks.sort((a,b) => { if (a.status === 'done' && b.status !== 'done') return 1; if (a.status !== 'done' && b.status === 'done') return -1; return b.createdAt - a.createdAt; });
+            const filtered = sorted.filter(t => { if (currentTaskTab === 'mine') return t.creatorId === state.user.id; return t.creatorId !== state.user.id; });
+
+            if(!filtered || filtered.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px; font-size:40px;">🥺<p style="font-size:16px; margin-top:10px;">В этой категории пусто</p></div>'; return; }
             
             list.innerHTML = filtered.map(t => {
                 let actionHTML = '';
-                
                 if (currentTaskTab === 'partner') { 
-                    if (t.status === 'active') {
-                        actionHTML = `<button class="action-btn done" style="width:100%" onclick="taskAction('${t.id}', 'submit_for_review')">Выполнить (На проверку)</button>`;
-                    } else if (t.status === 'review') {
-                        actionHTML = `<div style="text-align:center; opacity:0.6; padding:10px 0; border: 1px dashed var(--card-border); border-radius: 10px;">Ожидает проверки партнером ⏳</div>`;
-                    } else {
-                        actionHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--accent-green)"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Одобрено</div>`;
-                    }
+                    if (t.status === 'active') actionHTML = `<button class="action-btn done" style="width:100%" onclick="taskAction('${t.id}', 'submit_for_review')">Выполнить (На проверку)</button>`;
+                    else if (t.status === 'review') actionHTML = `<div style="text-align:center; opacity:0.6; padding:10px 0; border: 1px dashed var(--card-border); border-radius: 10px;">Ожидает проверки партнером ⏳</div>`;
+                    else actionHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;">✅ Одобрено</div>`;
                 } else { 
-                    if (t.status === 'active') {
-                        actionHTML = `<div style="display:flex; justify-content:space-between;">
-                                <span style="opacity:0.6; align-self:center; font-size:14px;">Ожидаем партнера...</span>
-                                <button class="action-btn del" style="width:30%" onclick="delItem('tasks', 'taskId', '${t.id}')">Удалить</button>
-                               </div>`;
-                    } else if (t.status === 'review') {
-                        actionHTML = `<div style="display:flex; justify-content:space-between;">
-                                <button class="action-btn done" onclick="taskAction('${t.id}', 'approve')">Принять ✅</button>
-                                <button class="action-btn del" onclick="taskAction('${t.id}', 'reject')">Отклонить ❌</button>
-                               </div>`;
-                    } else {
-                        actionHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--accent-green)"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Завершено</div>`;
-                    }
+                    if (t.status === 'active') actionHTML = `<div style="display:flex; justify-content:space-between;"><span style="opacity:0.6; align-self:center; font-size:14px;">Ожидаем выполнения...</span><button class="action-btn del" style="width:30%" onclick="delItem('tasks', 'taskId', '${t.id}')">Удалить</button></div>`;
+                    else if (t.status === 'review') actionHTML = `<div style="display:flex; justify-content:space-between;"><button class="action-btn done" onclick="taskAction('${t.id}', 'approve')">Принять ✅</button><button class="action-btn del" onclick="taskAction('${t.id}', 'reject')">Отклонить ❌</button></div>`;
+                    else actionHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;">✅ Завершено</div>`;
                 }
-
                 return `<div class="card" style="${t.status === 'done' ? 'opacity:0.6' : ''}">
                     <h3 style="font-size: 18px; margin-bottom: 8px;">${t.title}</h3>
                     <p style="color:var(--accent-color); font-weight:600; font-size: 16px; margin-bottom:16px;">+<span id="task-${t.id}-pts">${t.points}</span> 💎</p>
@@ -618,59 +616,32 @@
 
         function renderWishes(wishes) {
             const list = document.getElementById('wishes-list');
-            
-            const sorted = wishes.sort((a,b) => {
-                if (a.isBought && !b.isBought) return 1;
-                if (!a.isBought && b.isBought) return -1;
-                return b.createdAt - a.createdAt;
-            });
-
-            if(!sorted || sorted.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px;"><svg viewBox="0 0 24 24" style="width:48px; height:48px; margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><p>Желаний пока нет</p></div>'; return; }
-            list.innerHTML = sorted.map(w => `<div class="card" style="${w.isBought ? 'opacity:0.6' : ''}">
-                <h3 style="font-size: 18px; margin-bottom: 8px;">${w.title}</h3>
+            const sorted = wishes.sort((a,b) => { if (a.isBought && !b.isBought) return 1; if (!a.isBought && b.isBought) return -1; return b.createdAt - a.createdAt; });
+            if(!sorted || sorted.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px; font-size:40px;">🎁<p style="font-size:16px; margin-top:10px;">Желаний пока нет</p></div>'; return; }
+            list.innerHTML = sorted.map(w => {
+                const titleStr = (w.isSecret && !w.isBought && w.creatorId !== state.user.id) ? "Секретное желание 🎁" : w.title;
+                return `<div class="card" style="${w.isBought ? 'opacity:0.6' : ''}">
+                <h3 style="font-size: 18px; margin-bottom: 8px; ${w.isSecret && !w.isBought ? 'color:var(--accent-color);' : ''}">${titleStr}</h3>
                 <p style="color:var(--accent-color); font-weight:600; font-size: 16px; margin-bottom:16px;">-${w.points} 💎</p>
-                ${w.isBought 
-                    ? `<div style="display:flex; align-items:center; gap:8px; opacity:0.6; font-weight:500;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--accent-blue)"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg> Куплено</div>` 
-                    : `<div style="display:flex; justify-content:space-between;">
-                        <button class="action-btn done" onclick="buyWish('${w.id}', ${w.points})">Купить</button>
-                        <button class="action-btn del" onclick="delItem('wishes', 'wishId', '${w.id}')">Удалить</button>
-                       </div>`
-                }
-            </div>`).join('');
+                ${w.isBought ? `<div style="display:flex; align-items:center; gap:8px; opacity:0.6; font-weight:500;">🛍 Куплено</div>` : `<div style="display:flex; justify-content:space-between;"><button class="action-btn done" onclick="buyWish('${w.id}', ${w.points})">Купить</button><button class="action-btn del" onclick="delItem('wishes', 'wishId', '${w.id}')">Удалить</button></div>`}
+                </div>`
+            }).join('');
         }
 
         function renderPlans(plans) {
-            window.cachedPlans = plans;
-            const list = document.getElementById('plans-list');
-            
-            const sorted = plans.sort((a,b) => {
-                if (a.isDone && !b.isDone) return 1;
-                if (!a.isDone && b.isDone) return -1;
-                return b.createdAt - a.createdAt;
-            });
-
-            if(!sorted || sorted.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px;"><svg viewBox="0 0 24 24" style="width:48px; height:48px; margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><p>Планов пока нет</p></div>'; return; }
-            
-            const types = { 'day': 'На день', 'week': 'На неделю', 'month': 'На месяц' };
+            window.cachedPlans = plans; const list = document.getElementById('plans-list');
+            const sorted = plans.sort((a,b) => { if (a.isDone && !b.isDone) return 1; if (!a.isDone && b.isDone) return -1; return b.createdAt - a.createdAt; });
+            if(!sorted || sorted.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px; font-size:40px;">🗓<p style="font-size:16px; margin-top:10px;">Планов пока нет</p></div>'; return; }
+            const types = { 'day': 'На день', 'week': 'На неделю', 'month': 'На месяц', 'date': 'Дата' };
             list.innerHTML = sorted.map(p => {
                 const iCompleted = p.completedBy && p.completedBy.includes(state.user.id);
                 let actionHTML = '';
-
-                if (p.isDone) {
-                    actionHTML = `<div style="display:flex; align-items:center; gap:8px; opacity:0.6; font-weight:500;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--accent-green)"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Выполнено обоими</div>`;
-                } else if (iCompleted) {
-                    actionHTML = `<div style="text-align:center; opacity:0.6; padding:10px 0; border: 1px dashed var(--card-border); border-radius: 10px;">Ожидаем партнера ⏳</div>`;
-                } else {
-                    actionHTML = `<div style="display:flex; justify-content:space-between;">
-                                <button class="action-btn done" style="width:70%" onclick="completePlan('${p.id}')">Я выполнил(а) ✅</button>
-                                <button class="action-btn del" style="width:25%" onclick="delItem('plans', 'planId', '${p.id}')">
-                                   <svg viewBox="0 0 24 24" style="width:20px;height:20px"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                </button>
-                               </div>`;
-                }
-
+                if (p.isDone) actionHTML = `<div style="display:flex; align-items:center; gap:8px; opacity:0.6; font-weight:500;">✅ Выполнено обоими</div>`;
+                else if (iCompleted) actionHTML = `<div style="text-align:center; opacity:0.6; padding:10px 0; border: 1px dashed var(--card-border); border-radius: 10px;">Ожидаем партнера ⏳</div>`;
+                else actionHTML = `<div style="display:flex; justify-content:space-between;"><button class="action-btn done" style="width:70%" onclick="completePlan('${p.id}')">Я выполнил(а) ✅</button><button class="action-btn del" style="width:25%" onclick="delItem('plans', 'planId', '${p.id}')"><svg viewBox="0 0 24 24" style="width:20px;height:20px"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
+                const dateStr = p.date ? `<span style="float:right; opacity:0.8;">${new Date(p.date).toLocaleDateString()}</span>` : '';
                 return `<div class="card" style="${p.isDone ? 'opacity:0.6' : ''}">
-                    <p style="font-size:12px; font-weight: 600; color:var(--accent-color); margin-bottom:6px; text-transform:uppercase; letter-spacing: 1px;">${types[p.type]}</p>
+                    <p style="font-size:12px; font-weight: 600; color:var(--accent-color); margin-bottom:6px; text-transform:uppercase; letter-spacing: 1px;">${types[p.type]} ${dateStr}</p>
                     <h3 style="font-size: 18px; margin-bottom:16px;">${p.text}</h3>
                     ${actionHTML}
                 </div>`;
@@ -682,10 +653,7 @@
             tg.HapticFeedback.impactOccurred('light');
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen-' + screenId).classList.add('active');
-            if (navElement) {
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                navElement.classList.add('active');
-            }
+            if (navElement) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); navElement.classList.add('active'); }
             if(screenId !== 'dashboard' && screenId !== 'settings') loadData();
         }
 
@@ -698,15 +666,27 @@
                 }
                 document.getElementById('bottom-nav').style.display = 'flex';
                 
-                // Update User Info
+                // My Info
                 document.getElementById('user-name').innerText = state.user.firstName;
                 document.getElementById('user-balance').innerText = state.user.balance;
-                document.getElementById('avatar-me').innerText = state.user.firstName.charAt(0).toUpperCase();
-                
+                if(state.user.photoUrl) {
+                    document.getElementById('avatar-me').innerText = '';
+                    document.getElementById('avatar-me').style.backgroundImage = `url(${state.user.photoUrl})`;
+                } else { document.getElementById('avatar-me').innerText = state.user.firstName.charAt(0).toUpperCase(); }
                 if (state.user.status) document.getElementById('status-me').innerText = state.user.status;
                 if (state.user.dailyNote) document.getElementById('my-note-input').value = state.user.dailyNote;
+                if (state.user.streak > 1) {
+                    document.getElementById('streak-me').innerText = `🔥 ${state.user.streak}`;
+                    document.getElementById('streak-me').style.display = 'flex';
+                }
 
-                // Update Partner Info
+                // Level Progress
+                const level = Math.floor(state.user.balance / 500) + 1;
+                const progress = (state.user.balance % 500) / 500 * 100;
+                document.getElementById('love-level').innerText = level;
+                document.getElementById('love-level-fill').style.width = `${progress}%`;
+
+                // Partner Info
                 let partnerData = null;
                 if (state.couple.partnerData) {
                     const keys = Object.keys(state.couple.partnerData);
@@ -715,15 +695,19 @@
                 }
 
                 if (partnerData) {
-                    if (partnerData.firstName) document.getElementById('avatar-partner').innerText = partnerData.firstName.charAt(0).toUpperCase();
+                    if (partnerData.photoUrl) {
+                        document.getElementById('avatar-partner').innerText = '';
+                        document.getElementById('avatar-partner').style.backgroundImage = `url(${partnerData.photoUrl})`;
+                    } else if (partnerData.firstName) {
+                        document.getElementById('avatar-partner').innerText = partnerData.firstName.charAt(0).toUpperCase();
+                    }
                     if (partnerData.status) document.getElementById('status-partner').innerText = partnerData.status;
-                    if (partnerData.dailyNote) {
-                        document.getElementById('partner-note').innerText = partnerData.dailyNote;
-                        document.getElementById('partner-note').style.opacity = '1';
-                        document.getElementById('partner-note').style.fontStyle = 'normal';
+                    if (partnerData.dailyNote) { document.getElementById('partner-note').innerText = partnerData.dailyNote; document.getElementById('partner-note').style.opacity = '1'; document.getElementById('partner-note').style.fontStyle = 'normal'; }
+                    if (partnerData.streak && partnerData.streak > 1) {
+                        document.getElementById('streak-partner').innerText = `🔥 ${partnerData.streak}`;
+                        document.getElementById('streak-partner').style.display = 'flex';
                     }
                 }
-                
             } else {
                 document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
                 document.getElementById('screen-auth').classList.add('active');
@@ -735,86 +719,24 @@
             if(!state.user) return;
             document.documentElement.setAttribute('data-theme', state.user.theme);
             document.documentElement.setAttribute('data-accent', state.user.accent);
-            try {
-                tg.setHeaderColor(state.user.theme === 'dark' ? '#0f172a' : '#f1f5f9');
-                tg.setBackgroundColor(state.user.theme === 'dark' ? '#0f172a' : '#f1f5f9');
-            } catch(e) {}
+            try { tg.setHeaderColor(state.user.theme === 'dark' ? '#0f172a' : '#f1f5f9'); tg.setBackgroundColor(state.user.theme === 'dark' ? '#0f172a' : '#f1f5f9'); } catch(e) {}
             document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('active'));
             const activeCircle = document.querySelector(`.color-circle[style*="var(--accent-${state.user.accent})"]`);
             if(activeCircle) activeCircle.classList.add('active');
         }
 
-        async function toggleTheme() {
-            tg.HapticFeedback.impactOccurred('light');
-            state.user.theme = state.user.theme === 'dark' ? 'light' : 'dark';
-            applyThemeSettings();
-            await apiCall('user', { telegramId: state.user.telegramId, updateData: { theme: state.user.theme } });
-        }
-
-        async function setAccent(color) {
-            tg.HapticFeedback.impactOccurred('light');
-            state.user.accent = color;
-            applyThemeSettings();
-            await apiCall('user', { telegramId: state.user.telegramId, updateData: { accent: state.user.accent } });
-        }
+        async function toggleTheme() { tg.HapticFeedback.impactOccurred('light'); state.user.theme = state.user.theme === 'dark' ? 'light' : 'dark'; applyThemeSettings(); await apiCall('user', { telegramId: state.user.telegramId, updateData: { theme: state.user.theme } }); }
+        async function setAccent(color) { tg.HapticFeedback.impactOccurred('light'); state.user.accent = color; applyThemeSettings(); await apiCall('user', { telegramId: state.user.telegramId, updateData: { accent: state.user.accent } }); }
 
         // --- Particles ---
-        const canvas = document.getElementById('particles-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [], gyroX = 0, gyroY = 0;
-
+        const canvas = document.getElementById('particles-canvas'); const ctx = canvas.getContext('2d'); let particles = [], gyroX = 0, gyroY = 0;
         function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 1;
-                this.speedX = Math.random() * 0.5 - 0.25;
-                this.speedY = Math.random() * 0.5 - 0.25;
-                this.baseAlpha = Math.random() * 0.5 + 0.1;
-            }
-            update() {
-                this.x += this.speedX + (gyroY * 0.05);
-                this.y += this.speedY + (gyroX * 0.05);
-                if (this.x > canvas.width) this.x = 0; else if (this.x < 0) this.x = canvas.width;
-                if (this.y > canvas.height) this.y = 0; else if (this.y < 0) this.y = canvas.height;
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#ec4899';
-                ctx.fillStyle = accentColor;
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = accentColor;
-                ctx.globalAlpha = this.baseAlpha;
-                ctx.fill();
-                ctx.globalAlpha = 1;
-                ctx.shadowBlur = 0;
-            }
-        }
-
-        function initParticles() {
-            particles = [];
-            for (let i = 0; i < Math.min(window.innerWidth / 10, 80); i++) particles.push(new Particle());
-        }
-
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(animateParticles);
-        }
-
-        window.addEventListener('deviceorientation', (e) => {
-            if (e.beta && e.gamma) { gyroX = e.beta; gyroY = e.gamma; }
-        });
-
-        initParticles();
-        animateParticles();
-
-        initApp();
+        window.addEventListener('resize', resizeCanvas); resizeCanvas();
+        class Particle { constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.size = Math.random() * 2 + 1; this.speedX = Math.random() * 0.5 - 0.25; this.speedY = Math.random() * 0.5 - 0.25; this.baseAlpha = Math.random() * 0.5 + 0.1; } update() { this.x += this.speedX + (gyroY * 0.05); this.y += this.speedY + (gyroX * 0.05); if (this.x > canvas.width) this.x = 0; else if (this.x < 0) this.x = canvas.width; if (this.y > canvas.height) this.y = 0; else if (this.y < 0) this.y = canvas.height; } draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#ec4899'; ctx.fillStyle = accentColor; ctx.shadowBlur = 15; ctx.shadowColor = accentColor; ctx.globalAlpha = this.baseAlpha; ctx.fill(); ctx.globalAlpha = 1; ctx.shadowBlur = 0; } }
+        function initParticles() { particles = []; for (let i = 0; i < Math.min(window.innerWidth / 10, 80); i++) particles.push(new Particle()); }
+        function animateParticles() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animateParticles); }
+        window.addEventListener('deviceorientation', (e) => { if (e.beta && e.gamma) { gyroX = e.beta; gyroY = e.gamma; } });
+        initParticles(); animateParticles(); initApp();
     </script>
 </body>
 </html>
