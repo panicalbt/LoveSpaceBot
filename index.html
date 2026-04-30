@@ -35,137 +35,58 @@
         [data-accent="green"] { --accent-color: var(--accent-green); --accent-glow: rgba(16, 185, 129, 0.5); }
         [data-accent="pink"] { --accent-color: var(--accent-pink); --accent-glow: rgba(236, 72, 153, 0.5); }
         
-        /* Reset and base styles */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            overflow-x: hidden;
-            transition: background-color 0.4s ease, color 0.4s ease;
-            -webkit-tap-highlight-color: transparent;
-        }
+        body { background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; transition: background-color 0.4s ease, color 0.4s ease; -webkit-tap-highlight-color: transparent; }
 
-        /* Ambient Glow Background */
-        .ambient-glow {
-            position: fixed;
-            top: 50%; left: 50%;
-            width: 80vw; height: 80vw;
-            background: var(--accent-color);
-            filter: blur(120px);
-            opacity: 0.15;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            z-index: -2;
-            pointer-events: none;
-            transition: background 0.4s ease;
-        }
+        .ambient-glow { position: fixed; top: 50%; left: 50%; width: 80vw; height: 80vw; background: var(--accent-color); filter: blur(120px); opacity: 0.15; transform: translate(-50%, -50%); border-radius: 50%; z-index: -2; pointer-events: none; transition: background 0.4s ease; }
+        #particles-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
 
-        #particles-canvas {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: -1; pointer-events: none;
-        }
-
-        /* Layout */
         .app-container { min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 90px; }
         .screen { display: none; padding: 24px; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .screen.active { display: block; }
-        
-        @keyframes slideUp { 
-            from { opacity: 0; transform: translateY(15px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* UI Elements */
-        .card {
-            background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border); border-radius: 20px; padding: 24px;
-            margin-bottom: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
-            position: relative; overflow: hidden;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
+        .card { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; margin-bottom: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
         
-        .btn {
-            background: var(--accent-color); color: white; border: none; padding: 14px 24px;
-            border-radius: 14px; font-size: 16px; font-weight: 600; width: 100%;
-            cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
-            box-shadow: 0 4px 20px var(--accent-glow); margin-bottom: 12px;
-            display: flex; justify-content: center; align-items: center; gap: 8px;
-        }
+        .btn { background: var(--accent-color); color: white; border: none; padding: 14px 24px; border-radius: 14px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 20px var(--accent-glow); margin-bottom: 12px; display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn:active { transform: scale(0.96); box-shadow: 0 2px 10px var(--accent-glow); }
         
-        .action-btn {
-           background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color);
-           padding: 10px 14px; border-radius: 10px; margin-top: 12px; cursor: pointer; transition: 0.2s;
-           font-weight: 600; width: 48%; font-size: 14px;
-        }
+        .action-btn { background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 10px 14px; border-radius: 10px; margin-top: 12px; cursor: pointer; transition: 0.2s; font-weight: 600; font-size: 14px; display: flex; justify-content: center; align-items: center; }
         .action-btn.done { background: var(--accent-color); color: white; box-shadow: 0 4px 15px var(--accent-glow); }
         .action-btn.del { border-color: rgba(239, 68, 68, 0.5); color: #ef4444; }
 
-        /* Bottom Nav */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid var(--card-border); display: flex; justify-content: space-around;
-            padding: 12px 0; z-index: 100; padding-bottom: calc(12px + env(safe-area-inset-bottom));
-        }
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center; color: var(--text-color);
-            opacity: 0.4; font-size: 11px; font-weight: 500; transition: all 0.3s ease; cursor: pointer; gap: 6px;
-        }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--card-border); display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-color); opacity: 0.4; font-size: 11px; font-weight: 500; transition: all 0.3s ease; cursor: pointer; gap: 6px; }
         .nav-item svg { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .nav-item.active { opacity: 1; color: var(--accent-color); }
         .nav-item.active svg { transform: scale(1.15); stroke-width: 2.5; }
 
-        /* Modals & Bottom Sheets */
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
-            z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s;
-        }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .overlay.active { opacity: 1; pointer-events: all; }
-        .bottom-sheet {
-            position: fixed; bottom: -100%; left: 0; width: 100%;
-            background: var(--bg-color); 
-            border-top-left-radius: 28px; border-top-right-radius: 28px;
-            padding: 28px; z-index: 1000; transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.3); border-top: 1px solid var(--card-border);
-            padding-bottom: calc(28px + env(safe-area-inset-bottom));
-        }
+        .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--bg-color); border-top-left-radius: 28px; border-top-right-radius: 28px; padding: 28px; z-index: 1000; transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 -10px 40px rgba(0,0,0,0.3); border-top: 1px solid var(--card-border); padding-bottom: calc(28px + env(safe-area-inset-bottom)); }
         .bottom-sheet.active { bottom: 0; }
 
-        input[type="text"], input[type="number"], select {
-            width: 100%; background: var(--card-bg); border: 1px solid var(--card-border);
-            color: var(--text-color); padding: 16px; border-radius: 14px; font-size: 16px;
-            margin-bottom: 16px; outline: none; appearance: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
+        input[type="text"], input[type="number"], select { width: 100%; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-color); padding: 16px; border-radius: 14px; font-size: 16px; margin-bottom: 16px; outline: none; appearance: none; transition: border-color 0.2s, box-shadow 0.2s; }
         input:focus, select:focus { border-color: var(--accent-color); box-shadow: 0 0 0 3px var(--accent-glow); }
         
-        /* Typography & Colors */
         h1, h2, h3 { margin-bottom: 16px; font-weight: 700; }
         p { line-height: 1.5; }
         .text-accent { color: var(--accent-color); }
         .text-glow { text-shadow: 0 0 20px var(--accent-glow); }
         
         .color-picker { display: flex; gap: 12px; margin-bottom: 24px; }
-        .color-circle { 
-            width: 44px; height: 44px; border-radius: 50%; cursor: pointer; 
-            border: 3px solid transparent; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
+        .color-circle { width: 44px; height: 44px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .color-circle.active { transform: scale(1.15); border-color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
-        /* Avatars */
         .couple-avatars { display: flex; justify-content: center; align-items: center; gap: 16px; margin: 30px 0; }
-        .avatar {
-            width: 70px; height: 70px; border-radius: 50%; background: var(--card-bg);
-            display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 28px;
-            border: 2px solid var(--accent-color); box-shadow: 0 0 25px var(--accent-glow);
-            text-transform: uppercase; color: var(--text-color); backdrop-filter: blur(10px);
-        }
+        .avatar-wrapper { position: relative; display: flex; flex-direction: column; align-items: center; }
+        .avatar { width: 70px; height: 70px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 28px; border: 2px solid var(--accent-color); box-shadow: 0 0 25px var(--accent-glow); text-transform: uppercase; color: var(--text-color); backdrop-filter: blur(10px); }
+        .status-bubble { position: absolute; bottom: -10px; background: var(--bg-color); border: 1px solid var(--card-border); border-radius: 12px; padding: 4px 10px; font-size: 12px; white-space: nowrap; font-weight: 600; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; transition: transform 0.2s; z-index: 10;}
+        .status-bubble:active { transform: scale(0.9); }
+        
         .heart-icon { width: 32px; height: 32px; color: var(--accent-color); animation: pulse 1.5s infinite; filter: drop-shadow(0 0 10px var(--accent-glow)); }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
         
-        /* Icons styling */
         svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     </style>
 </head>
@@ -175,6 +96,22 @@
     
     <div class="overlay" id="overlay" onclick="closeModal()"></div>
     
+    <!-- Modal: Status -->
+    <div class="bottom-sheet" id="modal-status">
+        <h3>Мой статус</h3>
+        <p style="opacity: 0.7; font-size: 14px; margin-bottom: 16px;">Покажите партнеру, чем вы заняты или какое у вас настроение!</p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+            <button class="action-btn" onclick="setStatus('💻 Работаю')">💻 Работаю</button>
+            <button class="action-btn" onclick="setStatus('😴 Сплю')">😴 Сплю</button>
+            <button class="action-btn" onclick="setStatus('🎮 Играю')">🎮 Играю</button>
+            <button class="action-btn" onclick="setStatus('🚶‍♂️ Гуляю')">🚶‍♂️ Гуляю</button>
+            <button class="action-btn" onclick="setStatus('🥰 Скучаю')">🥰 Скучаю</button>
+            <button class="action-btn" onclick="setStatus('🍿 Смотрю кино')">🍿 Смотрю кино</button>
+        </div>
+        <input type="text" id="custom-status" placeholder="Свой статус... (макс 15 симв.)" maxlength="15">
+        <button class="btn" onclick="setStatus(document.getElementById('custom-status').value)">Установить статус</button>
+    </div>
+
     <!-- Modal: Add Task -->
     <div class="bottom-sheet" id="modal-task">
         <h3>Новое задание</h3>
@@ -243,20 +180,50 @@
             <h2 style="text-align: center; font-size: 28px;">Привет, <span id="user-name" class="text-accent"></span>!</h2>
             
             <div class="couple-avatars">
-                <div class="avatar" id="avatar-me">Я</div>
+                <div class="avatar-wrapper">
+                    <div class="avatar" id="avatar-me">Я</div>
+                    <div class="status-bubble" id="status-me" onclick="openModal('modal-status')">💭 Статус</div>
+                </div>
+                
                 <svg class="heart-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                <div class="avatar" id="avatar-partner" style="border-color: var(--card-border); box-shadow: none; opacity: 0.8;">П</div>
+                
+                <div class="avatar-wrapper">
+                    <div class="avatar" id="avatar-partner" style="border-color: var(--card-border); box-shadow: none; opacity: 0.8;">П</div>
+                    <div class="status-bubble" id="status-partner" style="border-color: var(--card-border); opacity: 0.8;">💤 Офлайн</div>
+                </div>
             </div>
 
-            <div class="card" style="text-align: center; padding: 40px 20px;">
-                <p style="font-size: 16px; font-weight: 500; text-transform: uppercase; letter-spacing: 2px; opacity: 0.7;">Баланс пары</p>
-                <h1 class="text-accent text-glow" style="font-size: 64px; margin: 15px 0;" id="user-balance">0</h1>
-                <p style="font-size: 18px; font-weight: 500;">Кристаллов 💎</p>
+            <!-- Partner's Daily Note -->
+            <div class="card" style="border-color: var(--accent-color); background: rgba(236, 72, 153, 0.05); margin-top:30px;">
+                <h3 style="font-size: 18px; display: flex; align-items: center; gap: 8px;">
+                    <svg viewBox="0 0 24 24" style="color:var(--accent-color); width:20px; height:20px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    Послание от партнера
+                </h3>
+                <p id="partner-note" style="font-size: 16px; opacity: 0.8; font-style: italic; margin-top: 10px;">Партнер пока ничего не написал...</p>
+            </div>
+
+            <!-- My Daily Note -->
+            <div class="card">
+                <h3 style="font-size: 18px;">Моя записка на день</h3>
+                <p style="font-size: 13px; opacity: 0.7; margin-bottom: 12px;">Напишите что-нибудь приятное своей половинке</p>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="my-note-input" placeholder="Люблю тебя! ❤️" style="margin-bottom: 0; padding: 12px;">
+                    <button class="btn" style="width: auto; margin-bottom: 0; padding: 0 16px;" onclick="saveNote()">
+                        <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Balance -->
+            <div class="card" style="text-align: center; padding: 30px 20px;">
+                <p style="font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 2px; opacity: 0.7;">Баланс пары</p>
+                <h1 class="text-accent text-glow" style="font-size: 56px; margin: 10px 0;" id="user-balance">0</h1>
+                <p style="font-size: 16px; font-weight: 500;">Кристаллов 💎</p>
             </div>
             
             <button class="btn" style="background: transparent; border: 1px solid var(--card-border); color: var(--text-color); box-shadow: none;" onclick="tg.showAlert('Код вашей пары: ' + state.couple.code)">
                 <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                Показать код
+                Показать код пары
             </button>
         </div>
 
@@ -277,6 +244,10 @@
                 Задания
             </h2>
             <button class="btn" onclick="openModal('modal-task')" style="margin-top: 10px;">+ Дать задание</button>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn" id="tab-partner" onclick="switchTaskTab('partner')" style="flex:1; margin:0; padding:10px;">Мне (от партнера)</button>
+                <button class="btn" id="tab-mine" onclick="switchTaskTab('mine')" style="flex:1; margin:0; background:rgba(0,0,0,0.2); border:1px solid var(--card-border); color:var(--text-color); box-shadow:none; padding:10px;">Мои (для партнера)</button>
+            </div>
             <div id="tasks-list" style="margin-top: 20px;"></div>
         </div>
 
@@ -354,6 +325,9 @@
         tg.ready();
         
         let state = { user: null, couple: null };
+        let currentTaskTab = 'partner'; // 'partner' or 'mine'
+        window.cachedTasks = [];
+        window.cachedPlans = [];
 
         // --- Modals ---
         function openModal(id) {
@@ -394,7 +368,7 @@
                 if (!res.ok) throw new Error(json.error || 'API Error');
                 return json;
             } catch (e) {
-                tg.showPopup({ title: 'Ошибка', message: e.message });
+                tg.showPopup({ title: 'Внимание', message: e.message });
                 throw e;
             }
         }
@@ -452,10 +426,40 @@
             });
         }
 
+        // --- Status & Notes ---
+        async function setStatus(statusText) {
+            if(!statusText) return;
+            tg.HapticFeedback.impactOccurred('light');
+            state.user.status = statusText;
+            document.getElementById('status-me').innerText = statusText;
+            document.getElementById('custom-status').value = '';
+            closeModal();
+            await apiCall('user', { telegramId: state.user.telegramId, status: statusText });
+            tg.showPopup({message: "Статус обновлен!"});
+        }
+
+        async function saveNote() {
+            const noteText = document.getElementById('my-note-input').value;
+            if(!noteText) return;
+            tg.HapticFeedback.impactOccurred('light');
+            state.user.dailyNote = noteText;
+            await apiCall('user', { telegramId: state.user.telegramId, dailyNote: noteText });
+            tg.showPopup({message: "Послание сохранено и скоро появится у партнера!"});
+        }
+
         // --- Data Logic ---
         async function loadData() {
             if (!state.couple) return;
             const cid = state.couple.id;
+            
+            // Refresh auth to get latest partner status
+            fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ initData: tg.initData || '' }) })
+                .then(r => r.json()).then(u => {
+                    state.user = u;
+                    state.couple = u.couple;
+                    updateUI();
+                });
+
             const [tasks, wishes, plans] = await Promise.all([
                 fetch(`/api/tasks?coupleId=${cid}`).then(r => r.json()),
                 fetch(`/api/wishes?coupleId=${cid}`).then(r => r.json()),
@@ -471,20 +475,38 @@
             const title = document.getElementById('task-title').value;
             const points = document.getElementById('task-points').value;
             if(!title || !points) return;
-            await apiCall('tasks', { action: 'create', coupleId: state.couple.id, title, points });
+            await apiCall('tasks', { action: 'create', coupleId: state.couple.id, title, points, telegramId: state.user.telegramId });
             document.getElementById('task-title').value = '';
             document.getElementById('task-points').value = '';
             closeModal();
             loadData();
         }
 
-        async function completeTask(id) {
-            tg.HapticFeedback.impactOccurred('heavy');
-            await apiCall('tasks', { action: 'complete', coupleId: state.couple.id, taskId: id, telegramId: state.user.telegramId });
-            state.user.balance += parseInt(document.querySelector(`#task-${id}-pts`).innerText);
-            document.getElementById('user-balance').innerText = state.user.balance;
-            shootConfetti();
+        async function taskAction(id, action) {
+            tg.HapticFeedback.impactOccurred('medium');
+            await apiCall('tasks', { action, coupleId: state.couple.id, taskId: id, telegramId: state.user.telegramId });
+            if (action === 'submit_for_review') tg.showPopup({message: "Задание отправлено партнеру на проверку ⏳"});
+            if (action === 'approve') shootConfetti();
             loadData();
+        }
+
+        function switchTaskTab(tab) {
+            tg.HapticFeedback.impactOccurred('light');
+            currentTaskTab = tab;
+            const btnPartner = document.getElementById('tab-partner');
+            const btnMine = document.getElementById('tab-mine');
+            
+            btnPartner.style.background = tab === 'partner' ? 'var(--accent-color)' : 'rgba(0,0,0,0.2)';
+            btnPartner.style.color = tab === 'partner' ? 'white' : 'var(--text-color)';
+            btnPartner.style.boxShadow = tab === 'partner' ? '0 4px 20px var(--accent-glow)' : 'none';
+            btnPartner.style.border = tab === 'partner' ? 'none' : '1px solid var(--card-border)';
+            
+            btnMine.style.background = tab === 'mine' ? 'var(--accent-color)' : 'rgba(0,0,0,0.2)';
+            btnMine.style.color = tab === 'mine' ? 'white' : 'var(--text-color)';
+            btnMine.style.boxShadow = tab === 'mine' ? '0 4px 20px var(--accent-glow)' : 'none';
+            btnMine.style.border = tab === 'mine' ? 'none' : '1px solid var(--card-border)';
+
+            renderTasks(window.cachedTasks || []);
         }
 
         async function saveWish() {
@@ -526,14 +548,14 @@
 
         async function completePlan(id) {
             tg.HapticFeedback.impactOccurred('medium');
-            await apiCall('plans', { action: 'complete', coupleId: state.couple.id, planId: id });
+            await apiCall('plans', { action: 'complete', coupleId: state.couple.id, planId: id, telegramId: state.user.telegramId });
             shootConfetti();
             loadData();
         }
 
         async function delItem(endpoint, idField, id) {
             tg.HapticFeedback.impactOccurred('medium');
-            tg.showConfirm('Удалить?', async (c) => {
+            tg.showConfirm('Точно удалить?', async (c) => {
                 if(c) {
                     await apiCall(endpoint, { action: 'delete', coupleId: state.couple.id, [idField]: id });
                     loadData();
@@ -543,25 +565,68 @@
 
         // --- Renderers ---
         function renderTasks(tasks) {
+            window.cachedTasks = tasks;
             const list = document.getElementById('tasks-list');
-            if(!tasks || tasks.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px;"><svg viewBox="0 0 24 24" style="width:48px; height:48px; margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><p>Заданий пока нет</p></div>'; return; }
-            list.innerHTML = tasks.map(t => `<div class="card">
-                <h3 style="font-size: 18px; margin-bottom: 8px;">${t.title}</h3>
-                <p style="color:var(--accent-color); font-weight:600; font-size: 16px; margin-bottom:16px;">+<span id="task-${t.id}-pts">${t.points}</span> 💎</p>
-                ${t.status === 'done' 
-                    ? `<div style="display:flex; align-items:center; gap:8px; opacity:0.6; font-weight:500;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--accent-green)"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Выполнено</div>` 
-                    : `<div style="display:flex; justify-content:space-between;">
-                        <button class="action-btn done" onclick="completeTask('${t.id}')">Выполнить</button>
-                        <button class="action-btn del" onclick="delItem('tasks', 'taskId', '${t.id}')">Удалить</button>
-                       </div>`
+            
+            const sorted = tasks.sort((a,b) => {
+                if (a.status === 'done' && b.status !== 'done') return 1;
+                if (a.status !== 'done' && b.status === 'done') return -1;
+                return b.createdAt - a.createdAt;
+            });
+
+            const filtered = sorted.filter(t => {
+                if (currentTaskTab === 'mine') return t.creatorId === state.user.id;
+                return t.creatorId !== state.user.id;
+            });
+
+            if(!filtered || filtered.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px;"><svg viewBox="0 0 24 24" style="width:48px; height:48px; margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><p>В этой категории заданий нет</p></div>'; return; }
+            
+            list.innerHTML = filtered.map(t => {
+                let actionHTML = '';
+                
+                if (currentTaskTab === 'partner') { 
+                    if (t.status === 'active') {
+                        actionHTML = `<button class="action-btn done" style="width:100%" onclick="taskAction('${t.id}', 'submit_for_review')">Выполнить (На проверку)</button>`;
+                    } else if (t.status === 'review') {
+                        actionHTML = `<div style="text-align:center; opacity:0.6; padding:10px 0; border: 1px dashed var(--card-border); border-radius: 10px;">Ожидает проверки партнером ⏳</div>`;
+                    } else {
+                        actionHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--accent-green)"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Одобрено</div>`;
+                    }
+                } else { 
+                    if (t.status === 'active') {
+                        actionHTML = `<div style="display:flex; justify-content:space-between;">
+                                <span style="opacity:0.6; align-self:center; font-size:14px;">Ожидаем партнера...</span>
+                                <button class="action-btn del" style="width:30%" onclick="delItem('tasks', 'taskId', '${t.id}')">Удалить</button>
+                               </div>`;
+                    } else if (t.status === 'review') {
+                        actionHTML = `<div style="display:flex; justify-content:space-between;">
+                                <button class="action-btn done" onclick="taskAction('${t.id}', 'approve')">Принять ✅</button>
+                                <button class="action-btn del" onclick="taskAction('${t.id}', 'reject')">Отклонить ❌</button>
+                               </div>`;
+                    } else {
+                        actionHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--accent-green)"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Завершено</div>`;
+                    }
                 }
-            </div>`).join('');
+
+                return `<div class="card" style="${t.status === 'done' ? 'opacity:0.6' : ''}">
+                    <h3 style="font-size: 18px; margin-bottom: 8px;">${t.title}</h3>
+                    <p style="color:var(--accent-color); font-weight:600; font-size: 16px; margin-bottom:16px;">+<span id="task-${t.id}-pts">${t.points}</span> 💎</p>
+                    ${actionHTML}
+                </div>`;
+            }).join('');
         }
 
         function renderWishes(wishes) {
             const list = document.getElementById('wishes-list');
-            if(!wishes || wishes.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px;"><svg viewBox="0 0 24 24" style="width:48px; height:48px; margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><p>Желаний пока нет</p></div>'; return; }
-            list.innerHTML = wishes.map(w => `<div class="card">
+            
+            const sorted = wishes.sort((a,b) => {
+                if (a.isBought && !b.isBought) return 1;
+                if (!a.isBought && b.isBought) return -1;
+                return b.createdAt - a.createdAt;
+            });
+
+            if(!sorted || sorted.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px;"><svg viewBox="0 0 24 24" style="width:48px; height:48px; margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><p>Желаний пока нет</p></div>'; return; }
+            list.innerHTML = sorted.map(w => `<div class="card" style="${w.isBought ? 'opacity:0.6' : ''}">
                 <h3 style="font-size: 18px; margin-bottom: 8px;">${w.title}</h3>
                 <p style="color:var(--accent-color); font-weight:600; font-size: 16px; margin-bottom:16px;">-${w.points} 💎</p>
                 ${w.isBought 
@@ -575,20 +640,41 @@
         }
 
         function renderPlans(plans) {
+            window.cachedPlans = plans;
             const list = document.getElementById('plans-list');
-            if(!plans || plans.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px;"><svg viewBox="0 0 24 24" style="width:48px; height:48px; margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><p>Планов пока нет</p></div>'; return; }
+            
+            const sorted = plans.sort((a,b) => {
+                if (a.isDone && !b.isDone) return 1;
+                if (!a.isDone && b.isDone) return -1;
+                return b.createdAt - a.createdAt;
+            });
+
+            if(!sorted || sorted.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px;"><svg viewBox="0 0 24 24" style="width:48px; height:48px; margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><p>Планов пока нет</p></div>'; return; }
+            
             const types = { 'day': 'На день', 'week': 'На неделю', 'month': 'На месяц' };
-            list.innerHTML = plans.map(p => `<div class="card">
-                <p style="font-size:12px; font-weight: 600; color:var(--accent-color); margin-bottom:6px; text-transform:uppercase; letter-spacing: 1px;">${types[p.type]}</p>
-                <h3 style="font-size: 18px; margin-bottom:16px;">${p.text}</h3>
-                ${p.isDone 
-                    ? `<div style="display:flex; align-items:center; gap:8px; opacity:0.6; font-weight:500;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--accent-green)"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Выполнено</div>` 
-                    : `<div style="display:flex; justify-content:space-between;">
-                        <button class="action-btn done" onclick="completePlan('${p.id}')">Выполнить</button>
-                        <button class="action-btn del" onclick="delItem('plans', 'planId', '${p.id}')">Удалить</button>
-                       </div>`
+            list.innerHTML = sorted.map(p => {
+                const iCompleted = p.completedBy && p.completedBy.includes(state.user.id);
+                let actionHTML = '';
+
+                if (p.isDone) {
+                    actionHTML = `<div style="display:flex; align-items:center; gap:8px; opacity:0.6; font-weight:500;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--accent-green)"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Выполнено обоими</div>`;
+                } else if (iCompleted) {
+                    actionHTML = `<div style="text-align:center; opacity:0.6; padding:10px 0; border: 1px dashed var(--card-border); border-radius: 10px;">Ожидаем партнера ⏳</div>`;
+                } else {
+                    actionHTML = `<div style="display:flex; justify-content:space-between;">
+                                <button class="action-btn done" style="width:70%" onclick="completePlan('${p.id}')">Я выполнил(а) ✅</button>
+                                <button class="action-btn del" style="width:25%" onclick="delItem('plans', 'planId', '${p.id}')">
+                                   <svg viewBox="0 0 24 24" style="width:20px;height:20px"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                               </div>`;
                 }
-            </div>`).join('');
+
+                return `<div class="card" style="${p.isDone ? 'opacity:0.6' : ''}">
+                    <p style="font-size:12px; font-weight: 600; color:var(--accent-color); margin-bottom:6px; text-transform:uppercase; letter-spacing: 1px;">${types[p.type]}</p>
+                    <h3 style="font-size: 18px; margin-bottom:16px;">${p.text}</h3>
+                    ${actionHTML}
+                </div>`;
+            }).join('');
         }
 
         // --- UI & Nav ---
@@ -611,9 +697,33 @@
                     document.querySelector('.nav-item:first-child').classList.add('active');
                 }
                 document.getElementById('bottom-nav').style.display = 'flex';
+                
+                // Update User Info
                 document.getElementById('user-name').innerText = state.user.firstName;
                 document.getElementById('user-balance').innerText = state.user.balance;
                 document.getElementById('avatar-me').innerText = state.user.firstName.charAt(0).toUpperCase();
+                
+                if (state.user.status) document.getElementById('status-me').innerText = state.user.status;
+                if (state.user.dailyNote) document.getElementById('my-note-input').value = state.user.dailyNote;
+
+                // Update Partner Info
+                let partnerData = null;
+                if (state.couple.partnerData) {
+                    const keys = Object.keys(state.couple.partnerData);
+                    const partnerId = keys.find(k => k !== state.user.id);
+                    if (partnerId) partnerData = state.couple.partnerData[partnerId];
+                }
+
+                if (partnerData) {
+                    if (partnerData.firstName) document.getElementById('avatar-partner').innerText = partnerData.firstName.charAt(0).toUpperCase();
+                    if (partnerData.status) document.getElementById('status-partner').innerText = partnerData.status;
+                    if (partnerData.dailyNote) {
+                        document.getElementById('partner-note').innerText = partnerData.dailyNote;
+                        document.getElementById('partner-note').style.opacity = '1';
+                        document.getElementById('partner-note').style.fontStyle = 'normal';
+                    }
+                }
+                
             } else {
                 document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
                 document.getElementById('screen-auth').classList.add('active');
@@ -638,14 +748,14 @@
             tg.HapticFeedback.impactOccurred('light');
             state.user.theme = state.user.theme === 'dark' ? 'light' : 'dark';
             applyThemeSettings();
-            await apiCall('auth', { initData: tg.initData || '', updateData: { theme: state.user.theme } });
+            await apiCall('user', { telegramId: state.user.telegramId, updateData: { theme: state.user.theme } });
         }
 
         async function setAccent(color) {
             tg.HapticFeedback.impactOccurred('light');
             state.user.accent = color;
             applyThemeSettings();
-            await apiCall('auth', { initData: tg.initData || '', updateData: { accent: state.user.accent } });
+            await apiCall('user', { telegramId: state.user.telegramId, updateData: { accent: state.user.accent } });
         }
 
         // --- Particles ---

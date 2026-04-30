@@ -7,43 +7,72 @@ module.exports = async (req, res) => {
       const { coupleId } = req.query;
       if (!coupleId) return res.status(400).json({ error: 'coupleId required' });
       const tasksHash = await redis.hgetall(`tasks:${coupleId}`);
-      const tasks = tasksHash ? Object.values(tasksHash) : [];
-      return res.status(200).json(tasks.sort((a,b) => b.createdAt - a.createdAt));
+      let tasks = tasksHash ? Object.values(tasksHash) : [];
+      tasks = tasks.map(t => typeof t === 'string' ? JSON.parse(t) : t);
+      return res.status(200).json(tasks);
     }
 
     if (req.method === 'POST') {
       const { title, points, coupleId, action, taskId, telegramId } = req.body;
-      
+      let user = await redis.get(`user:${telegramId}`);
+      if (!user) return res.status(400).json({error: "User not found"});
+
       if (action === 'create') {
         const id = crypto.randomUUID();
-        const task = { id, title, points: parseInt(points), status: 'active', createdAt: Date.now() };
+        const task = { id, title, points: parseInt(points), status: 'active', creatorId: user.id, createdAt: Date.now() };
         await redis.hset(`tasks:${coupleId}`, { [id]: task });
         return res.status(200).json(task);
       }
       
-      if (action === 'complete') {
+      if (action === 'submit_for_review') {
         let task = await redis.hget(`tasks:${coupleId}`, taskId);
         if(!task) return res.status(404).json({error: "Task not found"});
-        if(typeof task === 'string') task = JSON.parse(task); // upstash sometimes returns string for hget
+        if(typeof task === 'string') task = JSON.parse(task);
+        
+        if (task.creatorId === user.id) return res.status(400).json({error: "Вы не можете выполнять свое же задание"});
+        
+        task.status = 'review';
+        task.executorTelegramId = telegramId;
+        await redis.hset(`tasks:${coupleId}`, { [taskId]: task });
+        return res.status(200).json(task);
+      }
+
+      if (action === 'approve') {
+        let task = await redis.hget(`tasks:${coupleId}`, taskId);
+        if(!task) return res.status(404).json({error: "Task not found"});
+        if(typeof task === 'string') task = JSON.parse(task);
+
+        if (task.creatorId !== user.id) return res.status(400).json({error: "Только создатель может принять задание"});
         
         task.status = 'done';
         await redis.hset(`tasks:${coupleId}`, { [taskId]: task });
         
-        // Add points
-        if (telegramId) {
-           let user = await redis.get(`user:${telegramId}`);
-           if (user) {
-              user.balance += task.points;
-              await redis.set(`user:${telegramId}`, user);
+        if (task.executorTelegramId) {
+           let executor = await redis.get(`user:${task.executorTelegramId}`);
+           if (executor) {
+              executor.balance += task.points;
+              await redis.set(`user:${task.executorTelegramId}`, executor);
            }
         }
         return res.status(200).json(task);
       }
-      
+
+      if (action === 'reject') {
+        let task = await redis.hget(`tasks:${coupleId}`, taskId);
+        if(!task) return res.status(404).json({error: "Task not found"});
+        if(typeof task === 'string') task = JSON.parse(task);
+        
+        task.status = 'active';
+        delete task.executorTelegramId;
+        await redis.hset(`tasks:${coupleId}`, { [taskId]: task });
+        return res.status(200).json(task);
+      }
+
       if (action === 'delete') {
          await redis.hdel(`tasks:${coupleId}`, taskId);
          return res.status(200).json({ success: true });
       }
+
       return res.status(400).json({ error: 'Invalid action' });
     }
   } catch (error) {
