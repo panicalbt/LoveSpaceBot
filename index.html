@@ -60,8 +60,13 @@
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .card { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; margin-bottom: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
-        
+        .card { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--card-border); border-radius: 20px; padding: 16px 20px; margin-bottom: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+        .card:active { transform: scale(0.98); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; }
+        .card-content { max-height: 0; overflow: hidden; transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card.expanded .card-content { max-height: 200px; margin-top: 16px; border-top: 1px solid var(--card-border); padding-top: 16px; }
+        .card-arrow { width: 18px; height: 18px; opacity: 0.3; transition: transform 0.3s; }
+        .card.expanded .card-arrow { transform: rotate(90deg); opacity: 0.8; }
         .btn { background: var(--accent-color); color: white; border: none; padding: 14px 24px; border-radius: 14px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 20px var(--accent-glow); margin-bottom: 12px; display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn:active { transform: scale(0.96); box-shadow: 0 2px 10px var(--accent-glow); }
         
@@ -605,6 +610,13 @@
             tg.HapticFeedback.impactOccurred('light');
         }
 
+        function toggleCard(el) {
+            const wasExpanded = el.classList.contains('expanded');
+            document.querySelectorAll('.card.expanded').forEach(c => c.classList.remove('expanded'));
+            if (!wasExpanded) el.classList.add('expanded');
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
         function openModal(id) {
             tg.HapticFeedback.impactOccurred('light');
             document.getElementById('overlay').classList.add('active');
@@ -1094,18 +1106,25 @@
             list.innerHTML = filtered.map(t => {
                 let actionHTML = '';
                 if (currentTaskTab === 'partner') { 
-                    if (t.status === 'active') actionHTML = `<button class="action-btn done" style="width:100%" onclick="taskAction('${t.id}', 'submit_for_review')">Выполнить (На проверку)</button>`;
+                    if (t.status === 'active') actionHTML = `<button class="action-btn done" style="width:100%" onclick="event.stopPropagation(); taskAction('${t.id}', 'submit_for_review')">Выполнить (На проверку)</button>`;
                     else if (t.status === 'review') actionHTML = `<div style="text-align:center; opacity:0.6; padding:10px 0; border: 1px dashed var(--card-border); border-radius: 10px;">Ожидает проверки партнером <i class="ci-clock"></i></div>`;
                     else actionHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;"><i class="ci-checkbox-check"></i> Одобрено</div>`;
                 } else { 
-                    if (t.status === 'active') actionHTML = `<div style="display:flex; justify-content:space-between;"><span style="opacity:0.6; align-self:center; font-size:14px;">Ожидаем выполнения...</span><button class="action-btn del" style="width:30%" onclick="delItem('tasks', 'taskId', '${t.id}')">Удалить</button></div>`;
-                    else if (t.status === 'review') actionHTML = `<div style="display:flex; justify-content:space-between;"><button class="action-btn done" onclick="taskAction('${t.id}', 'approve')">Принять <i class="ci-checkbox-check"></i></button><button class="action-btn del" onclick="taskAction('${t.id}', 'reject')">Отклонить <i class="ci-close-big"></i></button></div>`;
+                    if (t.status === 'active') actionHTML = `<div style="display:flex; flex-direction:column; gap:10px;"><span style="opacity:0.6; text-align:center; font-size:14px;">Ожидаем выполнения...</span><button class="action-btn del" style="width:100%" onclick="event.stopPropagation(); delItem('tasks', 'taskId', '${t.id}')">Удалить задание</button></div>`;
+                    else if (t.status === 'review') actionHTML = `<div style="display:flex; flex-direction:column; gap:10px;"><button class="action-btn done" onclick="event.stopPropagation(); taskAction('${t.id}', 'approve')">Принять выполнение <i class="ci-checkbox-check"></i></button><button class="action-btn del" onclick="event.stopPropagation(); taskAction('${t.id}', 'reject')">Отклонить</button></div>`;
                     else actionHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;"><i class="ci-checkbox-check"></i> Завершено</div>`;
                 }
-                return `<div class="card" style="${t.status === 'done' ? 'opacity:0.6' : ''}">
-                    <h3 style="font-size: 18px; margin-bottom: 8px;">${t.title}</h3>
-                    <p style="color:var(--accent-color); font-weight:600; font-size: 16px; margin-bottom:16px;">+<span id="task-${t.id}-pts">${t.points}</span> <i class="ci-gem"></i></p>
-                    ${actionHTML}
+                return `<div class="card" onclick="toggleCard(this)" style="${t.status === 'done' ? 'opacity:0.6' : ''}">
+                    <div class="card-header">
+                        <div style="flex: 1;">
+                            <h3 style="font-size: 17px; margin-bottom: 4px;">${t.title}</h3>
+                            <p style="color:var(--accent-color); font-weight:700; font-size: 15px;">+${t.points} <i class="ci-gem"></i></p>
+                        </div>
+                        <svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
+                    <div class="card-content">
+                        ${actionHTML}
+                    </div>
                 </div>`;
             }).join('');
         }
@@ -1121,14 +1140,21 @@
                 const titleStr = (w.isSecret && !w.isBought && w.creatorId !== state.user.id) ? "Секретное желание 🎁" : w.title;
                 let actionHTML = '';
                 if (currentWishTab === 'partner') {
-                    actionHTML = w.isBought ? `<div style="display:flex; align-items:center; gap:8px; opacity:0.6; font-weight:500;">🛍 Куплено</div>` : `<div style="display:flex; justify-content:space-between;"><button class="action-btn done" onclick="buyWish('${w.id}', ${w.points})">Купить</button></div>`;
+                    actionHTML = w.isBought ? `<div style="text-align:center; opacity:0.6; font-weight:500;">🛍 Куплено</div>` : `<button class="action-btn done" style="width:100%" onclick="event.stopPropagation(); buyWish('${w.id}', ${w.points})">Исполнить желание</button>`;
                 } else {
-                    actionHTML = w.isBought ? `<div style="display:flex; align-items:center; gap:8px; opacity:0.6; font-weight:500;">🛍 Куплено партнером</div>` : `<div style="display:flex; justify-content:space-between;"><button class="action-btn del" style="width:100%" onclick="delItem('wishes', 'wishId', '${w.id}')">Удалить</button></div>`;
+                    actionHTML = w.isBought ? `<div style="text-align:center; opacity:0.6; font-weight:500;">🛍 Куплено партнером</div>` : `<button class="action-btn del" style="width:100%" onclick="event.stopPropagation(); delItem('wishes', 'wishId', '${w.id}')">Удалить желание</button>`;
                 }
-                return `<div class="card" style="${w.isBought ? 'opacity:0.6' : ''}">
-                <h3 style="font-size: 18px; margin-bottom: 8px; ${w.isSecret && !w.isBought ? 'color:var(--accent-color);' : ''}">${titleStr}</h3>
-                <p style="color:var(--accent-color); font-weight:600; font-size: 16px; margin-bottom:16px;">-${w.points} <i class="ci-gem"></i></p>
-                ${actionHTML}
+                return `<div class="card" onclick="toggleCard(this)" style="${w.isBought ? 'opacity:0.6' : ''}">
+                    <div class="card-header">
+                        <div style="flex: 1;">
+                            <h3 style="font-size: 17px; margin-bottom: 4px; ${w.isSecret && !w.isBought ? 'color:var(--accent-color);' : ''}">${titleStr}</h3>
+                            <p style="color:var(--accent-color); font-weight:700; font-size: 15px;">-${w.points} <i class="ci-gem"></i></p>
+                        </div>
+                        <svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
+                    <div class="card-content">
+                        ${actionHTML}
+                    </div>
                 </div>`
             }).join('');
         }
@@ -1160,17 +1186,23 @@
             list.innerHTML = filtered.map(p => {
                 const iCompleted = p.completedBy && p.completedBy.includes(state.user.id);
                 let actionHTML = '';
-                if (p.isDone) actionHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;"><i class="ci-checkbox-check"></i> Выполнено обоими</div>`;
+                if (p.isDone) actionHTML = `<div style="text-align:center; opacity:0.6; font-weight:500;"><i class="ci-checkbox-check"></i> Выполнено обоими</div>`;
                 else if (iCompleted) actionHTML = `<div style="text-align:center; opacity:0.6; padding:10px 0; border: 1px dashed var(--card-border); border-radius: 10px;">Ожидаем партнера <i class="ci-clock"></i></div>`;
-                else actionHTML = `<div style="display:flex; justify-content:space-between;"><button class="action-btn done" style="width:70%" onclick="completePlan('${p.id}')">Я выполнил(а) <i class="ci-checkbox-check"></i></button><button class="action-btn del" style="width:25%" onclick="delItem('plans', 'planId', '${p.id}')"><svg viewBox="0 0 24 24" style="width:20px;height:20px"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
+                else actionHTML = `<div style="display:flex; flex-direction:column; gap:10px;"><button class="action-btn done" style="width:100%" onclick="event.stopPropagation(); completePlan('${p.id}')">Я выполнил(а) <i class="ci-checkbox-check"></i></button><button class="action-btn del" style="width:100%" onclick="event.stopPropagation(); delItem('plans', 'planId', '${p.id}')">Удалить план</button></div>`;
                 
                 const pDate = new Date(p.date);
-                const dateStr = `<span style="float:right; opacity:0.8;">${pDate.toLocaleDateString()}</span>`;
                 
-                return `<div class="card" style="${p.isDone ? 'opacity:0.6' : ''}">
-                    <p style="font-size:12px; font-weight: 600; color:var(--accent-color); margin-bottom:6px; text-transform:uppercase; letter-spacing: 1px;">План на ${pDate.toLocaleDateString()} ${dateStr}</p>
-                    <h3 style="font-size: 18px; margin-bottom:16px;">${p.text}</h3>
-                    ${actionHTML}
+                return `<div class="card" onclick="toggleCard(this)" style="${p.isDone ? 'opacity:0.6' : ''}">
+                    <div class="card-header">
+                        <div style="flex: 1;">
+                            <p style="font-size:11px; font-weight: 700; color:var(--accent-color); text-transform:uppercase; letter-spacing: 0.5px; margin-bottom:2px;">${pDate.toLocaleDateString()}</p>
+                            <h3 style="font-size: 17px;">${p.text}</h3>
+                        </div>
+                        <svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
+                    <div class="card-content">
+                        ${actionHTML}
+                    </div>
                 </div>`;
             }).join('');
         }
