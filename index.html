@@ -638,9 +638,10 @@
             </h2>
             
             <div class="stat-grid">
-                <div class="stat-card">
+                <div class="stat-card" onclick="openModal('modal-start-date')" style="cursor: pointer;">
                     <div class="stat-value" id="stat-days-together">0</div>
                     <div class="stat-label">Дней вместе</div>
+                    <div style="font-size: 10px; opacity: 0.5; margin-top: 4px;">(Изменить дату 🗓)</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="stat-max-streak">0</div>
@@ -849,11 +850,19 @@
 
         async function apiCall(endpoint, data = null, method = 'POST') {
             const options = { method, headers: { 'Content-Type': 'application/json' } };
-            if (data) options.body = JSON.stringify(data);
             
-            let url = `/api/${endpoint}`;
-            if (!['auth', 'cron'].includes(endpoint)) {
+            let url = endpoint.startsWith('interactions_poll') ? `/api/${endpoint}` : `/api/${endpoint}`;
+            if (!['auth', 'cron', 'interactions_poll'].includes(endpoint)) {
                 url = `/api/data?type=${endpoint}`;
+            }
+
+            if (data) {
+                if (method === 'GET') {
+                    const params = new URLSearchParams(data).toString();
+                    url += (url.includes('?') ? '&' : '?') + params;
+                } else {
+                    options.body = JSON.stringify(data);
+                }
             }
 
             try {
@@ -1621,6 +1630,7 @@
             tg.HapticFeedback.impactOccurred('medium');
             state.couple = await apiCall('couple', { action: 'updateStartDate', telegramId: state.user.telegramId, startDate: date });
             updateDaysTogether();
+            if (currentScreenIndex === screenOrder.indexOf('stats')) loadStats();
             closeModal();
             tg.showPopup({ message: 'Дата сохранена! ❤️' });
         }
