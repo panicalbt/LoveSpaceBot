@@ -1,5 +1,5 @@
-const redis = require('./db');
-const { verifyTelegramAuth, getUserData } = require('./utils/telegramAuth');
+const redis = require('./_lib/db');
+const { verifyTelegramAuth, getUserData } = require('./_lib/utils/telegramAuth');
 const crypto = require('crypto');
 
 module.exports = async (req, res) => {

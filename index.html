@@ -544,8 +544,14 @@
         async function apiCall(endpoint, data = null, method = 'POST') {
             const options = { method, headers: { 'Content-Type': 'application/json' } };
             if (data) options.body = JSON.stringify(data);
+            
+            let url = `/api/${endpoint}`;
+            if (!['auth', 'cron', 'couple'].includes(endpoint)) {
+                url = `/api/data?type=${endpoint}`;
+            }
+
             try {
-                const res = await fetch(`/api/${endpoint}`, options);
+                const res = await fetch(url, options);
                 const json = await res.json();
                 if (!res.ok) throw new Error(json.error || 'API Error');
                 return json;
@@ -624,13 +630,13 @@
                 .then(r => r.json()).then(u => { state.user = u; state.couple = u.couple; updateUI(); });
 
             const [tasks, wishes, plans, qotd, memories, wheel, events] = await Promise.all([
-                fetch(`/api/tasks?coupleId=${cid}`).then(r => r.json()),
-                fetch(`/api/wishes?coupleId=${cid}`).then(r => r.json()),
-                fetch(`/api/plans?coupleId=${cid}`).then(r => r.json()),
-                fetch(`/api/questions?coupleId=${cid}`).then(r => r.json()),
-                fetch(`/api/memories?coupleId=${cid}`).then(r => r.json()),
-                fetch(`/api/wheel?coupleId=${cid}`).then(r => r.json()),
-                fetch(`/api/events`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'get', coupleId: cid }) }).then(r => r.json())
+                fetch(`/api/data?type=tasks&coupleId=${cid}`).then(r => r.json()),
+                fetch(`/api/data?type=wishes&coupleId=${cid}`).then(r => r.json()),
+                fetch(`/api/data?type=plans&coupleId=${cid}`).then(r => r.json()),
+                fetch(`/api/data?type=questions&coupleId=${cid}`).then(r => r.json()),
+                fetch(`/api/data?type=memories&coupleId=${cid}`).then(r => r.json()),
+                fetch(`/api/data?type=wheel&coupleId=${cid}`).then(r => r.json()),
+                fetch(`/api/data?type=events`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'get', coupleId: cid }) }).then(r => r.json())
             ]);
             renderTasks(tasks); renderWishes(wishes); renderPlans(plans); renderQotd(qotd);
             renderTimeline(memories); renderWheelItems(wheel); renderEvents(events);

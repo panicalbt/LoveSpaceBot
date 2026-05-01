@@ -1,4 +1,4 @@
-const redis = require('./db');
+const redis = require('./_lib/db');
 const crypto = require('crypto');
 
 module.exports = async (req, res) => {
