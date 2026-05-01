@@ -123,9 +123,20 @@
         .widget-item svg { width: 28px; height: 28px; color: var(--accent-color); }
         .widget-item span { font-size: 12px; font-weight: 600; opacity: 0.8; }
         
-        .notification-item { padding: 12px 0; border-bottom: 1px solid var(--card-border); display: flex; gap: 12px; align-items: flex-start; }
         .notification-item:last-child { border-bottom: none; }
+        
+        /* Floating Action Button */
+        .fab { position: fixed; bottom: 100px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: var(--accent-color); color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px var(--accent-glow); z-index: 90; cursor: pointer; border: none; transition: transform 0.2s, box-shadow 0.2s; }
+        .fab:active { transform: scale(0.9); box-shadow: 0 3px 10px var(--accent-glow); }
+        .fab svg { width: 28px; height: 28px; }
+
+        /* Sliding Tabs */
+        .tab-group { display: flex; background: rgba(0,0,0,0.1); padding: 4px; border-radius: 14px; margin: 20px 0; position: relative; border: 1px solid var(--card-border); }
+        .tab-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; background: transparent; color: var(--text-color); font-weight: 600; font-size: 14px; cursor: pointer; position: relative; z-index: 1; transition: color 0.3s; }
+        .tab-btn.active { color: white; }
+        .tab-highlight { position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: var(--accent-color); border-radius: 10px; box-shadow: 0 4px 15px var(--accent-glow); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 0; }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/coolicons/coolicons.css">
 </head>
 <body>
     <div class="ambient-glow"></div>
@@ -138,23 +149,23 @@
         <h3>Мой статус</h3>
         <p style="opacity: 0.7; font-size: 14px; margin-bottom: 16px;">Покажите партнеру, чем вы заняты или какое у вас настроение!</p>
         <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
-            <button class="action-btn" onclick="setStatus('💻 Работаю')">💻 Работаю</button>
-            <button class="action-btn" onclick="setStatus('😴 Сплю')">😴 Сплю</button>
-            <button class="action-btn" onclick="setStatus('🎮 Играю')">🎮 Играю</button>
-            <button class="action-btn" onclick="setStatus('🚶‍♂️ Гуляю')">🚶‍♂️ Гуляю</button>
-            <button class="action-btn" onclick="setStatus('🥰 Скучаю')">🥰 Скучаю</button>
-            <button class="action-btn" onclick="setStatus('🍿 Смотрю кино')">🍿 Смотрю кино</button>
+            <button class="action-btn" onclick="setStatus('<i class=\'ci-desktop\'></i> Работаю')"><i class="ci-desktop"></i> Работаю</button>
+            <button class="action-btn" onclick="setStatus('<i class=\'ci-moon\'></i> Сплю')"><i class="ci-moon"></i> Сплю</button>
+            <button class="action-btn" onclick="setStatus('<i class=\'ci-game-controller\'></i> Играю')"><i class="ci-game-controller"></i> Играю</button>
+            <button class="action-btn" onclick="setStatus('<i class=\'ci-map\'></i> Гуляю')"><i class="ci-map"></i> Гуляю</button>
+            <button class="action-btn" onclick="setStatus('<i class=\'ci-heart-filled\'></i> Скучаю')"><i class="ci-heart-filled"></i> Скучаю</button>
+            <button class="action-btn" onclick="setStatus('<i class=\'ci-video\'></i> Смотрю кино')"><i class="ci-video"></i> Смотрю кино</button>
         </div>
         <input type="text" id="custom-status" placeholder="Свой статус... (макс 15 симв.)" maxlength="15">
         <button class="btn" onclick="setStatus(document.getElementById('custom-status').value)">Установить статус</button>
         <div style="margin-top: 20px; border-top: 1px solid var(--card-border); padding-top: 16px;">
             <h4 style="margin-bottom: 10px;">Как настроение сегодня?</h4>
             <div style="display: flex; gap: 10px; justify-content: space-between;">
-                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('🤩')">🤩</button>
-                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😊')">😊</button>
-                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😐')">😐</button>
-                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😔')">😔</button>
-                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😡')">😡</button>
+                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('🤩')"><i class="ci-face-happy"></i></button>
+                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😊')"><i class="ci-face-neutral"></i></button>
+                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😐')"><i class="ci-face-sad"></i></button>
+                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😔')"><i class="ci-face-idk"></i></button>
+                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😡')"><i class="ci-face-angry"></i></button>
             </div>
         </div>
     </div>
@@ -163,7 +174,7 @@
     <div class="bottom-sheet" id="modal-task">
         <h3>Новое задание</h3>
         <input type="text" id="task-title" placeholder="Что нужно сделать?">
-        <input type="number" id="task-points" placeholder="Награда (💎)">
+        <input type="number" id="task-points" placeholder="Награда (<i class='ci-gem'></i>)">
         <button class="btn" onclick="saveTask()">
             <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
             Сохранить
@@ -174,10 +185,10 @@
     <div class="bottom-sheet" id="modal-wish">
         <h3>Новое желание</h3>
         <input type="text" id="wish-title" placeholder="Чего вам хочется?">
-        <input type="number" id="wish-points" placeholder="Цена (💎)">
+        <input type="number" id="wish-points" placeholder="Цена (<i class='ci-gem'></i>)">
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
             <input type="checkbox" id="wish-secret" style="width:20px; height:20px; margin-bottom:0;">
-            <label for="wish-secret" style="font-size:16px;">Секретное желание 🎁</label>
+            <label for="wish-secret" style="font-size:16px;">Секретное желание <i class="ci-gift"></i></label>
         </div>
         <button class="btn" onclick="saveWish()">
             <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
@@ -192,7 +203,7 @@
             <option value="day">На день</option>
             <option value="week">На неделю</option>
             <option value="month">На месяц</option>
-            <option value="date">Точная дата 🗓</option>
+            <option value="date">Точная дата <i class="ci-calendar"></i></option>
         </select>
         <input type="date" id="plan-date" style="display:none;">
         <input type="text" id="plan-text" placeholder="Опишите план">
@@ -258,7 +269,7 @@
         <h3 style="text-align: center; margin-bottom: 20px;">Подробная статистика</h3>
         <div style="text-align: center; margin-bottom: 30px;">
             <h1 class="text-accent text-glow" style="font-size: 64px; margin: 0;" id="user-balance-modal">0</h1>
-            <p style="font-size: 16px; font-weight: 500; opacity: 0.8;">Кристаллов 💎</p>
+            <p style="font-size: 16px; font-weight: 500; opacity: 0.8;">Кристаллов <i class="ci-gem"></i></p>
         </div>
         <div class="card" style="margin-bottom: 16px;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 16px;">
@@ -306,17 +317,17 @@
             
             <div class="couple-avatars">
                 <div class="avatar-wrapper">
-                    <div class="streak-badge" id="streak-me" style="display:none;">🔥 1</div>
+                    <div class="streak-badge" id="streak-me" style="display:none;"><i class="ci-fire"></i> 1</div>
                     <div class="avatar" id="avatar-me">Я</div>
-                    <div class="status-bubble" id="status-me" onclick="openModal('modal-status')">💭 Статус</div>
+                    <div class="status-bubble" id="status-me" onclick="openModal('modal-status')"><i class="ci-chat-bubble"></i> Статус</div>
                 </div>
                 
                 <svg class="heart-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                 
                 <div class="avatar-wrapper">
-                    <div class="streak-badge" id="streak-partner" style="display:none;">🔥 1</div>
+                    <div class="streak-badge" id="streak-partner" style="display:none;"><i class="ci-fire"></i> 1</div>
                     <div class="avatar" id="avatar-partner" style="border-color: var(--card-border); box-shadow: none; opacity: 0.8;">П</div>
-                    <div class="status-bubble" id="status-partner" style="border-color: var(--card-border); opacity: 0.8;">💤 Офлайн</div>
+                    <div class="status-bubble" id="status-partner" style="border-color: var(--card-border); opacity: 0.8;"><i class="ci-moon"></i> Офлайн</div>
                 </div>
             </div>
 
@@ -392,7 +403,9 @@
                 <svg viewBox="0 0 24 24" style="color: var(--accent-color)"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
                 Таймлайн
             </h2>
-            <button class="btn" onclick="openModal('modal-memory')" style="margin-top: 10px;">+ Добавить воспоминание</button>
+            <button class="fab" onclick="openModal('modal-memory')">
+                <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+            </button>
             <div id="timeline-list" class="timeline"></div>
         </div>
 
@@ -421,7 +434,9 @@
                 Планы и Даты
             </h2>
             <div id="plans-list" style="margin-top: 20px;"></div>
-            <button class="btn" onclick="openModal('modal-plan')" style="margin-top: 20px;">+ Добавить план</button>
+            <button class="fab" onclick="openModal('modal-plan')">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
         </div>
 
         <!-- Tasks Screen -->
@@ -430,12 +445,15 @@
                 <svg viewBox="0 0 24 24" style="color: var(--accent-color)"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
                 Задания
             </h2>
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn" id="tab-partner" onclick="switchTaskTab('partner')" style="flex:1; margin:0; padding:10px;">Мне (от партнера)</button>
-                <button class="btn" id="tab-mine" onclick="switchTaskTab('mine')" style="flex:1; margin:0; background:rgba(0,0,0,0.2); border:1px solid var(--card-border); color:var(--text-color); box-shadow:none; padding:10px;">Мои (для партнера)</button>
+            <div class="tab-group">
+                <div class="tab-highlight" id="task-highlight"></div>
+                <button class="tab-btn active" id="tab-partner" onclick="switchTaskTab('partner')">Мне</button>
+                <button class="tab-btn" id="tab-mine" onclick="switchTaskTab('mine')">От меня</button>
             </div>
             <div id="tasks-list" style="margin-top: 20px;"></div>
-            <button class="btn" onclick="openModal('modal-task')" style="margin-top: 20px;">+ Дать задание</button>
+            <button class="fab" onclick="openModal('modal-task')">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
         </div>
 
         <!-- Wishes Screen -->
@@ -444,12 +462,15 @@
                 <svg viewBox="0 0 24 24" style="color: var(--accent-color)"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
                 Магазин Желаний
             </h2>
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn" id="tab-wish-partner" onclick="switchWishTab('partner')" style="flex:1; margin:0; padding:10px;">Для меня</button>
-                <button class="btn" id="tab-wish-mine" onclick="switchWishTab('mine')" style="flex:1; margin:0; background:rgba(0,0,0,0.2); border:1px solid var(--card-border); color:var(--text-color); box-shadow:none; padding:10px;">Для партнера</button>
+            <div class="tab-group">
+                <div class="tab-highlight" id="wish-highlight"></div>
+                <button class="tab-btn active" id="tab-wish-partner" onclick="switchWishTab('partner')">Для меня</button>
+                <button class="tab-btn" id="tab-wish-mine" onclick="switchWishTab('mine')">От меня</button>
             </div>
             <div id="wishes-list" style="margin-top: 20px;"></div>
-            <button class="btn" onclick="openModal('modal-wish')" style="margin-top: 20px;">+ Добавить желание</button>
+            <button class="fab" onclick="openModal('modal-wish')">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
         </div>
 
         <!-- Settings Screen -->
@@ -673,32 +694,24 @@
         async function taskAction(id, action) {
             tg.HapticFeedback.impactOccurred('medium');
             await apiCall('tasks', { action, coupleId: state.couple.id, taskId: id, telegramId: state.user.telegramId });
-            if (action === 'submit_for_review') tg.showPopup({message: "Задание отправлено партнеру на проверку ⏳"});
+            if (action === 'submit_for_review') tg.showPopup({message: "Задание отправлено партнеру на проверку <i class="ci-clock"></i>"});
             if (action === 'approve') shootConfetti();
             loadData();
         }
 
         function switchTaskTab(tab) {
             tg.HapticFeedback.impactOccurred('light'); currentTaskTab = tab;
-            const btnPartner = document.getElementById('tab-partner'); const btnMine = document.getElementById('tab-mine');
-            btnPartner.style.background = tab === 'partner' ? 'var(--accent-color)' : 'rgba(0,0,0,0.2)';
-            btnPartner.style.color = tab === 'partner' ? 'white' : 'var(--text-color)';
-            btnPartner.style.border = tab === 'partner' ? 'none' : '1px solid var(--card-border)';
-            btnMine.style.background = tab === 'mine' ? 'var(--accent-color)' : 'rgba(0,0,0,0.2)';
-            btnMine.style.color = tab === 'mine' ? 'white' : 'var(--text-color)';
-            btnMine.style.border = tab === 'mine' ? 'none' : '1px solid var(--card-border)';
+            document.querySelectorAll('#screen-tasks .tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tab === 'partner' ? 'tab-partner' : 'tab-mine').classList.add('active');
+            document.getElementById('task-highlight').style.transform = `translateX(${tab === 'partner' ? '0' : '100%'})`;
             renderTasks(window.cachedTasks || []);
         }
 
         function switchWishTab(tab) {
             tg.HapticFeedback.impactOccurred('light'); currentWishTab = tab;
-            const btnPartner = document.getElementById('tab-wish-partner'); const btnMine = document.getElementById('tab-wish-mine');
-            btnPartner.style.background = tab === 'partner' ? 'var(--accent-color)' : 'rgba(0,0,0,0.2)';
-            btnPartner.style.color = tab === 'partner' ? 'white' : 'var(--text-color)';
-            btnPartner.style.border = tab === 'partner' ? 'none' : '1px solid var(--card-border)';
-            btnMine.style.background = tab === 'mine' ? 'var(--accent-color)' : 'rgba(0,0,0,0.2)';
-            btnMine.style.color = tab === 'mine' ? 'white' : 'var(--text-color)';
-            btnMine.style.border = tab === 'mine' ? 'none' : '1px solid var(--card-border)';
+            document.querySelectorAll('#screen-wishes .tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tab === 'partner' ? 'tab-wish-partner' : 'tab-wish-mine').classList.add('active');
+            document.getElementById('wish-highlight').style.transform = `translateX(${tab === 'partner' ? '0' : '100%'})`;
             renderWishes(window.cachedWishes || []);
         }
 
@@ -798,7 +811,7 @@
         async function saveMemory() {
             tg.HapticFeedback.impactOccurred('medium');
             const text = document.getElementById('memory-text').value;
-            const emoji = document.getElementById('memory-emoji').value || '❤️';
+            const emoji = document.getElementById('memory-emoji').value || '<i class="ci-heart-filled"></i>';
             const date = document.getElementById('memory-date').value;
             const photo = document.getElementById('memory-photo-base64').value;
             if(!text) return;
@@ -904,7 +917,7 @@
             list.innerHTML = sorted.map(m => {
                 const photoHTML = m.photo ? `<img src="${m.photo}" style="width:100%; border-radius:12px; margin-top:12px; border: 1px solid var(--card-border);">` : '';
                 return `<div class="timeline-item">
-                    <div class="timeline-emoji">${m.emoji || '❤️'}</div>
+                    <div class="timeline-emoji">${m.emoji || '<i class="ci-heart-filled"></i>'}</div>
                     <div class="card" style="margin-bottom:0; padding:16px;">
                         <span style="font-size:12px; opacity:0.6; display:block; margin-bottom:4px;">${new Date(m.date).toLocaleDateString()}</span>
                         <p style="font-size:16px; font-weight:500;">${m.text}</p>
@@ -988,16 +1001,16 @@
                 let actionHTML = '';
                 if (currentTaskTab === 'partner') { 
                     if (t.status === 'active') actionHTML = `<button class="action-btn done" style="width:100%" onclick="taskAction('${t.id}', 'submit_for_review')">Выполнить (На проверку)</button>`;
-                    else if (t.status === 'review') actionHTML = `<div style="text-align:center; opacity:0.6; padding:10px 0; border: 1px dashed var(--card-border); border-radius: 10px;">Ожидает проверки партнером ⏳</div>`;
-                    else actionHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;">✅ Одобрено</div>`;
+                    else if (t.status === 'review') actionHTML = `<div style="text-align:center; opacity:0.6; padding:10px 0; border: 1px dashed var(--card-border); border-radius: 10px;">Ожидает проверки партнером <i class="ci-clock"></i></div>`;
+                    else actionHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;"><i class="ci-checkbox-check"></i> Одобрено</div>`;
                 } else { 
                     if (t.status === 'active') actionHTML = `<div style="display:flex; justify-content:space-between;"><span style="opacity:0.6; align-self:center; font-size:14px;">Ожидаем выполнения...</span><button class="action-btn del" style="width:30%" onclick="delItem('tasks', 'taskId', '${t.id}')">Удалить</button></div>`;
-                    else if (t.status === 'review') actionHTML = `<div style="display:flex; justify-content:space-between;"><button class="action-btn done" onclick="taskAction('${t.id}', 'approve')">Принять ✅</button><button class="action-btn del" onclick="taskAction('${t.id}', 'reject')">Отклонить ❌</button></div>`;
-                    else actionHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;">✅ Завершено</div>`;
+                    else if (t.status === 'review') actionHTML = `<div style="display:flex; justify-content:space-between;"><button class="action-btn done" onclick="taskAction('${t.id}', 'approve')">Принять <i class="ci-checkbox-check"></i></button><button class="action-btn del" onclick="taskAction('${t.id}', 'reject')">Отклонить <i class="ci-close-big"></i></button></div>`;
+                    else actionHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;"><i class="ci-checkbox-check"></i> Завершено</div>`;
                 }
                 return `<div class="card" style="${t.status === 'done' ? 'opacity:0.6' : ''}">
                     <h3 style="font-size: 18px; margin-bottom: 8px;">${t.title}</h3>
-                    <p style="color:var(--accent-color); font-weight:600; font-size: 16px; margin-bottom:16px;">+<span id="task-${t.id}-pts">${t.points}</span> 💎</p>
+                    <p style="color:var(--accent-color); font-weight:600; font-size: 16px; margin-bottom:16px;">+<span id="task-${t.id}-pts">${t.points}</span> <i class="ci-gem"></i></p>
                     ${actionHTML}
                 </div>`;
             }).join('');
@@ -1020,7 +1033,7 @@
                 }
                 return `<div class="card" style="${w.isBought ? 'opacity:0.6' : ''}">
                 <h3 style="font-size: 18px; margin-bottom: 8px; ${w.isSecret && !w.isBought ? 'color:var(--accent-color);' : ''}">${titleStr}</h3>
-                <p style="color:var(--accent-color); font-weight:600; font-size: 16px; margin-bottom:16px;">-${w.points} 💎</p>
+                <p style="color:var(--accent-color); font-weight:600; font-size: 16px; margin-bottom:16px;">-${w.points} <i class="ci-gem"></i></p>
                 ${actionHTML}
                 </div>`
             }).join('');
@@ -1034,9 +1047,9 @@
             list.innerHTML = sorted.map(p => {
                 const iCompleted = p.completedBy && p.completedBy.includes(state.user.id);
                 let actionHTML = '';
-                if (p.isDone) actionHTML = `<div style="display:flex; align-items:center; gap:8px; opacity:0.6; font-weight:500;">✅ Выполнено обоими</div>`;
-                else if (iCompleted) actionHTML = `<div style="text-align:center; opacity:0.6; padding:10px 0; border: 1px dashed var(--card-border); border-radius: 10px;">Ожидаем партнера ⏳</div>`;
-                else actionHTML = `<div style="display:flex; justify-content:space-between;"><button class="action-btn done" style="width:70%" onclick="completePlan('${p.id}')">Я выполнил(а) ✅</button><button class="action-btn del" style="width:25%" onclick="delItem('plans', 'planId', '${p.id}')"><svg viewBox="0 0 24 24" style="width:20px;height:20px"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
+                if (p.isDone) actionHTML = `<div style="display:flex; align-items:center; gap:8px; opacity:0.6; font-weight:500;"><i class="ci-checkbox-check"></i> Выполнено обоими</div>`;
+                else if (iCompleted) actionHTML = `<div style="text-align:center; opacity:0.6; padding:10px 0; border: 1px dashed var(--card-border); border-radius: 10px;">Ожидаем партнера <i class="ci-clock"></i></div>`;
+                else actionHTML = `<div style="display:flex; justify-content:space-between;"><button class="action-btn done" style="width:70%" onclick="completePlan('${p.id}')">Я выполнил(а) <i class="ci-checkbox-check"></i></button><button class="action-btn del" style="width:25%" onclick="delItem('plans', 'planId', '${p.id}')"><svg viewBox="0 0 24 24" style="width:20px;height:20px"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
                 const dateStr = p.date ? `<span style="float:right; opacity:0.8;">${new Date(p.date).toLocaleDateString()}</span>` : '';
                 return `<div class="card" style="${p.isDone ? 'opacity:0.6' : ''}">
                     <p style="font-size:12px; font-weight: 600; color:var(--accent-color); margin-bottom:6px; text-transform:uppercase; letter-spacing: 1px;">${types[p.type]} ${dateStr}</p>
