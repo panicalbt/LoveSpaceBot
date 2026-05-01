@@ -83,6 +83,6 @@ module.exports = async (req, res) => {
     res.status(200).json({ ...user, couple });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'DB Error' });
+    res.status(500).json({ error: error.message || 'DB Error' });
   }
 };

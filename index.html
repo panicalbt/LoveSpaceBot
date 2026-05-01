@@ -640,7 +640,11 @@
                 if (state.couple) loadData();
                 setTimeout(() => { document.getElementById('loading-screen').style.opacity = '0'; setTimeout(() => document.getElementById('loading-screen').style.display = 'none', 500); }, 300);
             } catch (e) {
-                document.getElementById('loading-screen').innerHTML = '<p style="text-align:center;padding:20px;">Ошибка авторизации. Перезапустите приложение.</p>';
+                document.getElementById('loading-screen').innerHTML = `<div style="text-align:center;padding:20px;">
+                    <p style="color:#ef4444; font-weight:bold; margin-bottom:10px;">Ошибка авторизации</p>
+                    <p style="font-size:14px; opacity:0.8;">${e.message}</p>
+                    <button class="btn" style="margin-top:20px;" onclick="location.reload()">Попробовать снова</button>
+                </div>`;
             }
         }
 
