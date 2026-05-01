@@ -56,9 +56,9 @@
         #particles-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
 
         .app-container { min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 90px; }
-        .screen { display: none; padding: 24px; animation: fadeIn 0.3s ease-out; }
+        .screen { display: none; padding: 24px; animation: slideFade 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .screen.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideFade { from { opacity: 0; transform: translateX(15px); } to { opacity: 1; transform: translateX(0); } }
 
         .card { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; margin-bottom: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
         
@@ -89,7 +89,7 @@
         .text-glow { text-shadow: 0 0 20px var(--accent-glow); }
         
         .color-picker { display: flex; gap: 12px; margin-bottom: 24px; }
-        .color-circle { width: 44px; height: 44px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex-shrink: 0; aspect-ratio: 1; }
+        .color-circle { width: 34px; height: 34px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex-shrink: 0; aspect-ratio: 1; }
         .color-circle.active { transform: scale(1.15); border-color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
         .couple-avatars { display: flex; justify-content: center; align-items: center; gap: 16px; margin: 30px 0; }
@@ -209,9 +209,7 @@
     <div class="bottom-sheet" id="modal-plan">
         <h3>Новый план</h3>
         <select id="plan-type">
-            <option value="day">На сегодня</option>
-            <option value="week">На неделю</option>
-            <option value="month">На месяц</option>
+            <option value="today">Сегодня</option>
             <option value="date">Выбрать дату <i class="ci-calendar"></i></option>
         </select>
         <input type="date" id="plan-date" style="display:none;">
@@ -349,27 +347,37 @@
             <div class="card" onclick="toggleStats()" style="cursor: pointer; padding: 16px; margin-bottom: 20px;">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div style="flex: 1; padding-right: 16px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; font-weight: 600;">
-                            <span>Уровни: <span id="love-level" class="text-accent">1</span> <span style="opacity: 0.5;">|</span> <span id="partner-level" class="text-accent">1</span></span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600;">
+                            <span>Уровни любви: <span id="love-level" class="text-accent">1</span> <span style="opacity: 0.5;">|</span> <span id="partner-level" class="text-accent">1</span></span>
                             <div style="display: flex; gap: 8px; align-items: center; opacity: 0.9;" class="text-accent">
                                 <span style="display: flex; align-items: center;">Вы: <span id="user-balance" style="margin-left:4px;">0</span></span>
                                 <span style="opacity: 0.5;">|</span>
                                 <span style="display: flex; align-items: center;">П: <span id="partner-balance" style="margin-left:4px;">0</span> <i class="ci-gem" style="font-size:14px; margin-left:2px;"></i></span>
                             </div>
                         </div>
-                        <div class="level-bar-bg" style="margin-top: 0; height: 6px;"><div class="level-bar-fill" id="love-level-fill" style="width: 0%"></div></div>
                     </div>
                     <svg id="stats-arrow" viewBox="0 0 24 24" style="width: 20px; height: 20px; opacity: 0.5; transition: transform 0.3s;"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </div>
                 
                 <div id="expanded-stats" style="max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); margin-top: 0;">
                     <div style="padding-top: 20px; border-top: 1px solid var(--card-border); margin-top: 15px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px;">
-                            <span style="opacity: 0.8;">Прогресс вашего уровня:</span>
-                            <span style="font-weight: bold; color: var(--accent-color);"><span id="crystals-to-next">500</span> до <span id="next-level-val">2</span> ур.</span>
+                        <!-- My Progress -->
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                            <span style="opacity: 0.8;">Ваш прогресс (Ур. <span id="my-level-val">1</span>):</span>
+                            <span style="font-weight: bold; color: var(--accent-color);"><span id="my-crystals-to-next">500</span> <i class="ci-gem" style="font-size:12px;"></i></span>
                         </div>
-                        <div class="level-bar-bg" style="height: 10px;"><div class="level-bar-fill" id="love-level-fill-expanded" style="width: 0%"></div></div>
-                        <p style="font-size: 12px; opacity: 0.5; margin-top: 10px; text-align: center;">Выполняйте задания, чтобы получать кристаллы и повышать уровень любви! ✨</p>
+                        <div class="level-bar-bg" style="height: 8px; margin-bottom: 16px; background: rgba(0,0,0,0.3);">
+                            <div class="level-bar-fill" id="my-level-fill-expanded" style="width: 0%; box-shadow: 0 0 15px var(--accent-glow);"></div>
+                        </div>
+                        
+                        <!-- Partner Progress -->
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                            <span style="opacity: 0.8;">Прогресс партнера (Ур. <span id="p-level-val">1</span>):</span>
+                            <span style="font-weight: bold; color: var(--accent-color);"><span id="p-crystals-to-next">500</span> <i class="ci-gem" style="font-size:12px;"></i></span>
+                        </div>
+                        <div class="level-bar-bg" style="height: 8px; background: rgba(0,0,0,0.3);">
+                            <div class="level-bar-fill" id="p-level-fill-expanded" style="width: 0%; box-shadow: 0 0 15px var(--accent-glow); opacity: 0.8;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -572,6 +580,10 @@
 
         document.getElementById('plan-type').addEventListener('change', function(e) {
             document.getElementById('plan-date').style.display = e.target.value === 'date' ? 'block' : 'none';
+            if (e.target.value === 'today') {
+                const now = new Date();
+                document.getElementById('plan-date').value = now.toISOString().split('T')[0];
+            }
         });
 
         function toggleStats() {
@@ -804,12 +816,15 @@
         async function savePlan() {
             if (!state.user || !state.couple) return;
             tg.HapticFeedback.impactOccurred('medium');
-            const type = document.getElementById('plan-type').value;
+            const isToday = document.getElementById('plan-type').value === 'today';
             const text = document.getElementById('plan-text').value;
-            const date = document.getElementById('plan-date').value;
-            if(!text) return;
+            let date = isToday ? new Date().toISOString().split('T')[0] : document.getElementById('plan-date').value;
+            
+            if(!text || !date) return;
+            
             try {
-                await apiCall('plans', { action: 'create', coupleId: state.couple.id, type, text, date });
+                // Type is still sent for backward compatibility but renderPlans will re-categorize
+                await apiCall('plans', { action: 'create', coupleId: state.couple.id, type: 'date', text, date });
                 document.getElementById('plan-text').value = ''; document.getElementById('plan-date').value = '';
                 closeModal(); loadData();
             } catch (e) {}
@@ -1066,7 +1081,7 @@
             const sorted = tasks.sort((a,b) => { if (a.status === 'done' && b.status !== 'done') return 1; if (a.status !== 'done' && b.status === 'done') return -1; return b.createdAt - a.createdAt; });
             const filtered = sorted.filter(t => { if (currentTaskTab === 'mine') return t.creatorId === state.user.id; return t.creatorId !== state.user.id; });
 
-            if(!filtered || filtered.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px; font-size:40px;">🥺<p style="font-size:16px; margin-top:10px;">В этой категории пусто</p></div>'; return; }
+            if(!filtered || filtered.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px;"><p style="font-size:16px;">В этой категории пока пусто</p></div>'; return; }
             
             list.innerHTML = filtered.map(t => {
                 let actionHTML = '';
@@ -1093,7 +1108,7 @@
             const sorted = wishes.sort((a,b) => { if (a.isBought && !b.isBought) return 1; if (!a.isBought && b.isBought) return -1; return b.createdAt - a.createdAt; });
             const filtered = sorted.filter(w => { if (currentWishTab === 'mine') return w.creatorId === state.user.id; return w.creatorId !== state.user.id; });
             
-            if(!filtered || filtered.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px; font-size:40px;">🎁<p style="font-size:16px; margin-top:10px;">В этой категории пусто</p></div>'; return; }
+            if(!filtered || filtered.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px;"><p style="font-size:16px;">В этой категории пока пусто</p></div>'; return; }
             list.innerHTML = filtered.map(w => {
                 const titleStr = (w.isSecret && !w.isBought && w.creatorId !== state.user.id) ? "Секретное желание 🎁" : w.title;
                 let actionHTML = '';
@@ -1114,22 +1129,38 @@
             window.cachedPlans = plans; const list = document.getElementById('plans-list');
             const sorted = plans.sort((a,b) => { if (a.isDone && !b.isDone) return 1; if (!a.isDone && b.isDone) return -1; return b.createdAt - a.createdAt; });
             
+            const now = new Date();
+            now.setHours(0,0,0,0);
+
             const filtered = sorted.filter(p => {
-                if (currentPlanTab === 'day') return p.type === 'day' || p.type === 'date';
-                return p.type === currentPlanTab;
+                if (!p.date) return currentPlanTab === 'month'; // No date goes to Month/Other
+                const pDate = new Date(p.date);
+                pDate.setHours(0,0,0,0);
+                const diffDays = Math.ceil((pDate - now) / (1000 * 60 * 60 * 24));
+
+                if (currentPlanTab === 'day') return diffDays <= 0;
+                if (currentPlanTab === 'week') return diffDays > 0 && diffDays <= 7;
+                if (currentPlanTab === 'month') return diffDays > 7;
+                return false;
             });
 
-            if(!filtered || filtered.length === 0) { list.innerHTML = `<div style="text-align:center; opacity:0.5; margin-top:40px; font-size:40px;">${currentPlanTab === 'day' ? '☀️' : (currentPlanTab === 'week' ? '📅' : '🗓️')}<p style="font-size:16px; margin-top:10px;">В этой категории пока пусто</p></div>`; return; }
-            const types = { 'day': 'На сегодня', 'week': 'На неделю', 'month': 'На месяц', 'date': 'Дата' };
+            if(!filtered || filtered.length === 0) { 
+                list.innerHTML = `<div style="text-align:center; opacity:0.5; margin-top:40px;"><p style="font-size:16px;">В этой категории пока пусто</p></div>`; 
+                return; 
+            }
+
             list.innerHTML = filtered.map(p => {
                 const iCompleted = p.completedBy && p.completedBy.includes(state.user.id);
                 let actionHTML = '';
                 if (p.isDone) actionHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;"><i class="ci-checkbox-check"></i> Выполнено обоими</div>`;
                 else if (iCompleted) actionHTML = `<div style="text-align:center; opacity:0.6; padding:10px 0; border: 1px dashed var(--card-border); border-radius: 10px;">Ожидаем партнера <i class="ci-clock"></i></div>`;
                 else actionHTML = `<div style="display:flex; justify-content:space-between;"><button class="action-btn done" style="width:70%" onclick="completePlan('${p.id}')">Я выполнил(а) <i class="ci-checkbox-check"></i></button><button class="action-btn del" style="width:25%" onclick="delItem('plans', 'planId', '${p.id}')"><svg viewBox="0 0 24 24" style="width:20px;height:20px"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
-                const dateStr = p.date ? `<span style="float:right; opacity:0.8;">${new Date(p.date).toLocaleDateString()}</span>` : '';
+                
+                const pDate = new Date(p.date);
+                const dateStr = `<span style="float:right; opacity:0.8;">${pDate.toLocaleDateString()}</span>`;
+                
                 return `<div class="card" style="${p.isDone ? 'opacity:0.6' : ''}">
-                    <p style="font-size:12px; font-weight: 600; color:var(--accent-color); margin-bottom:6px; text-transform:uppercase; letter-spacing: 1px;">${types[p.type]} ${dateStr}</p>
+                    <p style="font-size:12px; font-weight: 600; color:var(--accent-color); margin-bottom:6px; text-transform:uppercase; letter-spacing: 1px;">План на ${pDate.toLocaleDateString()} ${dateStr}</p>
                     <h3 style="font-size: 18px; margin-bottom:16px;">${p.text}</h3>
                     ${actionHTML}
                 </div>`;
@@ -1179,14 +1210,13 @@
                 const toNextLevel = 500 - crystalsInLevel;
 
                 // Modal Stats Update (Expanded Card)
-                document.getElementById('love-level').innerText = level;
-                document.getElementById('love-level-fill').style.width = `${progress}%`;
                 document.getElementById('user-balance').innerText = state.user.balance;
+                document.getElementById('love-level').innerText = level;
 
-                if (document.getElementById('love-level-fill-expanded')) {
-                    document.getElementById('next-level-val').innerText = level + 1;
-                    document.getElementById('crystals-to-next').innerText = toNextLevel;
-                    document.getElementById('love-level-fill-expanded').style.width = `${progress}%`;
+                if (document.getElementById('my-level-fill-expanded')) {
+                    document.getElementById('my-level-val').innerText = level;
+                    document.getElementById('my-crystals-to-next').innerText = toNextLevel;
+                    document.getElementById('my-level-fill-expanded').style.width = `${progress}%`;
                 }
 
                 // Partner Info
@@ -1198,19 +1228,19 @@
                 }
 
                 if (partnerData) {
-                    if (partnerData.photoUrl) {
-                        document.getElementById('avatar-partner').innerText = '';
-                        document.getElementById('avatar-partner').style.backgroundImage = `url(${partnerData.photoUrl})`;
-                    } else if (partnerData.firstName) {
-                        document.getElementById('avatar-partner').innerText = partnerData.firstName.charAt(0).toUpperCase();
-                    }
-                    if (partnerData.status) document.getElementById('status-partner').innerText = partnerData.status;
-                    if (document.getElementById('partner-balance')) {
-                        const pBalance = partnerData.balance || 0;
-                        document.getElementById('partner-balance').innerText = pBalance;
-                        if (document.getElementById('partner-level')) {
-                            document.getElementById('partner-level').innerText = Math.floor(pBalance / 500) + 1;
-                        }
+                    const pBalance = partnerData.balance || 0;
+                    const pLevel = Math.floor(pBalance / 500) + 1;
+                    const pCrystalsInLevel = pBalance % 500;
+                    const pProgress = (pCrystalsInLevel / 500) * 100;
+                    const pToNext = 500 - pCrystalsInLevel;
+
+                    document.getElementById('partner-balance').innerText = pBalance;
+                    document.getElementById('partner-level').innerText = pLevel;
+                    
+                    if (document.getElementById('p-level-fill-expanded')) {
+                        document.getElementById('p-level-val').innerText = pLevel;
+                        document.getElementById('p-crystals-to-next').innerText = pToNext;
+                        document.getElementById('p-level-fill-expanded').style.width = `${pProgress}%`;
                     }
                     if (partnerData.dailyNote) { document.getElementById('partner-note').innerText = partnerData.dailyNote; document.getElementById('partner-note').style.opacity = '1'; document.getElementById('partner-note').style.fontStyle = 'normal'; }
                     if (partnerData.streak && partnerData.streak > 1) {
