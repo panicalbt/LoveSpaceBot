@@ -73,6 +73,8 @@ module.exports = async (req, res) => {
           couple.partnerData[user.id].streak = user.streak;
           couple.partnerData[user.id].firstName = user.firstName;
           couple.partnerData[user.id].telegramId = user.telegramId;
+          couple.partnerData[user.id].balance = user.balance;
+          couple.partnerData[user.id].status = user.status || null;
           await redis.set(`couple:${user.coupleId}`, couple);
       } else {
           user.coupleId = null;

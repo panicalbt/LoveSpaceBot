@@ -1262,10 +1262,35 @@
                         document.getElementById('p-crystals-to-next').innerText = pToNext;
                         document.getElementById('p-level-fill-expanded').style.width = `${pProgress}%`;
                     }
-                    if (partnerData.dailyNote) { document.getElementById('partner-note').innerText = partnerData.dailyNote; document.getElementById('partner-note').style.opacity = '1'; document.getElementById('partner-note').style.fontStyle = 'normal'; }
+                    if (partnerData.dailyNote) { 
+                        document.getElementById('partner-note').innerText = partnerData.dailyNote; 
+                        document.getElementById('partner-note').style.opacity = '1'; 
+                        document.getElementById('partner-note').style.fontStyle = 'normal'; 
+                    }
                     if (partnerData.streak && partnerData.streak > 1) {
                         document.getElementById('streak-partner').innerText = `🔥 ${partnerData.streak}`;
                         document.getElementById('streak-partner').style.display = 'flex';
+                    }
+
+                    // Avatar & Status
+                    const pAvatar = document.getElementById('avatar-partner');
+                    const pStatus = document.getElementById('status-partner');
+                    
+                    if (partnerData.photoUrl) {
+                        pAvatar.innerText = '';
+                        pAvatar.style.backgroundImage = `url(${partnerData.photoUrl})`;
+                        pAvatar.style.backgroundSize = 'cover';
+                    } else {
+                        pAvatar.innerText = (partnerData.firstName || 'П').charAt(0).toUpperCase();
+                        pAvatar.style.backgroundImage = 'none';
+                    }
+                    
+                    if (partnerData.status) {
+                        pStatus.innerHTML = partnerData.status;
+                        pStatus.style.opacity = '1';
+                    } else {
+                        pStatus.innerHTML = '<i class="ci-moon"></i> Офлайн';
+                        pStatus.style.opacity = '0.6';
                     }
                 }
             } else {
