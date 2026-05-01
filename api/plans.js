@@ -1,6 +1,7 @@
 const redis = require('./db');
 const crypto = require('crypto');
-
+const bot = require('./utils/bot');
+const { notifyPartner } = require('./utils/notify');
 module.exports = async (req, res) => {
   try {
     if (req.method === 'GET') {
@@ -19,6 +20,12 @@ module.exports = async (req, res) => {
         const id = crypto.randomUUID();
         const plan = { id, type, text, date: date || null, isDone: false, completedBy: [], createdAt: Date.now() };
         await redis.hset(`plans:${coupleId}`, { [id]: plan });
+        
+        let user = await redis.get(`user:${telegramId}`);
+        if (user) {
+            await notifyPartner(coupleId, user.id, `🗓 <b>Новый план!</b>\nПартнер добавил: <i>${text}</i>`);
+        }
+        
         return res.status(200).json(plan);
       }
       
@@ -40,6 +47,7 @@ module.exports = async (req, res) => {
         }
 
         await redis.hset(`plans:${coupleId}`, { [planId]: plan });
+        await notifyPartner(coupleId, user.id, `✅ <b>План выполнен</b>\nПартнер отметил выполнение: <i>${plan.text}</i>!`);
         return res.status(200).json(plan);
       }
 

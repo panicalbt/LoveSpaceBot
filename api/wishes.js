@@ -1,6 +1,7 @@
 const redis = require('./db');
 const crypto = require('crypto');
 const bot = require('./utils/bot');
+const { notifyPartner } = require('./utils/notify');
 
 module.exports = async (req, res) => {
   try {
@@ -42,13 +43,7 @@ module.exports = async (req, res) => {
         await redis.set(`user:${telegramId}`, user);
         await redis.hset(`wishes:${coupleId}`, { [wishId]: wish });
 
-        const couple = await redis.get(`couple:${coupleId}`);
-        if(couple && couple.telegramIds) {
-            const partnerTgId = couple.telegramIds.find(t => t !== telegramId);
-            if (partnerTgId) {
-                bot.sendMessage(partnerTgId, `🎁 <b>Сюрприз!</b>\nПартнер только что приобрел желание: <i>${wish.title}</i>!`);
-            }
-        }
+        await notifyPartner(coupleId, user.id, `🎁 <b>Сюрприз!</b>\nПартнер только что приобрел желание: <i>${wish.title}</i>!`);
         
         return res.status(200).json(wish);
       }

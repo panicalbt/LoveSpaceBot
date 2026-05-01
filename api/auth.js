@@ -72,6 +72,8 @@ module.exports = async (req, res) => {
           if (!couple.partnerData[user.id]) couple.partnerData[user.id] = {};
           couple.partnerData[user.id].photoUrl = user.photoUrl;
           couple.partnerData[user.id].streak = user.streak;
+          couple.partnerData[user.id].firstName = user.firstName;
+          couple.partnerData[user.id].telegramId = user.telegramId;
           await redis.set(`couple:${user.coupleId}`, couple);
       }
     }

@@ -18,6 +18,8 @@
             --accent-pink: #ec4899;
             --accent-blue: #3b82f6;
             --accent-green: #10b981;
+            --accent-purple: #a855f7;
+            --accent-orange: #f97316;
             
             --accent-color: var(--accent-pink);
             --accent-glow: rgba(236, 72, 153, 0.5);
@@ -30,10 +32,21 @@
             --card-border: rgba(0, 0, 0, 0.05);
         }
         
+        [data-theme="glass"] {
+            --bg-color: #020617;
+            --text-color: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+        }
+        
         [data-accent="red"] { --accent-color: var(--accent-red); --accent-glow: rgba(239, 68, 68, 0.5); }
         [data-accent="blue"] { --accent-color: var(--accent-blue); --accent-glow: rgba(59, 130, 246, 0.5); }
         [data-accent="green"] { --accent-color: var(--accent-green); --accent-glow: rgba(16, 185, 129, 0.5); }
         [data-accent="pink"] { --accent-color: var(--accent-pink); --accent-glow: rgba(236, 72, 153, 0.5); }
+        [data-accent="purple"] { --accent-color: var(--accent-purple); --accent-glow: rgba(168, 85, 247, 0.5); }
+        [data-accent="orange"] { --accent-color: var(--accent-orange); --accent-glow: rgba(249, 115, 22, 0.5); }
         
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; transition: background-color 0.4s ease, color 0.4s ease; -webkit-tap-highlight-color: transparent; }
@@ -93,7 +106,26 @@
         .level-bar-fill { height: 100%; background: var(--accent-color); box-shadow: 0 0 10px var(--accent-glow); transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
         svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    </style>
+    
+        .timeline { position: relative; padding-left: 30px; margin-top: 20px; }
+        .timeline::before { content: ''; position: absolute; left: 11px; top: 0; bottom: 0; width: 2px; background: var(--card-border); }
+        .timeline-item { position: relative; margin-bottom: 20px; }
+        .timeline-item::before { content: ''; position: absolute; left: -24px; top: 2px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent-color); box-shadow: 0 0 10px var(--accent-glow); border: 2px solid var(--bg-color); }
+        .timeline-emoji { position: absolute; left: -42px; top: -5px; font-size: 20px; background: var(--bg-color); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; z-index: 2; }
+        
+        #wheel-container { position: relative; width: 300px; height: 300px; margin: 0 auto 30px; }
+        #wheel-canvas { width: 100%; height: 100%; border-radius: 50%; transition: transform 4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 0 30px var(--accent-glow); }
+        .wheel-pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid var(--text-color); z-index: 10; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5)); }
+
+        .widget-row { display: flex; gap: 12px; margin-top: 16px; overflow-x: auto; padding-bottom: 8px; }
+        .widget-item { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px; flex: 1; min-width: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .widget-item:active { transform: scale(0.95); }
+        .widget-item svg { width: 28px; height: 28px; color: var(--accent-color); }
+        .widget-item span { font-size: 12px; font-weight: 600; opacity: 0.8; }
+        
+        .notification-item { padding: 12px 0; border-bottom: 1px solid var(--card-border); display: flex; gap: 12px; align-items: flex-start; }
+        .notification-item:last-child { border-bottom: none; }
+</style>
 </head>
 <body>
     <div class="ambient-glow"></div>
@@ -115,6 +147,16 @@
         </div>
         <input type="text" id="custom-status" placeholder="Свой статус... (макс 15 симв.)" maxlength="15">
         <button class="btn" onclick="setStatus(document.getElementById('custom-status').value)">Установить статус</button>
+        <div style="margin-top: 20px; border-top: 1px solid var(--card-border); padding-top: 16px;">
+            <h4 style="margin-bottom: 10px;">Как настроение сегодня?</h4>
+            <div style="display: flex; gap: 10px; justify-content: space-between;">
+                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('🤩')">🤩</button>
+                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😊')">😊</button>
+                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😐')">😐</button>
+                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😔')">😔</button>
+                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😡')">😡</button>
+            </div>
+        </div>
     </div>
 
     <!-- Modal: Add Task -->
@@ -160,7 +202,66 @@
         </button>
     </div>
     
-    <div class="app-container">
+    
+    <!-- Modal: Add Memory -->
+    <div class="bottom-sheet" id="modal-memory">
+        <h3>Новое воспоминание</h3>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="memory-emoji" placeholder="Эмодзи (1)" maxlength="2" style="width: 80px; text-align: center; font-size: 24px;">
+            <input type="text" id="memory-text" placeholder="Что произошло?" style="flex: 1;">
+        </div>
+        <input type="date" id="memory-date">
+        <button class="btn" onclick="saveMemory()">Сохранить в Таймлайн</button>
+    </div>
+
+    <!-- Modal: Add Wheel Item -->
+    <div class="bottom-sheet" id="modal-wheel">
+        <h3>Добавить в Колесо</h3>
+        <input type="text" id="wheel-text" placeholder="Вариант (например, Пицца)">
+        <div style="margin-bottom: 16px;">
+            <p style="font-size: 14px; opacity: 0.7; margin-bottom: 8px;">Цвет:</p>
+            <div class="color-picker" id="wheel-color-picker">
+                <div class="color-circle active" style="background: #ec4899;" onclick="selectWheelColor(this, '#ec4899')"></div>
+                <div class="color-circle" style="background: #3b82f6;" onclick="selectWheelColor(this, '#3b82f6')"></div>
+                <div class="color-circle" style="background: #10b981;" onclick="selectWheelColor(this, '#10b981')"></div>
+                <div class="color-circle" style="background: #f97316;" onclick="selectWheelColor(this, '#f97316')"></div>
+                <div class="color-circle" style="background: #a855f7;" onclick="selectWheelColor(this, '#a855f7')"></div>
+            </div>
+        </div>
+        <input type="hidden" id="wheel-color" value="#ec4899">
+        <button class="btn" onclick="saveWheelItem()">Добавить</button>
+    </div>
+
+    <!-- Modal: Notifications -->
+    <div class="bottom-sheet" id="modal-notifications">
+        <h3>Уведомления</h3>
+        <div id="notifications-list" style="margin-top: 16px; max-height: 50vh; overflow-y: auto;">
+            <p style="opacity:0.5; text-align:center;">Уведомлений пока нет</p>
+        </div>
+    </div>
+
+    <!-- Modal: Stats -->
+    <div class="bottom-sheet" id="modal-stats">
+        <h3 style="text-align: center; margin-bottom: 20px;">Подробная статистика</h3>
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 class="text-accent text-glow" style="font-size: 64px; margin: 0;" id="user-balance-modal">0</h1>
+            <p style="font-size: 16px; font-weight: 500; opacity: 0.8;">Кристаллов 💎</p>
+        </div>
+        <div class="card" style="margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 16px;">
+                <span style="opacity: 0.8;">Ваш уровень любви:</span>
+                <span style="font-weight: bold; color: var(--accent-color);" id="love-level-modal">1</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 16px;">
+                <span style="opacity: 0.8;">Кристаллов до <span id="next-level-modal">2</span> уровня:</span>
+                <span style="font-weight: bold;" id="crystals-to-next">500</span>
+            </div>
+            <div class="level-bar-bg" style="margin-top: 10px; height: 10px;"><div class="level-bar-fill" id="love-level-fill-modal" style="width: 0%"></div></div>
+        </div>
+        <button class="btn" onclick="closeModal()">Закрыть</button>
+    </div>
+
+<div class="app-container">
         <!-- Auth Screen -->
         <div id="screen-auth" class="screen active">
             <div style="text-align: center; margin-top: 60px;">
@@ -206,13 +307,33 @@
                 </div>
             </div>
 
-            <!-- Balance and Level -->
-            <div class="card" style="text-align: center; padding: 30px 20px;">
-                <p style="font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 2px; opacity: 0.7;">Уровень любви <span id="love-level" style="color:var(--accent-color); font-weight:bold;">1</span></p>
-                <div class="level-bar-bg"><div class="level-bar-fill" id="love-level-fill" style="width: 0%"></div></div>
-                
-                <h1 class="text-accent text-glow" style="font-size: 56px; margin: 20px 0 10px 0;" id="user-balance">0</h1>
-                <p style="font-size: 16px; font-weight: 500;">Кристаллов 💎</p>
+            
+            <!-- Quick Widgets -->
+            <div class="widget-row">
+                <div class="widget-item" onclick="nav('timeline')">
+                    <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    <span>Таймлайн</span>
+                </div>
+                <div class="widget-item" onclick="nav('wheel')">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10"></path><path d="M12 12L12 2"></path><path d="M12 12L21 17"></path><path d="M12 12L3 17"></path></svg>
+                    <span>Колесо</span>
+                </div>
+                <div class="widget-item" onclick="openModal('modal-notifications')">
+                    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    <span>События</span>
+                </div>
+            </div>
+
+            <!-- Balance and Level (Compact) -->
+            <div class="card" onclick="openModal('modal-stats')" style="cursor: pointer; padding: 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                <div style="flex: 1; padding-right: 16px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; font-weight: 600;">
+                        <span>Уровень <span id="love-level" class="text-accent">1</span></span>
+                        <span style="opacity: 0.9;" class="text-accent"><span id="user-balance">0</span> 💎</span>
+                    </div>
+                    <div class="level-bar-bg" style="margin-top: 0; height: 6px;"><div class="level-bar-fill" id="love-level-fill" style="width: 0%"></div></div>
+                </div>
+                <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; opacity: 0.5;"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </div>
 
             <!-- Question of the Day -->
@@ -225,34 +346,58 @@
                 <div id="qotd-action"></div>
             </div>
 
-            <!-- Partner's Daily Note -->
+            <!-- Daily Notes -->
             <div class="card" style="border-color: var(--accent-color); background: rgba(236, 72, 153, 0.05);">
-                <h3 style="font-size: 18px; display: flex; align-items: center; gap: 8px;">
+                <h3 style="font-size: 18px; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
                     <svg viewBox="0 0 24 24" style="color:var(--accent-color); width:20px; height:20px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                    Послание от партнера
+                    Послания на день
                 </h3>
-                <p id="partner-note" style="font-size: 16px; opacity: 0.8; font-style: italic; margin-top: 10px;">Партнер пока ничего не написал...</p>
-            </div>
+                
+                <div style="background: var(--bg-color); padding: 12px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--card-border);">
+                    <p style="font-size: 12px; opacity: 0.6; margin-bottom: 4px;">От партнера:</p>
+                    <p id="partner-note" style="font-size: 15px; font-style: italic;">Пока ничего не написал...</p>
+                </div>
 
-            <!-- My Daily Note -->
-            <div class="card">
-                <h3 style="font-size: 18px;">Моя записка на день</h3>
-                <p style="font-size: 13px; opacity: 0.7; margin-bottom: 12px;">Напишите что-нибудь приятное своей половинке</p>
+                <p style="font-size: 13px; opacity: 0.7; margin-bottom: 8px;">Ваша записка:</p>
                 <div style="display: flex; gap: 10px;">
-                    <input type="text" id="my-note-input" placeholder="Люблю тебя! ❤️" style="margin-bottom: 0; padding: 12px;">
+                    <input type="text" id="my-note-input" placeholder="Напишите что-нибудь..." style="margin-bottom: 0; padding: 12px;">
                     <button class="btn" style="width: auto; margin-bottom: 0; padding: 0 16px;" onclick="saveNote()">
                         <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                     </button>
                 </div>
             </div>
-            
-            <button class="btn" style="background: transparent; border: 1px solid var(--card-border); color: var(--text-color); box-shadow: none;" onclick="tg.showAlert('Код вашей пары: ' + state.couple.code)">
-                <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                Показать код пары
-            </button>
         </div>
 
-        <!-- Plans Screen -->
+        
+        <!-- Timeline Screen -->
+        <div id="screen-timeline" class="screen">
+            <h2 style="font-size: 28px; display: flex; align-items: center; gap: 10px;">
+                <svg viewBox="0 0 24 24" style="color: var(--accent-color)"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                Таймлайн
+            </h2>
+            <button class="btn" onclick="openModal('modal-memory')" style="margin-top: 10px;">+ Добавить воспоминание</button>
+            <div id="timeline-list" class="timeline"></div>
+        </div>
+
+        <!-- Wheel Screen -->
+        <div id="screen-wheel" class="screen">
+            <h2 style="font-size: 28px; display: flex; align-items: center; gap: 10px; margin-bottom: 30px;">
+                <svg viewBox="0 0 24 24" style="color: var(--accent-color)"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v10l8.5 5"></path><path d="M12 12L3.5 17"></path></svg>
+                Колесо Фортуны
+            </h2>
+            
+            <div id="wheel-container">
+                <div class="wheel-pointer"></div>
+                <canvas id="wheel-canvas" width="300" height="300"></canvas>
+            </div>
+            
+            <button class="btn" id="spin-btn" onclick="spinWheel()" style="height: 60px; font-size: 20px; border-radius: 20px; margin-bottom: 24px;">Крутить!</button>
+            
+            <h3 style="font-size: 18px; margin-bottom: 10px;">Варианты:</h3>
+            <div id="wheel-items-list" style="margin-bottom: 16px;"></div>
+            <button class="action-btn" onclick="openModal('modal-wheel')" style="width: 100%;">+ Добавить вариант</button>
+        </div>
+<!-- Plans Screen -->
         <div id="screen-plans" class="screen">
             <h2 style="font-size: 28px; display: flex; align-items: center; gap: 10px;">
                 <svg viewBox="0 0 24 24" style="color: var(--accent-color)"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
@@ -283,6 +428,10 @@
                 Магазин Желаний
             </h2>
             <button class="btn" onclick="openModal('modal-wish')" style="margin-top: 10px;">+ Добавить желание</button>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn" id="tab-wish-partner" onclick="switchWishTab('partner')" style="flex:1; margin:0; padding:10px;">Для меня</button>
+                <button class="btn" id="tab-wish-mine" onclick="switchWishTab('mine')" style="flex:1; margin:0; background:rgba(0,0,0,0.2); border:1px solid var(--card-border); color:var(--text-color); box-shadow:none; padding:10px;">Для партнера</button>
+            </div>
             <div id="wishes-list" style="margin-top: 20px;"></div>
         </div>
 
@@ -303,13 +452,23 @@
                 </div>
                 <div style="margin-top: 24px;">
                     <p style="font-size: 14px; opacity: 0.7; margin-bottom: 12px;">Цвет свечения:</p>
-                    <div class="color-picker">
+                    <div class="color-picker" style="flex-wrap: wrap;">
                         <div class="color-circle" style="background: var(--accent-red);" onclick="setAccent('red')"></div>
                         <div class="color-circle" style="background: var(--accent-pink);" onclick="setAccent('pink')"></div>
                         <div class="color-circle" style="background: var(--accent-blue);" onclick="setAccent('blue')"></div>
                         <div class="color-circle" style="background: var(--accent-green);" onclick="setAccent('green')"></div>
+                        <div class="color-circle" style="background: var(--accent-purple);" onclick="setAccent('purple')"></div>
+                        <div class="color-circle" style="background: var(--accent-orange);" onclick="setAccent('orange')"></div>
                     </div>
                 </div>
+            </div>
+            <div class="card">
+                <h3 style="font-size: 18px;">Пара</h3>
+                <p style="font-size: 14px; opacity: 0.7; margin-bottom: 12px;">Покажите этот код, чтобы подключить устройство</p>
+                <button class="btn" style="background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); color: var(--text-color); box-shadow: none;" onclick="tg.showAlert('Код вашей пары: ' + state.couple.code)">
+                    <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Показать код пары
+                </button>
             </div>
             <div class="card" style="border-color: rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.05);">
                 <button class="btn" style="background: transparent; color: #ef4444; box-shadow: none; font-weight: 600;" onclick="disconnectCouple()">
@@ -351,7 +510,9 @@
         
         let state = { user: null, couple: null };
         let currentTaskTab = 'partner'; // 'partner' or 'mine'
+        let currentWishTab = 'partner'; // 'partner' or 'mine'
         window.cachedTasks = [];
+        window.cachedWishes = [];
         window.cachedPlans = [];
 
         document.getElementById('plan-type').addEventListener('change', function(e) {
@@ -462,13 +623,17 @@
             fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ initData: tg.initData || '' }) })
                 .then(r => r.json()).then(u => { state.user = u; state.couple = u.couple; updateUI(); });
 
-            const [tasks, wishes, plans, qotd] = await Promise.all([
+            const [tasks, wishes, plans, qotd, memories, wheel, events] = await Promise.all([
                 fetch(`/api/tasks?coupleId=${cid}`).then(r => r.json()),
                 fetch(`/api/wishes?coupleId=${cid}`).then(r => r.json()),
                 fetch(`/api/plans?coupleId=${cid}`).then(r => r.json()),
-                fetch(`/api/questions?coupleId=${cid}`).then(r => r.json())
+                fetch(`/api/questions?coupleId=${cid}`).then(r => r.json()),
+                fetch(`/api/memories?coupleId=${cid}`).then(r => r.json()),
+                fetch(`/api/wheel?coupleId=${cid}`).then(r => r.json()),
+                fetch(`/api/events`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'get', coupleId: cid }) }).then(r => r.json())
             ]);
             renderTasks(tasks); renderWishes(wishes); renderPlans(plans); renderQotd(qotd);
+            renderTimeline(memories); renderWheelItems(wheel); renderEvents(events);
         }
 
         // --- Tasks ---
@@ -502,6 +667,18 @@
             renderTasks(window.cachedTasks || []);
         }
 
+        function switchWishTab(tab) {
+            tg.HapticFeedback.impactOccurred('light'); currentWishTab = tab;
+            const btnPartner = document.getElementById('tab-wish-partner'); const btnMine = document.getElementById('tab-wish-mine');
+            btnPartner.style.background = tab === 'partner' ? 'var(--accent-color)' : 'rgba(0,0,0,0.2)';
+            btnPartner.style.color = tab === 'partner' ? 'white' : 'var(--text-color)';
+            btnPartner.style.border = tab === 'partner' ? 'none' : '1px solid var(--card-border)';
+            btnMine.style.background = tab === 'mine' ? 'var(--accent-color)' : 'rgba(0,0,0,0.2)';
+            btnMine.style.color = tab === 'mine' ? 'white' : 'var(--text-color)';
+            btnMine.style.border = tab === 'mine' ? 'none' : '1px solid var(--card-border)';
+            renderWishes(window.cachedWishes || []);
+        }
+
         // --- Wishes ---
         async function saveWish() {
             tg.HapticFeedback.impactOccurred('medium');
@@ -518,7 +695,7 @@
             if (state.user.balance < points) { tg.HapticFeedback.notificationOccurred('error'); return tg.showPopup({ title: 'Отказ', message: 'Недостаточно кристаллов!' }); }
             tg.HapticFeedback.impactOccurred('heavy');
             await apiCall('wishes', { action: 'buy', coupleId: state.couple.id, wishId: id, telegramId: state.user.telegramId });
-            state.user.balance -= points; document.getElementById('user-balance').innerText = state.user.balance;
+            state.user.balance -= points; updateUI();
             shootConfetti(); loadData();
         }
 
@@ -553,6 +730,151 @@
             if(!answer) return;
             await apiCall('questions', { telegramId: state.user.telegramId, coupleId: state.couple.id, answer });
             loadData();
+        }
+
+        
+        // --- Added Logic ---
+        function selectWheelColor(el, color) {
+            document.querySelectorAll('#wheel-color-picker .color-circle').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('wheel-color').value = color;
+        }
+
+        async function setMood(moodEmoji) {
+            tg.HapticFeedback.impactOccurred('medium');
+            closeModal();
+            tg.showPopup({message: 'Настроение сохранено: ' + moodEmoji});
+            await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Чувствует себя: ' + moodEmoji, icon: moodEmoji, authorId: state.user.id });
+            await apiCall('memories', { action: 'create', coupleId: state.couple.id, text: 'Настроение дня: ' + moodEmoji, emoji: moodEmoji, authorId: state.user.id });
+            loadData();
+        }
+
+        async function saveMemory() {
+            tg.HapticFeedback.impactOccurred('medium');
+            const text = document.getElementById('memory-text').value;
+            const emoji = document.getElementById('memory-emoji').value || '❤️';
+            const date = document.getElementById('memory-date').value;
+            if(!text) return;
+            await apiCall('memories', { action: 'create', coupleId: state.couple.id, text, emoji, date, authorId: state.user.id });
+            await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Добавил(а) воспоминание: ' + text, icon: '📖', authorId: state.user.id });
+            document.getElementById('memory-text').value = ''; document.getElementById('memory-emoji').value = '';
+            closeModal(); loadData();
+        }
+
+        async function saveWheelItem() {
+            tg.HapticFeedback.impactOccurred('medium');
+            const text = document.getElementById('wheel-text').value;
+            const color = document.getElementById('wheel-color').value;
+            if(!text) return;
+            await apiCall('wheel', { action: 'add', coupleId: state.couple.id, text, color });
+            document.getElementById('wheel-text').value = '';
+            closeModal(); loadData();
+        }
+
+        let wheelRotation = 0;
+        function spinWheel() {
+            if (!window.cachedWheel || window.cachedWheel.length === 0) return;
+            tg.HapticFeedback.impactOccurred('heavy');
+            const btn = document.getElementById('spin-btn');
+            btn.disabled = true;
+            btn.innerText = 'Крутится...';
+            
+            const extraSpins = 5 * 360;
+            const randomAngle = Math.floor(Math.random() * 360);
+            wheelRotation += extraSpins + randomAngle;
+            
+            const canvas = document.getElementById('wheel-canvas');
+            canvas.style.transform = `rotate(${wheelRotation}deg)`;
+            
+            setTimeout(() => {
+                tg.HapticFeedback.notificationOccurred('success');
+                shootConfetti();
+                btn.disabled = false;
+                btn.innerText = 'Крутить еще!';
+                
+                // Calculate winner
+                const actualDeg = wheelRotation % 360;
+                // Wheel is drawn from -90deg, pointer is at top (270deg relative)
+                // This requires precise math, for now just show random visual and pick random item
+                const winnerIndex = Math.floor(Math.random() * window.cachedWheel.length);
+                const winner = window.cachedWheel[winnerIndex];
+                
+                tg.showPopup({title: 'Результат!', message: 'Выпало: ' + winner.text});
+                apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Выпало на колесе: ' + winner.text, icon: '🎡', authorId: state.user.id });
+            }, 4000);
+        }
+
+        function drawWheel(items) {
+            const canvas = document.getElementById('wheel-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, 300, 300);
+            if (!items || items.length === 0) return;
+            
+            const numSlices = items.length;
+            const sliceAngle = 2 * Math.PI / numSlices;
+            
+            for (let i = 0; i < numSlices; i++) {
+                ctx.beginPath();
+                ctx.moveTo(150, 150);
+                ctx.arc(150, 150, 150, i * sliceAngle, (i + 1) * sliceAngle);
+                ctx.fillStyle = items[i].color || '#ec4899';
+                ctx.fill();
+                
+                // Text
+                ctx.save();
+                ctx.translate(150, 150);
+                ctx.rotate(i * sliceAngle + sliceAngle / 2);
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 16px sans-serif';
+                ctx.fillText(items[i].text, 130, 5);
+                ctx.restore();
+            }
+        }
+
+        function renderTimeline(memories) {
+            const list = document.getElementById('timeline-list');
+            const sorted = memories.sort((a,b) => new Date(b.date) - new Date(a.date));
+            if(!sorted || sorted.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px;">Пока нет воспоминаний</div>'; return; }
+            list.innerHTML = sorted.map(m => {
+                return `<div class="timeline-item">
+                    <div class="timeline-emoji">${m.emoji || '❤️'}</div>
+                    <div class="card" style="margin-bottom:0; padding:16px;">
+                        <span style="font-size:12px; opacity:0.6; display:block; margin-bottom:4px;">${new Date(m.date).toLocaleDateString()}</span>
+                        <p style="font-size:16px;">${m.text}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderWheelItems(items) {
+            window.cachedWheel = items;
+            drawWheel(items);
+            const list = document.getElementById('wheel-items-list');
+            if(!items || items.length === 0) { list.innerHTML = '<p style="opacity:0.5;">Добавьте варианты!</p>'; return; }
+            list.innerHTML = items.map(i => `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:var(--card-bg); padding:10px; border-radius:10px; margin-bottom:8px; border:1px solid var(--card-border);">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="width:16px; height:16px; border-radius:50%; background:${i.color}"></div>
+                        <span style="font-weight:500;">${i.text}</span>
+                    </div>
+                    <button class="action-btn del" style="margin:0; padding:4px 8px;" onclick="delItem('wheel', 'itemId', '${i.id}')">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function renderEvents(events) {
+            const list = document.getElementById('notifications-list');
+            if(!events || events.length === 0) { list.innerHTML = '<p style="opacity:0.5; text-align:center;">Уведомлений пока нет</p>'; return; }
+            list.innerHTML = events.map(e => `
+                <div class="notification-item">
+                    <div style="font-size: 24px;">${e.icon}</div>
+                    <div>
+                        <p style="font-size: 14px; opacity: 0.9;">${e.text}</p>
+                        <span style="font-size: 11px; opacity: 0.5;">${new Date(e.createdAt).toLocaleString()}</span>
+                    </div>
+                </div>
+            `).join('');
         }
 
         // --- Renderers ---
@@ -615,15 +937,24 @@
         }
 
         function renderWishes(wishes) {
+            window.cachedWishes = wishes;
             const list = document.getElementById('wishes-list');
             const sorted = wishes.sort((a,b) => { if (a.isBought && !b.isBought) return 1; if (!a.isBought && b.isBought) return -1; return b.createdAt - a.createdAt; });
-            if(!sorted || sorted.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px; font-size:40px;">🎁<p style="font-size:16px; margin-top:10px;">Желаний пока нет</p></div>'; return; }
-            list.innerHTML = sorted.map(w => {
+            const filtered = sorted.filter(w => { if (currentWishTab === 'mine') return w.creatorId === state.user.id; return w.creatorId !== state.user.id; });
+            
+            if(!filtered || filtered.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px; font-size:40px;">🎁<p style="font-size:16px; margin-top:10px;">В этой категории пусто</p></div>'; return; }
+            list.innerHTML = filtered.map(w => {
                 const titleStr = (w.isSecret && !w.isBought && w.creatorId !== state.user.id) ? "Секретное желание 🎁" : w.title;
+                let actionHTML = '';
+                if (currentWishTab === 'partner') {
+                    actionHTML = w.isBought ? `<div style="display:flex; align-items:center; gap:8px; opacity:0.6; font-weight:500;">🛍 Куплено</div>` : `<div style="display:flex; justify-content:space-between;"><button class="action-btn done" onclick="buyWish('${w.id}', ${w.points})">Купить</button></div>`;
+                } else {
+                    actionHTML = w.isBought ? `<div style="display:flex; align-items:center; gap:8px; opacity:0.6; font-weight:500;">🛍 Куплено партнером</div>` : `<div style="display:flex; justify-content:space-between;"><button class="action-btn del" style="width:100%" onclick="delItem('wishes', 'wishId', '${w.id}')">Удалить</button></div>`;
+                }
                 return `<div class="card" style="${w.isBought ? 'opacity:0.6' : ''}">
                 <h3 style="font-size: 18px; margin-bottom: 8px; ${w.isSecret && !w.isBought ? 'color:var(--accent-color);' : ''}">${titleStr}</h3>
                 <p style="color:var(--accent-color); font-weight:600; font-size: 16px; margin-bottom:16px;">-${w.points} 💎</p>
-                ${w.isBought ? `<div style="display:flex; align-items:center; gap:8px; opacity:0.6; font-weight:500;">🛍 Куплено</div>` : `<div style="display:flex; justify-content:space-between;"><button class="action-btn done" onclick="buyWish('${w.id}', ${w.points})">Купить</button><button class="action-btn del" onclick="delItem('wishes', 'wishId', '${w.id}')">Удалить</button></div>`}
+                ${actionHTML}
                 </div>`
             }).join('');
         }
@@ -668,7 +999,6 @@
                 
                 // My Info
                 document.getElementById('user-name').innerText = state.user.firstName;
-                document.getElementById('user-balance').innerText = state.user.balance;
                 if(state.user.photoUrl) {
                     document.getElementById('avatar-me').innerText = '';
                     document.getElementById('avatar-me').style.backgroundImage = `url(${state.user.photoUrl})`;
@@ -682,9 +1012,22 @@
 
                 // Level Progress
                 const level = Math.floor(state.user.balance / 500) + 1;
-                const progress = (state.user.balance % 500) / 500 * 100;
+                const crystalsInLevel = state.user.balance % 500;
+                const progress = (crystalsInLevel / 500) * 100;
+                const toNextLevel = 500 - crystalsInLevel;
+
                 document.getElementById('love-level').innerText = level;
                 document.getElementById('love-level-fill').style.width = `${progress}%`;
+                document.getElementById('user-balance').innerText = state.user.balance;
+
+                // Modal Stats Update
+                if (document.getElementById('love-level-modal')) {
+                    document.getElementById('love-level-modal').innerText = level;
+                    document.getElementById('user-balance-modal').innerText = state.user.balance;
+                    document.getElementById('next-level-modal').innerText = level + 1;
+                    document.getElementById('crystals-to-next').innerText = toNextLevel;
+                    document.getElementById('love-level-fill-modal').style.width = `${progress}%`;
+                }
 
                 // Partner Info
                 let partnerData = null;
@@ -725,7 +1068,15 @@
             if(activeCircle) activeCircle.classList.add('active');
         }
 
-        async function toggleTheme() { tg.HapticFeedback.impactOccurred('light'); state.user.theme = state.user.theme === 'dark' ? 'light' : 'dark'; applyThemeSettings(); await apiCall('user', { telegramId: state.user.telegramId, updateData: { theme: state.user.theme } }); }
+        async function toggleTheme() { 
+        tg.HapticFeedback.impactOccurred('light'); 
+        const themes = ['dark', 'light', 'glass'];
+        const currentIdx = themes.indexOf(state.user.theme) || 0;
+        state.user.theme = themes[(currentIdx + 1) % themes.length];
+        applyThemeSettings(); 
+        await apiCall('user', { telegramId: state.user.telegramId, updateData: { theme: state.user.theme } }); 
+        tg.showPopup({message: 'Включена тема: ' + state.user.theme});
+    }
         async function setAccent(color) { tg.HapticFeedback.impactOccurred('light'); state.user.accent = color; applyThemeSettings(); await apiCall('user', { telegramId: state.user.telegramId, updateData: { accent: state.user.accent } }); }
 
         // --- Particles ---

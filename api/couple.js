@@ -18,6 +18,7 @@ module.exports = async (req, res) => {
       const couple = { id: coupleId, code: newCode, users: [user.id] };
       await redis.set(`couple:${coupleId}`, couple);
       await redis.set(`couplecode:${newCode}`, coupleId);
+      await redis.sadd('couples:all', coupleId); // Add to set for cron
       
       user.coupleId = coupleId;
       await redis.set(`user:${telegramId}`, user);
@@ -46,6 +47,7 @@ module.exports = async (req, res) => {
 
     if (action === 'leave') {
       if (!user.coupleId) return res.status(400).json({ error: 'Not in a couple' });
+      await redis.srem('couples:all', user.coupleId); // Remove from cron
       user.coupleId = null;
       await redis.set(`user:${telegramId}`, user);
       return res.status(200).json({ success: true });

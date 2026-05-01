@@ -1,6 +1,7 @@
 const redis = require('./db');
 const crypto = require('crypto');
 const bot = require('./utils/bot');
+const { notifyPartner } = require('./utils/notify');
 
 module.exports = async (req, res) => {
   try {
@@ -24,11 +25,7 @@ module.exports = async (req, res) => {
         await redis.hset(`tasks:${coupleId}`, { [id]: task });
         
         // Notify partner
-        const couple = await redis.get(`couple:${coupleId}`);
-        if(couple && couple.telegramIds) {
-            const partnerTgId = couple.telegramIds.find(t => t !== telegramId);
-            if (partnerTgId) bot.sendMessage(partnerTgId, `📝 <b>Новое задание!</b>\nПартнер поручил вам: <i>${title}</i> за ${points}💎`);
-        }
+        await notifyPartner(coupleId, user.id, `📝 <b>Новое задание!</b>\nПартнер поручил вам: <i>${title}</i> за ${points}💎`);
 
         return res.status(200).json(task);
       }
@@ -44,11 +41,7 @@ module.exports = async (req, res) => {
         await redis.hset(`tasks:${coupleId}`, { [taskId]: task });
 
         // Notify creator
-        const couple = await redis.get(`couple:${coupleId}`);
-        if(couple && couple.telegramIds) {
-            const partnerTgId = couple.telegramIds.find(t => t !== telegramId);
-            if (partnerTgId) bot.sendMessage(partnerTgId, `⏳ <b>Задание на проверке</b>\nПартнер выполнил задание <i>${task.title}</i>. Зайдите в приложение, чтобы принять его!`);
-        }
+        await notifyPartner(coupleId, user.id, `⏳ <b>Задание на проверке</b>\nПартнер выполнил задание <i>${task.title}</i>. Зайдите в приложение, чтобы принять его!`);
 
         return res.status(200).json(task);
       }
@@ -82,11 +75,7 @@ module.exports = async (req, res) => {
         delete task.executorTelegramId;
         await redis.hset(`tasks:${coupleId}`, { [taskId]: task });
 
-        const couple = await redis.get(`couple:${coupleId}`);
-        if(couple && couple.telegramIds) {
-            const partnerTgId = couple.telegramIds.find(t => t !== telegramId);
-            if (partnerTgId) bot.sendMessage(partnerTgId, `❌ <b>Задание отклонено</b>\nВаше выполнение <i>${task.title}</i> было отклонено.`);
-        }
+        await notifyPartner(coupleId, user.id, `❌ <b>Задание отклонено</b>\nВаше выполнение <i>${task.title}</i> было отклонено.`);
 
         return res.status(200).json(task);
       }
