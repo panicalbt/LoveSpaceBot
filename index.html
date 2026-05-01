@@ -56,9 +56,9 @@
         #particles-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
 
         .app-container { min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 90px; }
-        .screen { display: none; padding: 24px; animation: slideFade 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .screen { display: none; padding: 24px; animation: fadeIn 0.3s ease; }
         .screen.active { display: block; }
-        @keyframes slideFade { from { opacity: 0; transform: translateX(15px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .card { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; margin-bottom: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
         
@@ -127,7 +127,9 @@
         .notification-item:last-child { border-bottom: none; }
         
         /* Floating Action Button */
-        .fab { position: fixed; bottom: 100px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: var(--accent-color); color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px var(--accent-glow); z-index: 90; cursor: pointer; border: none; transition: transform 0.2s, box-shadow 0.2s; }
+        .fab { position: fixed; bottom: 100px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent-color); color: white; display: none; align-items: center; justify-content: center; box-shadow: 0 6px 20px var(--accent-glow); z-index: 90; cursor: pointer; border: none; transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s; }
+        .fab.active { display: flex; animation: fabPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes fabPop { from { transform: scale(0) rotate(-45deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
         .fab:active { transform: scale(0.9); box-shadow: 0 3px 10px var(--accent-glow); }
         .fab svg { width: 28px; height: 28px; }
 
@@ -158,23 +160,23 @@
         <h3>Мой статус</h3>
         <p style="opacity: 0.7; font-size: 14px; margin-bottom: 16px;">Покажите партнеру, чем вы заняты или какое у вас настроение!</p>
         <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
-            <button class="action-btn" onclick="setStatus('<i class=\'ci-desktop\'></i> Работаю')"><i class="ci-desktop"></i> Работаю</button>
-            <button class="action-btn" onclick="setStatus('<i class=\'ci-moon\'></i> Сплю')"><i class="ci-moon"></i> Сплю</button>
-            <button class="action-btn" onclick="setStatus('<i class=\'ci-game-controller\'></i> Играю')"><i class="ci-game-controller"></i> Играю</button>
-            <button class="action-btn" onclick="setStatus('<i class=\'ci-map\'></i> Гуляю')"><i class="ci-map"></i> Гуляю</button>
-            <button class="action-btn" onclick="setStatus('<i class=\'ci-heart-filled\'></i> Скучаю')"><i class="ci-heart-filled"></i> Скучаю</button>
-            <button class="action-btn" onclick="setStatus('<i class=\'ci-video\'></i> Смотрю кино')"><i class="ci-video"></i> Смотрю кино</button>
+            <button class="action-btn" onclick="setStatus('💻 Работаю')">💻 Работаю</button>
+            <button class="action-btn" onclick="setStatus('😴 Сплю')">😴 Сплю</button>
+            <button class="action-btn" onclick="setStatus('🎮 Играю')">🎮 Играю</button>
+            <button class="action-btn" onclick="setStatus('🌳 Гуляю')">🌳 Гуляю</button>
+            <button class="action-btn" onclick="setStatus('❤️ Скучаю')">❤️ Скучаю</button>
+            <button class="action-btn" onclick="setStatus('🍿 Смотрю кино')">🍿 Смотрю кино</button>
         </div>
         <input type="text" id="custom-status" placeholder="Свой статус... (макс 15 симв.)" maxlength="15">
         <button class="btn" onclick="setStatus(document.getElementById('custom-status').value)">Установить статус</button>
         <div style="margin-top: 20px; border-top: 1px solid var(--card-border); padding-top: 16px;">
             <h4 style="margin-bottom: 10px;">Как настроение сегодня?</h4>
             <div style="display: flex; gap: 10px; justify-content: space-between;">
-                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('🤩')"><i class="ci-face-happy"></i></button>
-                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😊')"><i class="ci-face-neutral"></i></button>
-                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😐')"><i class="ci-face-sad"></i></button>
-                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😔')"><i class="ci-face-idk"></i></button>
-                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😡')"><i class="ci-face-angry"></i></button>
+                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('🤩')">🤩</button>
+                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😊')">😊</button>
+                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😐')">😐</button>
+                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😔')">😔</button>
+                <button class="action-btn" style="flex:1; font-size:24px;" onclick="setMood('😡')">😡</button>
             </div>
         </div>
     </div>
@@ -421,9 +423,6 @@
                 <svg viewBox="0 0 24 24" style="color: var(--accent-color)"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
                 Таймлайн
             </h2>
-            <button class="fab" onclick="openModal('modal-memory')">
-                <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-            </button>
             <div id="timeline-list" class="timeline"></div>
         </div>
 
@@ -458,9 +457,6 @@
                 <button class="tab-btn" id="tab-plan-month" onclick="switchPlanTab('month')">Месяц</button>
             </div>
             <div id="plans-list" style="margin-top: 10px;"></div>
-            <button class="fab" onclick="openModal('modal-plan')">
-                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            </button>
         </div>
 
         <!-- Tasks Screen -->
@@ -475,9 +471,6 @@
                 <button class="tab-btn" id="tab-mine" onclick="switchTaskTab('mine')">От меня</button>
             </div>
             <div id="tasks-list" style="margin-top: 20px;"></div>
-            <button class="fab" onclick="openModal('modal-task')">
-                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            </button>
         </div>
 
         <!-- Wishes Screen -->
@@ -492,9 +485,6 @@
                 <button class="tab-btn" id="tab-wish-mine" onclick="switchWishTab('mine')">От меня</button>
             </div>
             <div id="wishes-list" style="margin-top: 20px;"></div>
-            <button class="fab" onclick="openModal('modal-wish')">
-                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            </button>
         </div>
 
         <!-- Settings Screen -->
@@ -541,29 +531,21 @@
         </div>
     </div>
 
-    <!-- Navigation -->
-    <div id="bottom-nav" class="bottom-nav" style="display: none;">
-        <div class="nav-item active" onclick="nav('dashboard', this)">
-            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-            Главная
-        </div>
-        <div class="nav-item" onclick="nav('plans', this)">
-            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            Планы
-        </div>
-        <div class="nav-item" onclick="nav('tasks', this)">
-            <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-            Задания
-        </div>
-        <div class="nav-item" onclick="nav('wishes', this)">
-            <svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
-            Желания
-        </div>
-        <div class="nav-item" onclick="nav('settings', this)">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-            Настройки
-        </div>
     </div>
+
+    <!-- Global FABs -->
+    <button class="fab" id="fab-task" onclick="openModal('modal-task')">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    </button>
+    <button class="fab" id="fab-wish" onclick="openModal('modal-wish')">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    </button>
+    <button class="fab" id="fab-plan" onclick="openModal('modal-plan')">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    </button>
+    <button class="fab" id="fab-memory" onclick="openModal('modal-memory')">
+        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+    </button>
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -1169,10 +1151,22 @@
 
         // --- UI & Nav ---
         function nav(screenId, navElement) {
-            tg.HapticFeedback.impactOccurred('light');
+            tg.HapticFeedback.impactOccurred('medium');
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen-' + screenId).classList.add('active');
-            if (navElement) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); navElement.classList.add('active'); }
+            
+            if (navElement) {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                navElement.classList.add('active');
+            }
+
+            // Manage FABs with pop animation
+            document.querySelectorAll('.fab').forEach(f => f.classList.remove('active'));
+            if (screenId === 'tasks') document.getElementById('fab-task').classList.add('active');
+            if (screenId === 'wishes') document.getElementById('fab-wish').classList.add('active');
+            if (screenId === 'plans') document.getElementById('fab-plan').classList.add('active');
+            if (screenId === 'timeline') document.getElementById('fab-memory').classList.add('active');
+
             if(screenId !== 'dashboard' && screenId !== 'settings') loadData();
         }
 
