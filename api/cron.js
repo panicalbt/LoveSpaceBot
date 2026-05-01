@@ -1,5 +1,5 @@
-const redis = require('./_lib/db');
-const bot = require('./_lib/utils/bot');
+const redis = require('../lib/db');
+const bot = require('../lib/utils/bot');
 
 module.exports = async (req, res) => {
     // Vercel Cron will hit this endpoint via GET

@@ -546,7 +546,7 @@
             if (data) options.body = JSON.stringify(data);
             
             let url = `/api/${endpoint}`;
-            if (!['auth', 'cron', 'couple'].includes(endpoint)) {
+            if (!['auth', 'cron'].includes(endpoint)) {
                 url = `/api/data?type=${endpoint}`;
             }
 
