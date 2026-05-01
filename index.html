@@ -207,11 +207,24 @@
     <div class="bottom-sheet" id="modal-memory">
         <h3>Новое воспоминание</h3>
         <div style="display: flex; gap: 10px;">
-            <input type="text" id="memory-emoji" placeholder="Эмодзи (1)" maxlength="2" style="width: 80px; text-align: center; font-size: 24px;">
+            <input type="text" id="memory-emoji" placeholder="✨" maxlength="2" style="width: 80px; text-align: center; font-size: 24px;">
             <input type="text" id="memory-text" placeholder="Что произошло?" style="flex: 1;">
         </div>
         <input type="date" id="memory-date">
-        <button class="btn" onclick="saveMemory()">Сохранить в Таймлайн</button>
+        
+        <div style="margin-top: 15px;">
+            <p style="font-size: 14px; opacity: 0.7; margin-bottom: 8px;">Фотография (необязательно):</p>
+            <input type="file" id="memory-photo-input" accept="image/*" style="display: none;" onchange="handleMemoryPhoto(this)">
+            <div id="memory-photo-preview" onclick="document.getElementById('memory-photo-input').click()" style="width: 100%; height: 120px; border: 2px dashed var(--card-border); border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(0,0,0,0.1); overflow: hidden;">
+                <div id="memory-photo-placeholder" style="text-align: center; opacity: 0.5;">
+                    <svg viewBox="0 0 24 24" style="width: 32px; height: 32px; margin-bottom: 8px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                    <p style="font-size: 12px;">Выбрать фото</p>
+                </div>
+            </div>
+            <input type="hidden" id="memory-photo-base64">
+        </div>
+
+        <button class="btn" style="margin-top: 20px;" onclick="saveMemory()">Сохранить в Таймлайн</button>
     </div>
 
     <!-- Modal: Add Wheel Item -->
@@ -349,7 +362,7 @@
             <!-- Daily Notes -->
             <div class="card" style="border-color: var(--accent-color); background: rgba(236, 72, 153, 0.05);">
                 <h3 style="font-size: 18px; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
-                    <svg viewBox="0 0 24 24" style="color:var(--accent-color); width:20px; height:20px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <svg viewBox="0 0 24 24" style="color:var(--accent-color); width:20px; height:20px;"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l1.5 14.5L13 18l5-5-1.5-7.5L2 2z"></path><path d="M14 11l5 5"></path></svg>
                     Послания на день
                 </h3>
                 
@@ -755,15 +768,45 @@
             loadData();
         }
 
+        function handleMemoryPhoto(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    const scaleSize = Math.min(1, MAX_WIDTH / img.width);
+                    canvas.width = img.width * scaleSize;
+                    canvas.height = img.height * scaleSize;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const base64 = canvas.toDataURL('image/jpeg', 0.6);
+                    document.getElementById('memory-photo-base64').value = base64;
+                    const preview = document.getElementById('memory-photo-preview');
+                    preview.innerHTML = `<img src="${base64}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
         async function saveMemory() {
             tg.HapticFeedback.impactOccurred('medium');
             const text = document.getElementById('memory-text').value;
             const emoji = document.getElementById('memory-emoji').value || '❤️';
             const date = document.getElementById('memory-date').value;
+            const photo = document.getElementById('memory-photo-base64').value;
             if(!text) return;
-            await apiCall('memories', { action: 'create', coupleId: state.couple.id, text, emoji, date, authorId: state.user.id });
+            await apiCall('memories', { action: 'create', coupleId: state.couple.id, text, emoji, date, photo, authorId: state.user.id });
             await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Добавил(а) воспоминание: ' + text, icon: '📖', authorId: state.user.id });
-            document.getElementById('memory-text').value = ''; document.getElementById('memory-emoji').value = '';
+            
+            document.getElementById('memory-text').value = ''; 
+            document.getElementById('memory-emoji').value = '';
+            document.getElementById('memory-photo-base64').value = '';
+            document.getElementById('memory-photo-preview').innerHTML = '<div style="text-align: center; opacity: 0.5;"><svg viewBox="0 0 24 24" style="width: 32px; height: 32px; margin-bottom: 8px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><p style="font-size: 12px;">Выбрать фото</p></div>';
+            
             closeModal(); loadData();
         }
 
@@ -843,11 +886,13 @@
             const sorted = memories.sort((a,b) => new Date(b.date) - new Date(a.date));
             if(!sorted || sorted.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px;">Пока нет воспоминаний</div>'; return; }
             list.innerHTML = sorted.map(m => {
+                const photoHTML = m.photo ? `<img src="${m.photo}" style="width:100%; border-radius:12px; margin-top:12px; border: 1px solid var(--card-border);">` : '';
                 return `<div class="timeline-item">
                     <div class="timeline-emoji">${m.emoji || '❤️'}</div>
                     <div class="card" style="margin-bottom:0; padding:16px;">
                         <span style="font-size:12px; opacity:0.6; display:block; margin-bottom:4px;">${new Date(m.date).toLocaleDateString()}</span>
-                        <p style="font-size:16px;">${m.text}</p>
+                        <p style="font-size:16px; font-weight:500;">${m.text}</p>
+                        ${photoHTML}
                     </div>
                 </div>`;
             }).join('');
