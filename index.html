@@ -48,16 +48,16 @@
         [data-accent="purple"] { --accent-color: var(--accent-purple); --accent-glow: rgba(168, 85, 247, 0.5); }
         [data-accent="orange"] { --accent-color: var(--accent-orange); --accent-glow: rgba(249, 115, 22, 0.5); }
         
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; transition: background-color 0.4s ease, color 0.4s ease; -webkit-tap-highlight-color: transparent; }
+        html { background-color: var(--bg-color); min-height: 100%; }
+        body { background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; transition: background-color 0.4s ease, color 0.4s ease; -webkit-tap-highlight-color: transparent; min-height: 100vh; }
 
         .ambient-glow { position: fixed; top: 50%; left: 50%; width: 80vw; height: 80vw; background: var(--accent-color); filter: blur(120px); opacity: 0.15; transform: translate(-50%, -50%); border-radius: 50%; z-index: -2; pointer-events: none; transition: background 0.4s ease; }
         #particles-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
 
         .app-container { min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 90px; }
-        .screen { display: none; padding: 24px; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .screen { display: none; padding: 24px; animation: fadeIn 0.3s ease-out; }
         .screen.active { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .card { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; margin-bottom: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
         
@@ -88,7 +88,7 @@
         .text-glow { text-shadow: 0 0 20px var(--accent-glow); }
         
         .color-picker { display: flex; gap: 12px; margin-bottom: 24px; }
-        .color-circle { width: 44px; height: 44px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .color-circle { width: 44px; height: 44px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex-shrink: 0; aspect-ratio: 1; }
         .color-circle.active { transform: scale(1.15); border-color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
         .couple-avatars { display: flex; justify-content: center; align-items: center; gap: 16px; margin: 30px 0; }
@@ -208,10 +208,10 @@
     <div class="bottom-sheet" id="modal-plan">
         <h3>Новый план</h3>
         <select id="plan-type">
-            <option value="day">На день</option>
+            <option value="day">На сегодня</option>
             <option value="week">На неделю</option>
             <option value="month">На месяц</option>
-            <option value="date">Точная дата <i class="ci-calendar"></i></option>
+            <option value="date">Выбрать дату <i class="ci-calendar"></i></option>
         </select>
         <input type="date" id="plan-date" style="display:none;">
         <input type="text" id="plan-text" placeholder="Опишите план">
@@ -272,26 +272,7 @@
         </div>
     </div>
 
-    <!-- Modal: Stats -->
-    <div class="bottom-sheet" id="modal-stats">
-        <h3 style="text-align: center; margin-bottom: 20px;">Подробная статистика</h3>
-        <div style="text-align: center; margin-bottom: 30px;">
-            <h1 class="text-accent text-glow" style="font-size: 64px; margin: 0;" id="user-balance-modal">0</h1>
-            <p style="font-size: 16px; font-weight: 500; opacity: 0.8;">Кристаллов <i class="ci-gem"></i></p>
-        </div>
-        <div class="card" style="margin-bottom: 16px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 16px;">
-                <span style="opacity: 0.8;">Ваш уровень любви:</span>
-                <span style="font-weight: bold; color: var(--accent-color);" id="love-level-modal">1</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 16px;">
-                <span style="opacity: 0.8;">Кристаллов до <span id="next-level-modal">2</span> уровня:</span>
-                <span style="font-weight: bold;" id="crystals-to-next">500</span>
-            </div>
-            <div class="level-bar-bg" style="margin-top: 10px; height: 10px;"><div class="level-bar-fill" id="love-level-fill-modal" style="width: 0%"></div></div>
-        </div>
-        <button class="btn" onclick="closeModal()">Закрыть</button>
-    </div>
+
 
 <div class="app-container">
         <!-- Auth Screen -->
@@ -364,29 +345,32 @@
             </div>
 
             <!-- Balance and Level (Compact) -->
-            <div class="card" onclick="openModal('modal-stats')" style="cursor: pointer; padding: 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-                <div style="flex: 1; padding-right: 16px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; font-weight: 600;">
-                        <span>Уровни: <span id="love-level" class="text-accent">1</span> <span style="opacity: 0.5;">|</span> <span id="partner-level" class="text-accent">1</span></span>
-                        <div style="display: flex; gap: 8px; opacity: 0.9;" class="text-accent">
-                            <span>Вы: <span id="user-balance">0</span></span>
-                            <span style="opacity: 0.5;">|</span>
-                            <span>П: <span id="partner-balance">0</span> 💎</span>
+            <div class="card" onclick="toggleStats()" style="cursor: pointer; padding: 16px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="flex: 1; padding-right: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; font-weight: 600;">
+                            <span>Уровни: <span id="love-level" class="text-accent">1</span> <span style="opacity: 0.5;">|</span> <span id="partner-level" class="text-accent">1</span></span>
+                            <div style="display: flex; gap: 8px; align-items: center; opacity: 0.9;" class="text-accent">
+                                <span style="display: flex; align-items: center;">Вы: <span id="user-balance" style="margin-left:4px;">0</span></span>
+                                <span style="opacity: 0.5;">|</span>
+                                <span style="display: flex; align-items: center;">П: <span id="partner-balance" style="margin-left:4px;">0</span> <i class="ci-gem" style="font-size:14px; margin-left:2px;"></i></span>
+                            </div>
                         </div>
+                        <div class="level-bar-bg" style="margin-top: 0; height: 6px;"><div class="level-bar-fill" id="love-level-fill" style="width: 0%"></div></div>
                     </div>
-                    <div class="level-bar-bg" style="margin-top: 0; height: 6px;"><div class="level-bar-fill" id="love-level-fill" style="width: 0%"></div></div>
+                    <svg id="stats-arrow" viewBox="0 0 24 24" style="width: 20px; height: 20px; opacity: 0.5; transition: transform 0.3s;"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </div>
-                <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; opacity: 0.5;"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </div>
-
-            <!-- Question of the Day -->
-            <div class="card" style="border-color: var(--accent-blue); background: rgba(59, 130, 246, 0.05);">
-                <h3 style="font-size: 18px; display: flex; align-items: center; gap: 8px; color: var(--accent-blue);">
-                    <svg viewBox="0 0 24 24" style="color:var(--accent-blue); width:20px; height:20px;"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                    Вопрос дня
-                </h3>
-                <p id="qotd-text" style="font-size: 16px; font-weight: 500; margin-top: 10px; margin-bottom: 15px;">Загрузка вопроса...</p>
-                <div id="qotd-action"></div>
+                
+                <div id="expanded-stats" style="max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); margin-top: 0;">
+                    <div style="padding-top: 20px; border-top: 1px solid var(--card-border); margin-top: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px;">
+                            <span style="opacity: 0.8;">Прогресс вашего уровня:</span>
+                            <span style="font-weight: bold; color: var(--accent-color);"><span id="crystals-to-next">500</span> до <span id="next-level-val">2</span> ур.</span>
+                        </div>
+                        <div class="level-bar-bg" style="height: 10px;"><div class="level-bar-fill" id="love-level-fill-expanded" style="width: 0%"></div></div>
+                        <p style="font-size: 12px; opacity: 0.5; margin-top: 10px; text-align: center;">Выполняйте задания, чтобы получать кристаллы и повышать уровень любви! ✨</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Daily Notes -->
@@ -408,6 +392,16 @@
                         <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                     </button>
                 </div>
+            </div>
+
+            <!-- Question of the Day -->
+            <div class="card" style="border-color: var(--accent-blue); background: rgba(59, 130, 246, 0.05);">
+                <h3 style="font-size: 18px; display: flex; align-items: center; gap: 8px; color: var(--accent-blue);">
+                    <svg viewBox="0 0 24 24" style="color:var(--accent-blue); width:20px; height:20px;"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    Вопрос дня
+                </h3>
+                <p id="qotd-text" style="font-size: 16px; font-weight: 500; margin-top: 10px; margin-bottom: 15px;">Загрузка вопроса...</p>
+                <div id="qotd-action"></div>
             </div>
         </div>
 
@@ -448,7 +442,13 @@
                 <svg viewBox="0 0 24 24" style="color: var(--accent-color)"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                 Планы и Даты
             </h2>
-            <div id="plans-list" style="margin-top: 20px;"></div>
+            <div class="tab-group" style="margin-bottom: 10px;">
+                <div class="tab-highlight" id="plan-highlight" style="width: calc(33.33% - 4px);"></div>
+                <button class="tab-btn active" id="tab-plan-day" onclick="switchPlanTab('day')">Сегодня</button>
+                <button class="tab-btn" id="tab-plan-week" onclick="switchPlanTab('week')">Неделя</button>
+                <button class="tab-btn" id="tab-plan-month" onclick="switchPlanTab('month')">Месяц</button>
+            </div>
+            <div id="plans-list" style="margin-top: 10px;"></div>
             <button class="fab" onclick="openModal('modal-plan')">
                 <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </button>
@@ -562,8 +562,9 @@
         tg.ready();
         
         let state = { user: null, couple: null };
-        let currentTaskTab = 'partner'; // 'partner' or 'mine'
-        let currentWishTab = 'partner'; // 'partner' or 'mine'
+        let currentTaskTab = 'partner';
+        let currentWishTab = 'partner';
+        let currentPlanTab = 'day';
         window.cachedTasks = [];
         window.cachedWishes = [];
         window.cachedPlans = [];
@@ -571,6 +572,21 @@
         document.getElementById('plan-type').addEventListener('change', function(e) {
             document.getElementById('plan-date').style.display = e.target.value === 'date' ? 'block' : 'none';
         });
+
+        function toggleStats() {
+            const content = document.getElementById('expanded-stats');
+            const arrow = document.getElementById('stats-arrow');
+            const isExpanded = content.style.maxHeight !== '0px' && content.style.maxHeight !== '';
+            
+            if (isExpanded) {
+                content.style.maxHeight = '0px';
+                arrow.style.transform = 'rotate(0deg)';
+            } else {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                arrow.style.transform = 'rotate(90deg)';
+            }
+            tg.HapticFeedback.impactOccurred('light');
+        }
 
         function openModal(id) {
             tg.HapticFeedback.impactOccurred('light');
@@ -746,6 +762,15 @@
             document.getElementById(tab === 'partner' ? 'tab-wish-partner' : 'tab-wish-mine').classList.add('active');
             document.getElementById('wish-highlight').style.transform = `translateX(${tab === 'partner' ? '0' : '100%'})`;
             renderWishes(window.cachedWishes || []);
+        }
+
+        function switchPlanTab(tab) {
+            tg.HapticFeedback.impactOccurred('light'); currentPlanTab = tab;
+            document.querySelectorAll('#screen-plans .tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`tab-plan-${tab}`).classList.add('active');
+            const idx = tab === 'day' ? 0 : (tab === 'week' ? 1 : 2);
+            document.getElementById('plan-highlight').style.transform = `translateX(${idx * 100}%)`;
+            renderPlans(window.cachedPlans || []);
         }
 
         // --- Wishes ---
@@ -1087,12 +1112,18 @@
         function renderPlans(plans) {
             window.cachedPlans = plans; const list = document.getElementById('plans-list');
             const sorted = plans.sort((a,b) => { if (a.isDone && !b.isDone) return 1; if (!a.isDone && b.isDone) return -1; return b.createdAt - a.createdAt; });
-            if(!sorted || sorted.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px; font-size:40px;">🗓<p style="font-size:16px; margin-top:10px;">Планов пока нет</p></div>'; return; }
-            const types = { 'day': 'На день', 'week': 'На неделю', 'month': 'На месяц', 'date': 'Дата' };
-            list.innerHTML = sorted.map(p => {
+            
+            const filtered = sorted.filter(p => {
+                if (currentPlanTab === 'day') return p.type === 'day' || p.type === 'date';
+                return p.type === currentPlanTab;
+            });
+
+            if(!filtered || filtered.length === 0) { list.innerHTML = `<div style="text-align:center; opacity:0.5; margin-top:40px; font-size:40px;">${currentPlanTab === 'day' ? '☀️' : (currentPlanTab === 'week' ? '📅' : '🗓️')}<p style="font-size:16px; margin-top:10px;">В этой категории пока пусто</p></div>`; return; }
+            const types = { 'day': 'На сегодня', 'week': 'На неделю', 'month': 'На месяц', 'date': 'Дата' };
+            list.innerHTML = filtered.map(p => {
                 const iCompleted = p.completedBy && p.completedBy.includes(state.user.id);
                 let actionHTML = '';
-                if (p.isDone) actionHTML = `<div style="display:flex; align-items:center; gap:8px; opacity:0.6; font-weight:500;"><i class="ci-checkbox-check"></i> Выполнено обоими</div>`;
+                if (p.isDone) actionHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;"><i class="ci-checkbox-check"></i> Выполнено обоими</div>`;
                 else if (iCompleted) actionHTML = `<div style="text-align:center; opacity:0.6; padding:10px 0; border: 1px dashed var(--card-border); border-radius: 10px;">Ожидаем партнера <i class="ci-clock"></i></div>`;
                 else actionHTML = `<div style="display:flex; justify-content:space-between;"><button class="action-btn done" style="width:70%" onclick="completePlan('${p.id}')">Я выполнил(а) <i class="ci-checkbox-check"></i></button><button class="action-btn del" style="width:25%" onclick="delItem('plans', 'planId', '${p.id}')"><svg viewBox="0 0 24 24" style="width:20px;height:20px"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
                 const dateStr = p.date ? `<span style="float:right; opacity:0.8;">${new Date(p.date).toLocaleDateString()}</span>` : '';
@@ -1146,17 +1177,15 @@
                 const progress = (crystalsInLevel / 500) * 100;
                 const toNextLevel = 500 - crystalsInLevel;
 
+                // Modal Stats Update (Expanded Card)
                 document.getElementById('love-level').innerText = level;
                 document.getElementById('love-level-fill').style.width = `${progress}%`;
                 document.getElementById('user-balance').innerText = state.user.balance;
 
-                // Modal Stats Update
-                if (document.getElementById('love-level-modal')) {
-                    document.getElementById('love-level-modal').innerText = level;
-                    document.getElementById('user-balance-modal').innerText = state.user.balance;
-                    document.getElementById('next-level-modal').innerText = level + 1;
+                if (document.getElementById('love-level-fill-expanded')) {
+                    document.getElementById('next-level-val').innerText = level + 1;
                     document.getElementById('crystals-to-next').innerText = toNextLevel;
-                    document.getElementById('love-level-fill-modal').style.width = `${progress}%`;
+                    document.getElementById('love-level-fill-expanded').style.width = `${progress}%`;
                 }
 
                 // Partner Info
