@@ -1694,7 +1694,6 @@
             const ctx = canvas.getContext('2d');
             const dpr = window.devicePixelRatio || 1;
             
-            // Resize canvas
             const rect = canvas.getBoundingClientRect();
             canvas.width = rect.width * dpr;
             canvas.height = rect.height * dpr;
@@ -1702,53 +1701,71 @@
             
             const w = rect.width;
             const h = rect.height;
-            
             ctx.clearRect(0, 0, w, h);
             
-            // Draw Trunk
-            ctx.beginPath();
-            ctx.moveTo(w / 2, h - 20);
-            ctx.quadraticCurveTo(w / 2 - 10, h / 2 + 50, w / 2, h / 2);
-            ctx.lineWidth = 8;
-            ctx.strokeStyle = '#3d2b1f';
-            ctx.lineCap = 'round';
-            ctx.stroke();
+            const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#ec4899';
             
-            // Draw Branches
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(w / 2, h / 2 + 20);
-            ctx.quadraticCurveTo(w / 2 - 50, h / 2 - 20, w / 2 - 60, h / 2 - 80);
-            ctx.moveTo(w / 2, h / 2 + 30);
-            ctx.quadraticCurveTo(w / 2 + 50, h / 2 - 10, w / 2 + 70, h / 2 - 60);
-            ctx.stroke();
+            // Recursive branch function
+            function drawBranch(x, y, len, angle, branchWidth) {
+                ctx.beginPath();
+                ctx.save();
+                ctx.strokeStyle = '#3d2b1f';
+                ctx.lineWidth = branchWidth;
+                ctx.translate(x, y);
+                ctx.rotate(angle * Math.PI / 180);
+                ctx.moveTo(0, 0);
+                ctx.lineTo(0, -len);
+                ctx.stroke();
+                
+                if (len < 15) {
+                    ctx.restore();
+                    return;
+                }
+                
+                // Left branch
+                drawBranch(0, -len, len * 0.75, angle - 15, branchWidth * 0.7);
+                // Right branch
+                drawBranch(0, -len, len * 0.75, angle + 15, branchWidth * 0.7);
+                // Middle branch (new!)
+                drawBranch(0, -len, len * 0.6, angle, branchWidth * 0.6);
+                
+                ctx.restore();
+            }
             
-            // Draw Leaves (Optimized: random but deterministic based on day)
+            // Draw complex tree structure
+            drawBranch(w / 2, h - 20, 70, 0, 8);
+            
+            // Draw Leaves (Optimized & Theme-colored)
             const seed = 12345;
             function random(i) {
                 const x = Math.sin(seed + i) * 10000;
                 return x - Math.floor(x);
             }
 
-            ctx.fillStyle = 'var(--accent-color)';
-            ctx.globalAlpha = 0.6;
+            ctx.fillStyle = accentColor;
+            ctx.shadowColor = accentColor;
             
-            const maxLeaves = Math.min(leafCount, 1000); // Performance cap
+            const maxLeaves = Math.min(leafCount, 1500); 
             for (let i = 0; i < maxLeaves; i++) {
+                const leafOpacity = 0.4 + random(i) * 0.4;
+                ctx.globalAlpha = leafOpacity;
+                ctx.shadowBlur = random(i) > 0.7 ? 10 : 0; // Randomly glow some leaves
+                
                 const angle = random(i) * Math.PI * 2;
-                const dist = Math.sqrt(random(i + 1000)) * 120;
+                const dist = Math.sqrt(random(i + 1000)) * 140;
                 const lx = w / 2 + Math.cos(angle) * dist;
-                const ly = h / 2 - 40 + Math.sin(angle) * (dist * 0.7);
+                const ly = h / 2 - 40 + Math.sin(angle) * (dist * 0.8);
                 
                 ctx.beginPath();
-                ctx.ellipse(lx, ly, 4, 2, angle, 0, Math.PI * 2);
+                ctx.ellipse(lx, ly, 5, 2.5, angle, 0, Math.PI * 2);
                 ctx.fill();
             }
+            ctx.shadowBlur = 0;
             ctx.globalAlpha = 1;
             
-            // Draw Decorations from state
+            // Draw Decorations
             if (state.couple.treeDecorations) {
-                ctx.font = '20px serif';
+                ctx.font = '22px serif';
                 ctx.textAlign = 'center';
                 state.couple.treeDecorations.forEach(dec => {
                     ctx.fillText(dec.emoji, dec.x * w, dec.y * h);
