@@ -56,9 +56,11 @@
         #particles-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
 
         .app-container { min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 90px; }
-        .screen { display: none; padding: 24px; animation: fadeIn 0.3s ease; }
-        .screen.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .screen { display: none; padding: 24px; }
+        .screen.active { display: block; animation: slideIn 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(var(--slide-dir, 60px)); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideInLeft { from { opacity: 0; transform: translateX(-60px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: translateX(0); } }
 
         .card { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--card-border); border-radius: 20px; padding: 16px 20px; margin-bottom: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
         .card:active { transform: scale(0.98); }
@@ -147,7 +149,66 @@
         #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
         .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-top-color: var(--accent-color); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
         @keyframes spin { to { transform: rotate(360deg); } }
-</style>
+
+        /* Days Together Widget */
+        .days-widget { position: relative; text-align: center; margin: 10px 0 20px; padding: 24px 20px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; backdrop-filter: blur(20px); overflow: hidden; }
+        .days-ring { position: relative; width: 120px; height: 120px; margin: 0 auto 16px; }
+        .days-ring svg { width: 120px; height: 120px; transform: rotate(-90deg); }
+        .days-ring .ring-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 6; }
+        .days-ring .ring-fill { fill: none; stroke: var(--accent-color); stroke-width: 6; stroke-linecap: round; filter: drop-shadow(0 0 8px var(--accent-glow)); transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .days-count { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 36px; font-weight: 800; color: var(--accent-color); text-shadow: 0 0 20px var(--accent-glow); line-height: 1; }
+        .days-count small { display: block; font-size: 11px; font-weight: 600; opacity: 0.6; color: var(--text-color); margin-top: 2px; text-shadow: none; }
+        .days-milestone { font-size: 13px; opacity: 0.6; margin-top: 4px; }
+        .days-milestone span { color: var(--accent-color); font-weight: 700; }
+
+        /* Canvas Screen */
+        .canvas-wrapper { position: relative; width: 100%; aspect-ratio: 1; background: #111827; border-radius: 20px; border: 2px solid var(--card-border); overflow: hidden; touch-action: none; margin-bottom: 16px; }
+        .canvas-wrapper canvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
+        .canvas-toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+        .canvas-toolbar .tool-btn { width: 44px; height: 44px; border-radius: 12px; border: 2px solid var(--card-border); background: var(--card-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: var(--text-color); flex-shrink: 0; }
+        .canvas-toolbar .tool-btn.active { border-color: var(--accent-color); box-shadow: 0 0 12px var(--accent-glow); background: rgba(236, 72, 153, 0.15); }
+        .canvas-toolbar .tool-btn:active { transform: scale(0.92); }
+        .canvas-color-btn { width: 32px; height: 32px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: transform 0.2s, border-color 0.2s; flex-shrink: 0; }
+        .canvas-color-btn.active { border-color: white; transform: scale(1.15); box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .brush-size-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.1); outline: none; margin: 8px 0; }
+        .brush-size-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-color); cursor: pointer; box-shadow: 0 0 10px var(--accent-glow); }
+        .canvas-actions { display: flex; gap: 10px; }
+        .canvas-actions .btn { flex: 1; }
+
+        /* Stats Screen */
+        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px; padding: 18px; text-align: center; backdrop-filter: blur(20px); transition: transform 0.2s; }
+        .stat-card:active { transform: scale(0.97); }
+        .stat-value { font-size: 32px; font-weight: 800; color: var(--accent-color); text-shadow: 0 0 15px var(--accent-glow); line-height: 1.1; }
+        .stat-label { font-size: 12px; font-weight: 600; opacity: 0.6; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+        .stat-bar-label { font-size: 13px; font-weight: 600; min-width: 80px; opacity: 0.8; }
+        .stat-bar-track { flex: 1; height: 10px; background: rgba(255,255,255,0.06); border-radius: 5px; overflow: hidden; }
+        .stat-bar-fill { height: 100%; border-radius: 5px; background: var(--accent-color); box-shadow: 0 0 10px var(--accent-glow); transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+        .stat-bar-val { font-size: 13px; font-weight: 700; min-width: 40px; text-align: right; color: var(--accent-color); }
+        .mood-chart { display: flex; align-items: flex-end; gap: 8px; height: 80px; margin-top: 12px; justify-content: center; }
+        .mood-bar { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .mood-bar-fill { width: 36px; border-radius: 8px 8px 4px 4px; background: var(--accent-color); box-shadow: 0 0 8px var(--accent-glow); transition: height 1s cubic-bezier(0.4, 0, 0.2, 1); min-height: 4px; }
+        .mood-bar-emoji { font-size: 20px; }
+        .activity-heatmap { display: flex; gap: 6px; justify-content: space-between; margin-top: 12px; }
+        .heatmap-day { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+        .heatmap-block { width: 100%; aspect-ratio: 1; border-radius: 8px; background: rgba(255,255,255,0.04); transition: background 0.5s; }
+        .heatmap-label { font-size: 10px; opacity: 0.5; font-weight: 600; }
+
+        /* Coupons */
+        .coupon-card { background: linear-gradient(135deg, var(--accent-color), var(--accent-glow)); border-radius: 20px; padding: 20px; position: relative; color: white; overflow: hidden; margin-bottom: 16px; box-shadow: 0 10px 25px var(--accent-glow); }
+        .coupon-card::before { content: ''; position: absolute; top: 0; left: -20px; width: 40px; height: 100%; background: var(--bg-color); border-radius: 50%; }
+        .coupon-card::after { content: ''; position: absolute; top: 0; right: -20px; width: 40px; height: 100%; background: var(--bg-color); border-radius: 50%; }
+        .coupon-card.redeemed { opacity: 0.6; filter: grayscale(1); transform: scale(0.95); }
+        .coupon-badge { position: absolute; top: 10px; right: 25px; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+
+        /* Flying Hearts */
+        .flying-heart { position: fixed; pointer-events: none; z-index: 1000; font-size: 24px; animation: flyUp 1.5s ease-out forwards; }
+        @keyframes flyUp {
+            0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-200px) scale(2) rotate(20deg); opacity: 0; }
+        }
+    </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/coolicons/coolicons.css">
 </head>
 <body>
@@ -324,7 +385,7 @@
                     <div class="status-bubble" id="status-me" onclick="openModal('modal-status')"><i class="ci-chat-bubble"></i> Статус</div>
                 </div>
                 
-                <svg class="heart-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <svg class="heart-icon" id="main-heart" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="cursor: pointer;" onclick="sendHug(event)"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                 
                 <div class="avatar-wrapper">
                     <div class="streak-badge" id="streak-partner" style="display:none;"><i class="ci-fire"></i> 1</div>
@@ -334,19 +395,40 @@
             </div>
 
             
+            <!-- Days Together Widget -->
+            <div class="days-widget" id="days-together-widget" style="display: none; cursor: pointer;" onclick="openModal('modal-start-date')">
+                <div class="days-ring">
+                    <svg viewBox="0 0 100 100">
+                        <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
+                        <circle class="ring-fill" id="days-ring-fill" cx="50" cy="50" r="45" stroke-dasharray="283" stroke-dashoffset="283"></circle>
+                    </svg>
+                    <div class="days-count" id="days-count-val">0<small>дней вместе</small></div>
+                </div>
+                <p style="font-weight: 600; font-size: 15px; margin-bottom: 4px;">Мы вместе уже <span id="days-total-text" class="text-accent">0</span> дней!</p>
+                <div class="days-milestone" id="days-milestone-text">До годовщины осталось <span>0</span> дней</div>
+            </div>
+
             <!-- Quick Widgets -->
             <div class="widget-row">
                 <div class="widget-item" onclick="nav('timeline')">
                     <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
                     <span>Таймлайн</span>
                 </div>
+                <div class="widget-item" onclick="nav('canvas')">
+                    <svg viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path></svg>
+                    <span>Холст</span>
+                </div>
+                <div class="widget-item" onclick="nav('stats')">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    <span>Статистика</span>
+                </div>
+                <div class="widget-item" onclick="nav('coupons')">
+                    <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="7" y1="8" x2="17" y2="8"></line><line x1="7" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="10" y2="16"></line></svg>
+                    <span>Купоны</span>
+                </div>
                 <div class="widget-item" onclick="nav('wheel')">
                     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10"></path><path d="M12 12L12 2"></path><path d="M12 12L21 17"></path><path d="M12 12L3 17"></path></svg>
                     <span>Колесо</span>
-                </div>
-                <div class="widget-item" onclick="openModal('modal-notifications')">
-                    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                    <span>События</span>
                 </div>
             </div>
 
@@ -534,8 +616,134 @@
                 </button>
             </div>
         </div>
+        <!-- Coupons Screen -->
+        <div id="screen-coupons" class="screen">
+            <h2 style="font-size: 28px; display: flex; align-items: center; gap: 10px; margin-bottom: 24px;">
+                <svg viewBox="0 0 24 24" style="color: var(--accent-color)"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="7" y1="8" x2="17" y2="8"></line><line x1="7" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="10" y2="16"></line></svg>
+                Купоны на любовь
+            </h2>
+            <div class="tab-group">
+                <div class="tab-highlight" id="coupon-highlight"></div>
+                <button class="tab-btn active" id="tab-coupon-partner" onclick="switchCouponTab('partner')">Для меня</button>
+                <button class="tab-btn" id="tab-coupon-mine" onclick="switchCouponTab('mine')">От меня</button>
+            </div>
+            <div id="coupons-list" style="margin-top: 20px;"></div>
+        </div>
+
+        <!-- Stats Screen -->
+        <div id="screen-stats" class="screen">
+            <h2 style="font-size: 28px; display: flex; align-items: center; gap: 10px; margin-bottom: 24px;">
+                <svg viewBox="0 0 24 24" style="color: var(--accent-color)"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                Статистика
+            </h2>
+            
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-days-together">0</div>
+                    <div class="stat-label">Дней вместе</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-max-streak">0</div>
+                    <div class="stat-label">Лучший стрик</div>
+                </div>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <h3 style="font-size: 16px; margin-bottom: 20px;">Активность за неделю</h3>
+                <div class="activity-heatmap" id="activity-heatmap">
+                    <!-- JS populated -->
+                </div>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <h3 style="font-size: 16px; margin-bottom: 20px;">Прогресс заданий</h3>
+                <div class="stat-bar-row">
+                    <div class="stat-bar-label">Выполнено</div>
+                    <div class="stat-bar-track"><div class="stat-bar-fill" id="stat-tasks-fill" style="width: 0%"></div></div>
+                    <div class="stat-bar-val" id="stat-tasks-val">0%</div>
+                </div>
+                <div class="stat-bar-row">
+                    <div class="stat-bar-label">Желания</div>
+                    <div class="stat-bar-track"><div class="stat-bar-fill" id="stat-wishes-fill" style="width: 0%"></div></div>
+                    <div class="stat-bar-val" id="stat-wishes-val">0%</div>
+                </div>
+                <div class="stat-bar-row">
+                    <div class="stat-bar-label">Планы</div>
+                    <div class="stat-bar-track"><div class="stat-bar-fill" id="stat-plans-fill" style="width: 0%"></div></div>
+                    <div class="stat-bar-val" id="stat-plans-val">0%</div>
+                </div>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <h3 style="font-size: 16px; margin-bottom: 20px;">Топ настроений</h3>
+                <div class="mood-chart" id="mood-stats-chart">
+                    <!-- JS populated -->
+                </div>
+            </div>
+            
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-total-crystals" style="font-size: 24px;">0 <i class="ci-gem"></i></div>
+                    <div class="stat-label">Всего добыто</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-spent-crystals" style="font-size: 24px; color: #ef4444;">0 <i class="ci-gem"></i></div>
+                    <div class="stat-label">Потрачено</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Canvas Screen -->
+        <div id="screen-canvas" class="screen">
+            <h2 style="font-size: 28px; display: flex; align-items: center; gap: 10px; margin-bottom: 24px;">
+                <svg viewBox="0 0 24 24" style="color: var(--accent-color)"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path></svg>
+                Совместный Холст
+            </h2>
+
+            <div class="canvas-wrapper">
+                <canvas id="drawing-canvas"></canvas>
+            </div>
+
+            <div class="canvas-toolbar">
+                <div class="tool-btn active" id="tool-brush" onclick="setCanvasTool('brush')"><i class="ci-edit"></i></div>
+                <div class="tool-btn" id="tool-eraser" onclick="setCanvasTool('eraser')"><i class="ci-eraser"></i></div>
+                <div style="flex: 1;"></div>
+                <div class="canvas-color-btn active" style="background: #ec4899;" onclick="setCanvasColor(this, '#ec4899')"></div>
+                <div class="canvas-color-btn" style="background: #3b82f6;" onclick="setCanvasColor(this, '#3b82f6')"></div>
+                <div class="canvas-color-btn" style="background: #10b981;" onclick="setCanvasColor(this, '#10b981')"></div>
+                <div class="canvas-color-btn" style="background: #f97316;" onclick="setCanvasColor(this, '#f97316')"></div>
+                <div class="canvas-color-btn" style="background: #ffffff;" onclick="setCanvasColor(this, '#ffffff')"></div>
+            </div>
+
+            <p style="font-size: 12px; opacity: 0.6; margin-bottom: 8px;">Размер кисти:</p>
+            <input type="range" class="brush-size-slider" id="brush-size" min="2" max="30" value="5" oninput="canvasState.brushSize = this.value">
+
+            <div class="canvas-actions" style="margin-top: 24px;">
+                <button class="btn" style="background: rgba(0,0,0,0.2); box-shadow: none;" onclick="clearCanvas()">Очистить</button>
+                <button class="btn" onclick="saveCanvasToTimeline()">В таймлайн ✨</button>
+            </div>
+        </div>
     </div>
 
+    <!-- Modal: Add Coupon -->
+    <div class="bottom-sheet" id="modal-coupon">
+        <h3>Новый купон на любовь</h3>
+        <p style="opacity: 0.7; font-size: 14px; margin-bottom: 20px;">Создайте подарок, который ваш партнер сможет «обналичить» в любой момент!</p>
+        <input type="text" id="coupon-title" placeholder="Название (например, Массаж)">
+        <input type="text" id="coupon-desc" placeholder="Описание (необязательно)">
+        <button class="btn" onclick="saveCoupon()">Создать купон</button>
+    </div>
+
+    <!-- Modal: Start Date -->
+    <div class="bottom-sheet" id="modal-start-date">
+        <h3>Дата начала отношений</h3>
+        <p style="opacity: 0.7; font-size: 14px; margin-bottom: 20px;">Когда началась ваша история любви? Это поможет нам точнее считать ваши дни вместе!</p>
+        <input type="date" id="start-date-input" style="text-align: center;">
+        <button class="btn" onclick="saveStartDate()">Сохранить дату</button>
+    </div>
+
+    <button class="fab" id="fab-coupon" onclick="openModal('modal-coupon')"><i class="ci-gift"></i></button>
+    
     <!-- Navigation -->
     <div id="bottom-nav" class="bottom-nav" style="display: none;">
         <div class="nav-item active" onclick="nav('dashboard', this)">
@@ -1208,10 +1416,20 @@
         }
 
         // --- UI & Nav ---
+        let currentScreenIndex = 0;
+        const screenOrder = ['dashboard', 'plans', 'tasks', 'wishes', 'settings', 'timeline', 'coupons', 'canvas', 'stats', 'wheel'];
+
         function nav(screenId, navElement) {
             tg.HapticFeedback.impactOccurred('medium');
+            
+            const newIndex = screenOrder.indexOf(screenId);
+            const direction = newIndex > currentScreenIndex ? '60px' : '-60px';
+            document.documentElement.style.setProperty('--slide-dir', direction);
+            currentScreenIndex = newIndex;
+
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('screen-' + screenId).classList.add('active');
+            const nextScreen = document.getElementById('screen-' + screenId);
+            nextScreen.classList.add('active');
             
             if (navElement) {
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1224,7 +1442,12 @@
             if (screenId === 'wishes') document.getElementById('fab-wish').classList.add('active');
             if (screenId === 'plans') document.getElementById('fab-plan').classList.add('active');
             if (screenId === 'timeline') document.getElementById('fab-memory').classList.add('active');
+            if (screenId === 'coupons') document.getElementById('fab-coupon').classList.add('active');
 
+            if (screenId === 'canvas') initCanvas();
+            if (screenId === 'stats') loadStats();
+            if (screenId === 'coupons') loadCoupons();
+            
             if(screenId !== 'dashboard' && screenId !== 'settings') loadData();
         }
 
@@ -1254,6 +1477,9 @@
                     document.getElementById('streak-me').innerText = `🔥 ${state.user.streak}`;
                     document.getElementById('streak-me').style.display = 'flex';
                 }
+
+                // Days Together Update
+                updateDaysTogether();
 
                 // Level Progress
                 const level = Math.floor(state.user.balance / 500) + 1;
@@ -1360,6 +1586,299 @@
         function initParticles() { particles = []; for (let i = 0; i < Math.min(window.innerWidth / 10, 80); i++) particles.push(new Particle()); }
         function animateParticles() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animateParticles); }
         window.addEventListener('deviceorientation', (e) => { if (e.beta && e.gamma) { gyroX = e.beta; gyroY = e.gamma; } });
+        function updateDaysTogether() {
+            if (!state.couple || (!state.couple.startDate && !state.couple.createdAt)) return;
+            const start = new Date(state.couple.startDate || state.couple.createdAt);
+            const now = new Date();
+            const diffTime = Math.abs(now - start);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            document.getElementById('days-together-widget').style.display = 'block';
+            document.getElementById('days-count-val').innerHTML = `${diffDays}<small>дней вместе</small>`;
+            document.getElementById('days-total-text').innerText = diffDays;
+
+            // Anniversary calculation
+            const nextAnniversary = new Date(start);
+            nextAnniversary.setFullYear(now.getFullYear() + (now > new Date(start.setFullYear(now.getFullYear())) ? 1 : 0));
+            // Reset start for calculation
+            const originalStart = new Date(state.couple.createdAt);
+            let nextAnniv = new Date(originalStart);
+            nextAnniv.setFullYear(now.getFullYear());
+            if (nextAnniv < now) nextAnniv.setFullYear(now.getFullYear() + 1);
+            
+            const daysToAnniv = Math.ceil((nextAnniv - now) / (1000 * 60 * 60 * 24));
+            document.getElementById('days-milestone-text').innerHTML = `До годовщины осталось <span>${daysToAnniv}</span> дней`;
+
+            // Ring progress (percentage of the year)
+            const daysInYear = 365; 
+            const progress = ((365 - daysToAnniv) / 365) * 283; // 283 is approx 2 * PI * 45
+            document.getElementById('days-ring-fill').style.strokeDashoffset = 283 - progress;
+        }
+
+        async function saveStartDate() {
+            const date = document.getElementById('start-date-input').value;
+            if (!date) return;
+            tg.HapticFeedback.impactOccurred('medium');
+            state.couple = await apiCall('couple', { action: 'updateStartDate', telegramId: state.user.telegramId, startDate: date });
+            updateDaysTogether();
+            closeModal();
+            tg.showPopup({ message: 'Дата сохранена! ❤️' });
+        }
+
+        // --- Interactions Logic ---
+        async function sendHug(event) {
+            tg.HapticFeedback.impactOccurred('heavy');
+            showFlyingHearts(event.clientX, event.clientY);
+            await apiCall('interactions', { action: 'hug', telegramId: state.user.telegramId, coupleId: state.couple.id });
+        }
+
+        function showFlyingHearts(x, y) {
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'flying-heart';
+                    heart.innerHTML = '❤️';
+                    heart.style.left = (x + (Math.random() * 60 - 30)) + 'px';
+                    heart.style.top = (y + (Math.random() * 60 - 30)) + 'px';
+                    document.body.appendChild(heart);
+                    setTimeout(() => heart.remove(), 1500);
+                }, i * 100);
+            }
+        }
+
+        // --- Coupons Logic ---
+        let currentCouponTab = 'partner';
+        function switchCouponTab(tab) {
+            currentCouponTab = tab;
+            document.querySelectorAll('#screen-coupons .tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-coupon-' + tab).classList.add('active');
+            document.getElementById('coupon-highlight').style.transform = `translateX(${tab === 'partner' ? '0' : '100%'})`;
+            loadCoupons();
+        }
+
+        async function loadCoupons() {
+            const coupons = await apiCall('coupons', { telegramId: state.user.telegramId, coupleId: state.couple.id }, 'GET');
+            renderCoupons(coupons);
+        }
+
+        async function saveCoupon() {
+            const title = document.getElementById('coupon-title').value;
+            const description = document.getElementById('coupon-desc').value;
+            if (!title) return;
+            tg.HapticFeedback.impactOccurred('medium');
+            await apiCall('coupons', { action: 'create', telegramId: state.user.telegramId, coupleId: state.couple.id, title, description });
+            document.getElementById('coupon-title').value = '';
+            document.getElementById('coupon-desc').value = '';
+            closeModal();
+            loadCoupons();
+        }
+
+        function renderCoupons(coupons) {
+            const list = document.getElementById('coupons-list');
+            const filtered = coupons.filter(c => currentCouponTab === 'mine' ? c.creatorId === state.user.id : c.creatorId !== state.user.id);
+            
+            if(!filtered || filtered.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px;"><p style="font-size:16px;">Пока купонов нет</p></div>'; return; }
+            
+            list.innerHTML = filtered.map(c => `
+                <div class="coupon-card ${c.status === 'redeemed' ? 'redeemed' : ''}">
+                    ${c.status === 'redeemed' ? '<div class="coupon-badge">Использовано</div>' : ''}
+                    <h3 style="margin-bottom: 4px;">${c.title}</h3>
+                    <p style="font-size: 14px; opacity: 0.9;">${c.description || ''}</p>
+                    ${c.status === 'active' && currentCouponTab === 'partner' ? `
+                        <button class="btn" style="background: white; color: var(--accent-color); margin-top: 15px; box-shadow: none;" onclick="redeemCoupon('${c.id}')">Использовать</button>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function redeemCoupon(id) {
+            tg.HapticFeedback.impactOccurred('heavy');
+            await apiCall('coupons', { action: 'redeem', telegramId: state.user.telegramId, coupleId: state.couple.id, couponId: id });
+            loadCoupons();
+            tg.showPopup({ message: 'Купон использован! ✨' });
+        }
+
+        async function pollInteractions() {
+            if (!state.couple || !state.user) return;
+            try {
+                const res = await fetch(`/api/interactions_poll?coupleId=${state.couple.id}&telegramId=${state.user.telegramId}`);
+                const interaction = await res.json();
+                if (interaction && interaction.type === 'hug') {
+                    tg.HapticFeedback.notificationOccurred('success');
+                    const heartPos = document.getElementById('main-heart').getBoundingClientRect();
+                    showFlyingHearts(heartPos.left + heartPos.width/2, heartPos.top + heartPos.height/2);
+                }
+            } catch (e) {}
+        }
+        setInterval(pollInteractions, 3000);
+
+        // --- Canvas Logic ---
+        let canvasState = {
+            isDrawing: false,
+            color: '#ec4899',
+            brushSize: 5,
+            tool: 'brush',
+            lastX: 0,
+            lastY: 0
+        };
+
+        function initCanvas() {
+            const canvas = document.getElementById('drawing-canvas');
+            const ctx = canvas.getContext('2d');
+            const wrapper = canvas.parentElement;
+            
+            // Set resolution
+            canvas.width = wrapper.offsetWidth * 2;
+            canvas.height = wrapper.offsetHeight * 2;
+            ctx.scale(2, 2);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Load existing canvas
+            fetch(`/api/data?type=canvas&coupleId=${state.couple.id}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.strokes) {
+                        data.strokes.forEach(s => drawStroke(ctx, s));
+                    }
+                });
+
+            // Event Listeners
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); const t = e.touches[0]; startDrawing(t); });
+            canvas.addEventListener('touchmove', (e) => { e.preventDefault(); const t = e.touches[0]; draw(t); });
+            canvas.addEventListener('touchend', stopDrawing);
+        }
+
+        function startDrawing(e) {
+            canvasState.isDrawing = true;
+            const canvas = document.getElementById('drawing-canvas');
+            const rect = canvas.getBoundingClientRect();
+            canvasState.lastX = (e.clientX || e.pageX) - rect.left;
+            canvasState.lastY = (e.clientY || e.pageY) - rect.top;
+        }
+
+        function draw(e) {
+            if (!canvasState.isDrawing) return;
+            const canvas = document.getElementById('drawing-canvas');
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || e.pageX) - rect.left;
+            const y = (e.clientY || e.pageY) - rect.top;
+
+            const stroke = {
+                fromX: canvasState.lastX,
+                fromY: canvasState.lastY,
+                toX: x,
+                toY: y,
+                color: canvasState.tool === 'eraser' ? 'transparent' : canvasState.color,
+                size: canvasState.brushSize,
+                mode: canvasState.tool === 'eraser' ? 'destination-out' : 'source-over'
+            };
+
+            drawStroke(ctx, stroke);
+            
+            // Send to server (throttled in production, but here simple)
+            apiCall('canvas', { action: 'addStroke', coupleId: state.couple.id, stroke, authorId: state.user.id });
+
+            canvasState.lastX = x;
+            canvasState.lastY = y;
+        }
+
+        function drawStroke(ctx, s) {
+            ctx.globalCompositeOperation = s.mode || 'source-over';
+            ctx.beginPath();
+            ctx.moveTo(s.fromX, s.fromY);
+            ctx.lineTo(s.toX, s.toY);
+            ctx.strokeStyle = s.color;
+            ctx.lineWidth = s.size;
+            ctx.stroke();
+        }
+
+        function stopDrawing() { canvasState.isDrawing = false; }
+
+        function setCanvasTool(tool) {
+            canvasState.tool = tool;
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tool-' + tool).classList.add('active');
+        }
+
+        function setCanvasColor(el, color) {
+            canvasState.color = color;
+            setCanvasTool('brush');
+            document.querySelectorAll('.canvas-color-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        async function clearCanvas() {
+            if (!confirm('Очистить холст?')) return;
+            const ctx = document.getElementById('drawing-canvas').getContext('2d');
+            ctx.clearRect(0, 0, 1000, 1000);
+            await apiCall('canvas', { action: 'clear', coupleId: state.couple.id });
+        }
+
+        async function saveCanvasToTimeline() {
+            const canvas = document.getElementById('drawing-canvas');
+            const imageData = canvas.toDataURL('image/png');
+            tg.showConfirm('Сохранить этот рисунок в Таймлайн?', async (ok) => {
+                if (ok) {
+                    await apiCall('canvas', { action: 'saveToTimeline', coupleId: state.couple.id, imageData, authorId: state.user.id });
+                    tg.showPopup({message: 'Рисунок сохранен! Холст очищен.'});
+                    nav('timeline');
+                }
+            });
+        }
+
+        // --- Stats Logic ---
+        async function loadStats() {
+            const data = await apiCall('stats', { coupleId: state.couple.id }, 'GET');
+            const start = new Date(state.couple.startDate || data.createdAt);
+            document.getElementById('stat-days-together').innerText = Math.floor(Math.abs(new Date() - start) / (1000*60*60*24)) || 0;
+            document.getElementById('stat-max-streak').innerText = data.maxStreak || 1;
+            document.getElementById('stat-total-crystals').innerHTML = `${data.totalCrystalsEarned} <i class="ci-gem"></i>`;
+            document.getElementById('stat-spent-crystals').innerHTML = `${data.totalCrystalsSpent} <i class="ci-gem"></i>`;
+
+            // Progress bars
+            const taskPct = data.totalTasks ? Math.round((data.completedTasks / data.totalTasks) * 100) : 0;
+            document.getElementById('stat-tasks-fill').style.width = taskPct + '%';
+            document.getElementById('stat-tasks-val').innerText = taskPct + '%';
+
+            const wishPct = data.totalWishes ? Math.round((data.boughtWishes / data.totalWishes) * 100) : 0;
+            document.getElementById('stat-wishes-fill').style.width = wishPct + '%';
+            document.getElementById('stat-wishes-val').innerText = wishPct + '%';
+
+            const planPct = data.totalPlans ? Math.round((data.completedPlans / data.totalPlans) * 100) : 0;
+            document.getElementById('stat-plans-fill').style.width = planPct + '%';
+            document.getElementById('stat-plans-val').innerText = planPct + '%';
+
+            // Mood chart
+            const moodChart = document.getElementById('mood-stats-chart');
+            const moodEntries = Object.entries(data.moodCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
+            const maxMood = Math.max(...Object.values(data.moodCounts), 1);
+            
+            moodChart.innerHTML = moodEntries.map(([emoji, count]) => `
+                <div class="mood-bar">
+                    <div class="mood-bar-fill" style="height: ${(count/maxMood)*100}%"></div>
+                    <div class="mood-bar-emoji">${emoji}</div>
+                </div>
+            `).join('') || '<p style="opacity:0.5; font-size:12px;">Нет данных о настроении</p>';
+
+            // Heatmap
+            const heatmap = document.getElementById('activity-heatmap');
+            heatmap.innerHTML = Object.entries(data.activityByDay).map(([date, count]) => {
+                const opacity = Math.min(count * 0.2 + 0.05, 1);
+                const dayName = new Date(date).toLocaleDateString('ru-RU', {weekday: 'short'});
+                return `
+                    <div class="heatmap-day">
+                        <div class="heatmap-block" style="background: var(--accent-color); opacity: ${opacity}"></div>
+                        <div class="heatmap-label">${dayName}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
         initParticles(); animateParticles(); initApp();
     </script>
 </body>
