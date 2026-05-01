@@ -135,10 +135,18 @@
         .tab-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; background: transparent; color: var(--text-color); font-weight: 600; font-size: 14px; cursor: pointer; position: relative; z-index: 1; transition: color 0.3s; }
         .tab-btn.active { color: white; }
         .tab-highlight { position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: var(--accent-color); border-radius: 10px; box-shadow: 0 4px 15px var(--accent-glow); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 0; }
+        
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
+        .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-top-color: var(--accent-color); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/coolicons/coolicons.css">
 </head>
 <body>
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <p style="opacity: 0.7; font-weight: 500;">LoveSpace</p>
+    </div>
     <div class="ambient-glow"></div>
     <canvas id="particles-canvas"></canvas>
     
@@ -287,7 +295,7 @@
 
 <div class="app-container">
         <!-- Auth Screen -->
-        <div id="screen-auth" class="screen active">
+        <div id="screen-auth" class="screen">
             <div style="text-align: center; margin-top: 60px;">
                 <svg viewBox="0 0 24 24" style="width: 64px; height: 64px; margin-bottom: 20px; color: var(--accent-color); filter: drop-shadow(0 0 15px var(--accent-glow));">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
@@ -314,6 +322,13 @@
         <!-- Dashboard Screen -->
         <div id="screen-dashboard" class="screen">
             <h2 style="text-align: center; font-size: 28px;">Привет, <span id="user-name" class="text-accent"></span>!</h2>
+            
+            <div id="waiting-partner-card" class="card" style="display: none; border: 2px dashed var(--accent-color); background: rgba(236, 72, 153, 0.05); text-align: center; padding: 30px;">
+                <h3 style="margin-bottom: 10px;">Ждем партнера!</h3>
+                <p style="font-size: 14px; opacity: 0.8; margin-bottom: 20px;">Отправьте этот код вашей второй половинке:</p>
+                <div id="dashboard-pair-code" style="font-size: 32px; font-weight: 800; color: var(--accent-color); letter-spacing: 5px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; margin-bottom: 20px;">------</div>
+                <button class="btn" style="background: rgba(255,255,255,0.1); box-shadow: none;" onclick="tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent('Привет! Заходи в LoveSpace по моему коду: ' + state.couple.code))">Отправить код</button>
+            </div>
             
             <div class="couple-avatars">
                 <div class="avatar-wrapper">
@@ -589,12 +604,17 @@
             }
 
             try {
+                console.log(`API Call: ${url}`, options);
                 const res = await fetch(url, options);
-                const json = await res.json();
+                const text = await res.text();
+                console.log(`API Response: ${res.status}`, text);
+                let json;
+                try { json = JSON.parse(text); } catch(e) { throw new Error(`Ошибка сервера: ${res.status}`); }
                 if (!res.ok) throw new Error(json.error || 'API Error');
                 return json;
             } catch (e) {
-                tg.showPopup({ title: 'Внимание', message: e.message });
+                console.error('API Error:', e);
+                tg.showPopup({ title: 'Ошибка', message: e.message });
                 throw e;
             }
         }
@@ -607,27 +627,34 @@
                 applyThemeSettings();
                 updateUI();
                 if (state.couple) loadData();
+                setTimeout(() => { document.getElementById('loading-screen').style.opacity = '0'; setTimeout(() => document.getElementById('loading-screen').style.display = 'none', 500); }, 300);
             } catch (e) {
-                document.querySelector('.app-container').innerHTML = '<p style="text-align:center;margin-top:50px;">Ошибка подключения к серверу.</p>';
+                document.getElementById('loading-screen').innerHTML = '<p style="text-align:center;padding:20px;">Ошибка авторизации. Перезапустите приложение.</p>';
             }
         }
 
         async function createCouple() {
+            if (!state.user) return;
             tg.HapticFeedback.impactOccurred('medium');
-            const couple = await apiCall('couple', { action: 'create', telegramId: state.user.telegramId });
-            state.user.coupleId = couple.id; state.couple = couple;
-            document.getElementById('my-code').innerText = couple.code; document.getElementById('my-code').style.display = 'block';
-            updateUI(); loadData();
+            try {
+                const couple = await apiCall('couple', { action: 'create', telegramId: String(state.user.telegramId) });
+                state.user.coupleId = couple.id; state.couple = couple;
+                document.getElementById('my-code').innerText = couple.code; document.getElementById('my-code').style.display = 'block';
+                updateUI(); loadData();
+            } catch (e) {}
         }
 
         async function joinCouple() {
+            if (!state.user) return;
             tg.HapticFeedback.impactOccurred('medium');
-            const code = document.getElementById('partner-code-input').value.toUpperCase();
+            const code = document.getElementById('partner-code-input').value.toUpperCase().trim();
             if (code.length === 6) {
-                const couple = await apiCall('couple', { action: 'join', telegramId: state.user.telegramId, code });
-                state.user.coupleId = couple.id; state.couple = couple;
-                updateUI(); loadData();
-                tg.showPopup({ title: 'Успех', message: 'Вы успешно объединились!' }); shootConfetti();
+                try {
+                    const couple = await apiCall('couple', { action: 'join', telegramId: String(state.user.telegramId), code });
+                    state.user.coupleId = couple.id; state.couple = couple;
+                    updateUI(); loadData();
+                    tg.showPopup({ title: 'Успех', message: 'Вы успешно объединились!' }); shootConfetti();
+                } catch (e) {}
             } else {
                 tg.HapticFeedback.notificationOccurred('error'); tg.showPopup({ message: 'Код должен состоять из 6 символов' });
             }
@@ -682,21 +709,27 @@
 
         // --- Tasks ---
         async function saveTask() {
+            if (!state.user || !state.couple) return;
             tg.HapticFeedback.impactOccurred('medium');
             const title = document.getElementById('task-title').value;
             const points = document.getElementById('task-points').value;
             if(!title || !points) return;
-            await apiCall('tasks', { action: 'create', coupleId: state.couple.id, title, points, telegramId: state.user.telegramId });
-            document.getElementById('task-title').value = ''; document.getElementById('task-points').value = '';
-            closeModal(); loadData();
+            try {
+                await apiCall('tasks', { action: 'create', coupleId: state.couple.id, title, points, telegramId: String(state.user.telegramId) });
+                document.getElementById('task-title').value = ''; document.getElementById('task-points').value = '';
+                closeModal(); loadData();
+            } catch (e) {}
         }
 
         async function taskAction(id, action) {
+            if (!state.user || !state.couple) return;
             tg.HapticFeedback.impactOccurred('medium');
-            await apiCall('tasks', { action, coupleId: state.couple.id, taskId: id, telegramId: state.user.telegramId });
-            if (action === 'submit_for_review') tg.showPopup({message: "Задание отправлено партнеру на проверку <i class="ci-clock"></i>"});
-            if (action === 'approve') shootConfetti();
-            loadData();
+            try {
+                await apiCall('tasks', { action, coupleId: state.couple.id, taskId: id, telegramId: String(state.user.telegramId) });
+                if (action === 'submit_for_review') tg.showPopup({message: "Задание отправлено партнеру на проверку <i class='ci-clock'></i>"});
+                if (action === 'approve') shootConfetti();
+                loadData();
+            } catch (e) {}
         }
 
         function switchTaskTab(tab) {
@@ -717,34 +750,43 @@
 
         // --- Wishes ---
         async function saveWish() {
+            if (!state.user || !state.couple) return;
             tg.HapticFeedback.impactOccurred('medium');
             const title = document.getElementById('wish-title').value;
             const points = document.getElementById('wish-points').value;
             const isSecret = document.getElementById('wish-secret').checked;
             if(!title || !points) return;
-            await apiCall('wishes', { action: 'create', coupleId: state.couple.id, title, points, isSecret, telegramId: state.user.telegramId });
-            document.getElementById('wish-title').value = ''; document.getElementById('wish-points').value = ''; document.getElementById('wish-secret').checked = false;
-            closeModal(); loadData();
+            try {
+                await apiCall('wishes', { action: 'create', coupleId: state.couple.id, title, points, isSecret, telegramId: String(state.user.telegramId) });
+                document.getElementById('wish-title').value = ''; document.getElementById('wish-points').value = ''; document.getElementById('wish-secret').checked = false;
+                closeModal(); loadData();
+            } catch (e) {}
         }
 
         async function buyWish(id, points) {
+            if (!state.user || !state.couple) return;
             if (state.user.balance < points) { tg.HapticFeedback.notificationOccurred('error'); return tg.showPopup({ title: 'Отказ', message: 'Недостаточно кристаллов!' }); }
             tg.HapticFeedback.impactOccurred('heavy');
-            await apiCall('wishes', { action: 'buy', coupleId: state.couple.id, wishId: id, telegramId: state.user.telegramId });
-            state.user.balance -= points; updateUI();
-            shootConfetti(); loadData();
+            try {
+                await apiCall('wishes', { action: 'buy', coupleId: state.couple.id, wishId: id, telegramId: String(state.user.telegramId) });
+                state.user.balance -= points; updateUI();
+                shootConfetti(); loadData();
+            } catch (e) {}
         }
 
         // --- Plans ---
         async function savePlan() {
+            if (!state.user || !state.couple) return;
             tg.HapticFeedback.impactOccurred('medium');
             const type = document.getElementById('plan-type').value;
             const text = document.getElementById('plan-text').value;
             const date = document.getElementById('plan-date').value;
             if(!text) return;
-            await apiCall('plans', { action: 'create', coupleId: state.couple.id, type, text, date });
-            document.getElementById('plan-text').value = ''; document.getElementById('plan-date').value = '';
-            closeModal(); loadData();
+            try {
+                await apiCall('plans', { action: 'create', coupleId: state.couple.id, type, text, date });
+                document.getElementById('plan-text').value = ''; document.getElementById('plan-date').value = '';
+                closeModal(); loadData();
+            } catch (e) {}
         }
 
         async function completePlan(id) {
@@ -809,21 +851,24 @@
         }
 
         async function saveMemory() {
+            if (!state.user || !state.couple) return;
             tg.HapticFeedback.impactOccurred('medium');
             const text = document.getElementById('memory-text').value;
-            const emoji = document.getElementById('memory-emoji').value || '<i class="ci-heart-filled"></i>';
+            const emoji = document.getElementById('memory-emoji').value || '<i class=\'ci-heart-filled\'></i>';
             const date = document.getElementById('memory-date').value;
             const photo = document.getElementById('memory-photo-base64').value;
             if(!text) return;
-            await apiCall('memories', { action: 'create', coupleId: state.couple.id, text, emoji, date, photo, authorId: state.user.id });
-            await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Добавил(а) воспоминание: ' + text, icon: '📖', authorId: state.user.id });
-            
-            document.getElementById('memory-text').value = ''; 
-            document.getElementById('memory-emoji').value = '';
-            document.getElementById('memory-photo-base64').value = '';
-            document.getElementById('memory-photo-preview').innerHTML = '<div style="text-align: center; opacity: 0.5;"><svg viewBox="0 0 24 24" style="width: 32px; height: 32px; margin-bottom: 8px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><p style="font-size: 12px;">Выбрать фото</p></div>';
-            
-            closeModal(); loadData();
+            try {
+                await apiCall('memories', { action: 'create', coupleId: state.couple.id, text, emoji, date, photo, authorId: state.user.id });
+                await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Добавил(а) воспоминание: ' + text, icon: '📖', authorId: state.user.id });
+                
+                document.getElementById('memory-text').value = ''; 
+                document.getElementById('memory-emoji').value = '';
+                document.getElementById('memory-photo-base64').value = '';
+                document.getElementById('memory-photo-preview').innerHTML = '<div style="text-align: center; opacity: 0.5;"><svg viewBox="0 0 24 24" style="width: 32px; height: 32px; margin-bottom: 8px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><p style="font-size: 12px;">Выбрать фото</p></div>';
+                
+                closeModal(); loadData();
+            } catch (e) {}
         }
 
         async function saveWheelItem() {
@@ -1076,6 +1121,11 @@
                     document.querySelector('.nav-item:first-child').classList.add('active');
                 }
                 document.getElementById('bottom-nav').style.display = 'flex';
+                
+                // Alone check
+                const isAlone = !state.couple.users || state.couple.users.length < 2;
+                document.getElementById('waiting-partner-card').style.display = isAlone ? 'block' : 'none';
+                if (isAlone) document.getElementById('dashboard-pair-code').innerText = state.couple.code;
                 
                 // My Info
                 document.getElementById('user-name').innerText = state.user.firstName;

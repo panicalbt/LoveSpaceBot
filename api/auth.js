@@ -66,7 +66,6 @@ module.exports = async (req, res) => {
     let couple = null;
     if (user.coupleId) {
       couple = await redis.get(`couple:${user.coupleId}`);
-      // Sync partner's photoUrl to couple
       if (couple) {
           if (!couple.partnerData) couple.partnerData = {};
           if (!couple.partnerData[user.id]) couple.partnerData[user.id] = {};
@@ -75,6 +74,9 @@ module.exports = async (req, res) => {
           couple.partnerData[user.id].firstName = user.firstName;
           couple.partnerData[user.id].telegramId = user.telegramId;
           await redis.set(`couple:${user.coupleId}`, couple);
+      } else {
+          user.coupleId = null;
+          await redis.set(`user:${tgid}`, user);
       }
     }
     
