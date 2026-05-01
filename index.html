@@ -48,8 +48,9 @@
         [data-accent="purple"] { --accent-color: var(--accent-purple); --accent-glow: rgba(168, 85, 247, 0.5); }
         [data-accent="orange"] { --accent-color: var(--accent-orange); --accent-glow: rgba(249, 115, 22, 0.5); }
         
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
         html { background-color: var(--bg-color); min-height: 100%; }
-        body { background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; transition: background-color 0.4s ease, color 0.4s ease; -webkit-tap-highlight-color: transparent; min-height: 100vh; }
+        body { background-color: transparent; color: var(--text-color); overflow-x: hidden; transition: background-color 0.4s ease, color 0.4s ease; -webkit-tap-highlight-color: transparent; min-height: 100vh; }
 
         .ambient-glow { position: fixed; top: 50%; left: 50%; width: 80vw; height: 80vw; background: var(--accent-color); filter: blur(120px); opacity: 0.15; transform: translate(-50%, -50%); border-radius: 50%; z-index: -2; pointer-events: none; transition: background 0.4s ease; }
         #particles-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
