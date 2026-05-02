@@ -234,9 +234,16 @@
         }
 
         .shockwave { position: fixed; border-radius: 50%; border: 2px solid var(--accent-color); pointer-events: none; z-index: 999; animation: shockwave 0.6s ease-out forwards; }
-        @keyframes shockwave {
-            0% { width: 0; height: 0; opacity: 1; transform: translate(-50%, -50%); border-width: 4px; }
-            100% { width: 150px; height: 150px; opacity: 0; transform: translate(-50%, -50%); border-width: 1px; }
+        .events-list { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+        .event-item { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px; padding: 16px; display: flex; gap: 14px; align-items: center; animation: slideIn 0.3s ease-out; }
+        .event-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+        .event-content { flex: 1; }
+        .event-text { font-size: 14px; font-weight: 500; margin-bottom: 4px; line-height: 1.4; }
+        .event-time { font-size: 11px; opacity: 0.5; font-weight: 600; text-transform: uppercase; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/coolicons/coolicons.css">
@@ -431,9 +438,9 @@
                     <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
                     <span>Таймлайн</span>
                 </div>
-                <div class="widget-item" onclick="nav('stats')">
-                    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                    <span>Статистика</span>
+                <div class="widget-item" onclick="nav('events')">
+                    <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                    <span>События</span>
                 </div>
                 <div class="widget-item" onclick="nav('wheel')">
                     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10"></path><path d="M12 12L12 2"></path><path d="M12 12L21 17"></path><path d="M12 12L3 17"></path></svg>
@@ -737,6 +744,17 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Events Screen -->
+        <div id="screen-events" class="screen">
+            <h2 style="font-size: 28px; display: flex; align-items: center; gap: 10px; margin-bottom: 24px;">
+                <svg viewBox="0 0 24 24" style="color: var(--accent-color)"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                События
+            </h2>
+            <div id="events-list-full" class="events-list">
+                <!-- JS populated -->
+            </div>
+        </div>
 
         <!-- Canvas Screen -->
         <div id="screen-canvas" class="screen">
@@ -973,7 +991,9 @@
             state.user.status = statusText; document.getElementById('status-me').innerText = statusText;
             document.getElementById('custom-status').value = ''; closeModal();
             await apiCall('user', { telegramId: state.user.telegramId, status: statusText });
+            await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Установил(а) статус: ' + statusText, icon: '💬', authorId: state.user.id });
             tg.showPopup({message: "Статус обновлен!"});
+            loadData();
         }
 
         async function saveNote() {
@@ -1013,6 +1033,7 @@
             if(!title || !points) return;
             try {
                 await apiCall('tasks', { action: 'create', coupleId: state.couple.id, title, points, telegramId: String(state.user.telegramId) });
+                await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Добавил(а) задание: ' + title, icon: '📝', authorId: state.user.id });
                 document.getElementById('task-title').value = ''; document.getElementById('task-points').value = '';
                 closeModal(); loadData();
             } catch (e) {}
@@ -1023,8 +1044,14 @@
             tg.HapticFeedback.impactOccurred('medium');
             try {
                 await apiCall('tasks', { action, coupleId: state.couple.id, taskId: id, telegramId: String(state.user.telegramId) });
-                if (action === 'submit_for_review') tg.showPopup({message: "Задание отправлено партнеру на проверку <i class='ci-clock'></i>"});
-                if (action === 'approve') shootConfetti();
+                if (action === 'submit_for_review') {
+                    tg.showPopup({message: "Задание отправлено партнеру на проверку ⏳"});
+                    await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Выполнил(а) задание и ждет проверки!', icon: '⏳', authorId: state.user.id });
+                }
+                if (action === 'approve') {
+                    shootConfetti();
+                    await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Подтвердил(а) выполнение задания!', icon: '✅', authorId: state.user.id });
+                }
                 loadData();
             } catch (e) {}
         }
@@ -1064,6 +1091,7 @@
             if(!title || !points) return;
             try {
                 await apiCall('wishes', { action: 'create', coupleId: state.couple.id, title, points, isSecret, telegramId: String(state.user.telegramId) });
+                await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Загадал(а) желание: ' + title, icon: '✨', authorId: state.user.id });
                 document.getElementById('wish-title').value = ''; document.getElementById('wish-points').value = ''; document.getElementById('wish-secret').checked = false;
                 closeModal(); loadData();
             } catch (e) {}
@@ -1075,6 +1103,7 @@
             tg.HapticFeedback.impactOccurred('heavy');
             try {
                 await apiCall('wishes', { action: 'buy', coupleId: state.couple.id, wishId: id, telegramId: String(state.user.telegramId) });
+                await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Купил(а) желание!', icon: '🛍️', authorId: state.user.id });
                 state.user.balance -= points; updateUI();
                 shootConfetti(); loadData();
             } catch (e) {}
@@ -1093,6 +1122,7 @@
             try {
                 // Type is still sent for backward compatibility but renderPlans will re-categorize
                 await apiCall('plans', { action: 'create', coupleId: state.couple.id, type: 'date', text, date });
+                await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Добавил(а) новый план: ' + text, icon: '📅', authorId: state.user.id });
                 document.getElementById('plan-text').value = ''; document.getElementById('plan-date').value = '';
                 closeModal(); loadData();
             } catch (e) {}
@@ -1101,6 +1131,7 @@
         async function completePlan(id) {
             tg.HapticFeedback.impactOccurred('medium');
             await apiCall('plans', { action: 'complete', coupleId: state.couple.id, planId: id, telegramId: state.user.telegramId });
+            await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Выполнил(а) план!', icon: '🏆', authorId: state.user.id });
             shootConfetti(); loadData();
         }
 
@@ -1299,16 +1330,26 @@
 
         function renderEvents(events) {
             const list = document.getElementById('notifications-list');
-            if(!events || events.length === 0) { list.innerHTML = '<p style="opacity:0.5; text-align:center;">Уведомлений пока нет</p>'; return; }
-            list.innerHTML = events.map(e => `
-                <div class="notification-item">
-                    <div style="font-size: 24px;">${e.icon}</div>
-                    <div>
-                        <p style="font-size: 14px; opacity: 0.9;">${e.text}</p>
-                        <span style="font-size: 11px; opacity: 0.5;">${new Date(e.createdAt).toLocaleString()}</span>
+            const fullList = document.getElementById('events-list-full');
+            if(!events || events.length === 0) { 
+                const emptyMsg = '<p style="opacity:0.5; text-align:center;">Уведомлений пока нет</p>';
+                if (list) list.innerHTML = emptyMsg;
+                if (fullList) fullList.innerHTML = emptyMsg;
+                return; 
+            }
+
+            const html = events.map(e => `
+                <div class="event-item">
+                    <div class="event-icon">${e.icon || '✨'}</div>
+                    <div class="event-content">
+                        <p class="event-text">${e.text}</p>
+                        <span class="event-time">${new Date(e.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} • ${new Date(e.createdAt).toLocaleDateString()}</span>
                     </div>
                 </div>
             `).join('');
+
+            if (list) list.innerHTML = html;
+            if (fullList) fullList.innerHTML = html;
         }
 
         // --- Renderers ---
@@ -1457,7 +1498,7 @@
 
         // --- UI & Nav ---
         let currentScreenIndex = 0;
-        const screenOrder = ['dashboard', 'plans', 'tasks', 'wishes', 'settings', 'timeline', 'canvas', 'stats', 'wheel'];
+        const screenOrder = ['dashboard', 'plans', 'tasks', 'wishes', 'settings', 'timeline', 'canvas', 'events', 'wheel', 'stats'];
 
         function nav(screenId, navElement) {
             tg.HapticFeedback.impactOccurred('medium');
@@ -1484,6 +1525,7 @@
             if (screenId === 'timeline') document.getElementById('fab-memory').classList.add('active');
             if (screenId === 'canvas') initCanvas();
             if (screenId === 'stats') loadStats();
+            if (screenId === 'events') loadData();
             
             if(screenId !== 'dashboard' && screenId !== 'settings') loadData();
         }
@@ -1975,6 +2017,7 @@
             tg.showConfirm('Сохранить этот рисунок в Таймлайн?', async (ok) => {
                 if (ok) {
                     await apiCall('canvas', { action: 'saveToTimeline', coupleId: state.couple.id, imageData, authorId: state.user.id });
+                    await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Нарисовал(а) новый шедевр на холсте! 🎨', icon: '🎨', authorId: state.user.id });
                     tg.showPopup({message: 'Рисунок сохранен! Холст очищен.'});
                     nav('timeline');
                 }
