@@ -1705,59 +1705,57 @@
             
             const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#ec4899';
             
-            // Recursive branch function
-            function drawBranch(x, y, len, angle, branchWidth) {
+            const leafPoints = [];
+            
+            // Re-written with coordinate tracking for perfect leaf placement
+            function drawNaturalBranch(x, y, len, angle, width) {
+                const x2 = x + Math.sin(angle * Math.PI / 180) * len;
+                const y2 = y - Math.cos(angle * Math.PI / 180) * len;
+                
                 ctx.beginPath();
-                ctx.save();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x2, y2);
                 ctx.strokeStyle = '#3d2b1f';
-                ctx.lineWidth = branchWidth;
-                ctx.translate(x, y);
-                ctx.rotate(angle * Math.PI / 180);
-                ctx.moveTo(0, 0);
-                ctx.lineTo(0, -len);
+                ctx.lineWidth = width;
+                ctx.lineCap = 'round';
                 ctx.stroke();
                 
-                if (len < 15) {
-                    ctx.restore();
+                if (len < 10) {
+                    leafPoints.push({ x: x2, y: y2, angle: angle });
                     return;
                 }
                 
-                // Left branch
-                drawBranch(0, -len, len * 0.75, angle - 15, branchWidth * 0.7);
-                // Right branch
-                drawBranch(0, -len, len * 0.75, angle + 15, branchWidth * 0.7);
-                // Middle branch (new!)
-                drawBranch(0, -len, len * 0.6, angle, branchWidth * 0.6);
-                
-                ctx.restore();
+                drawNaturalBranch(x2, y2, len * 0.75, angle - 25, width * 0.7);
+                drawNaturalBranch(x2, y2, len * 0.75, angle + 25, width * 0.7);
+                drawNaturalBranch(x2, y2, len * 0.4, angle, width * 0.6);
             }
+
+            drawNaturalBranch(w / 2, h - 20, 60, 0, 10);
             
-            // Draw complex tree structure
-            drawBranch(w / 2, h - 20, 70, 0, 8);
+            // Draw Leaves at branch tips
+            ctx.fillStyle = accentColor;
+            ctx.shadowColor = accentColor;
             
-            // Draw Leaves (Optimized & Theme-colored)
             const seed = 12345;
             function random(i) {
                 const x = Math.sin(seed + i) * 10000;
                 return x - Math.floor(x);
             }
 
-            ctx.fillStyle = accentColor;
-            ctx.shadowColor = accentColor;
-            
-            const maxLeaves = Math.min(leafCount, 1500); 
-            for (let i = 0; i < maxLeaves; i++) {
-                const leafOpacity = 0.4 + random(i) * 0.4;
+            for (let i = 0; i < leafCount; i++) {
+                // Pick a random branch tip
+                const point = leafPoints[i % leafPoints.length];
+                const leafOpacity = 0.3 + random(i) * 0.5;
                 ctx.globalAlpha = leafOpacity;
-                ctx.shadowBlur = random(i) > 0.7 ? 10 : 0; // Randomly glow some leaves
+                ctx.shadowBlur = random(i) > 0.8 ? 8 : 0;
                 
-                const angle = random(i) * Math.PI * 2;
-                const dist = Math.sqrt(random(i + 1000)) * 140;
-                const lx = w / 2 + Math.cos(angle) * dist;
-                const ly = h / 2 - 40 + Math.sin(angle) * (dist * 0.8);
+                const angle = (point.angle + (random(i) * 60 - 30)) * Math.PI / 180;
+                const dist = random(i + 500) * 20;
+                const lx = point.x + Math.cos(angle) * dist;
+                const ly = point.y + Math.sin(angle) * dist;
                 
                 ctx.beginPath();
-                ctx.ellipse(lx, ly, 5, 2.5, angle, 0, Math.PI * 2);
+                ctx.ellipse(lx, ly, 6, 3, angle, 0, Math.PI * 2);
                 ctx.fill();
             }
             ctx.shadowBlur = 0;
@@ -1845,9 +1843,10 @@
         // --- Interactions Logic ---
 
         async function pollInteractions() {
-            if (!state.couple || !state.user) return;
+            if (!state.couple || !state.couple.id || !state.user) return;
             try {
                 const res = await fetch(`/api/interactions_poll?coupleId=${state.couple.id}&telegramId=${state.user.telegramId}`);
+                if (!res.ok) return;
                 const interaction = await res.json();
                 if (interaction && interaction.type === 'hug') {
                     tg.HapticFeedback.notificationOccurred('success');
@@ -1979,10 +1978,17 @@
 
         // --- Stats Logic ---
         async function loadStats() {
+            if (!state.couple || !state.couple.id) return;
             const data = await apiCall('stats', { coupleId: state.couple.id }, 'GET');
-            const start = new Date(state.couple.startDate || data.createdAt);
-            document.getElementById('stat-days-together').innerText = Math.floor(Math.abs(new Date() - start) / (1000*60*60*24)) || 0;
-            document.getElementById('stat-max-streak').innerText = data.maxStreak || 1;
+            // Update stats if elements exist
+            const daysEl = document.getElementById('stat-days-together');
+            if (daysEl) {
+                const start = new Date(state.couple.startDate || data.createdAt);
+                daysEl.innerText = Math.floor(Math.abs(new Date() - start) / (1000*60*60*24)) || 0;
+            }
+            const streakEl = document.getElementById('stat-max-streak');
+            if (streakEl) streakEl.innerText = data.maxStreak || 1;
+            
             document.getElementById('stat-total-crystals').innerHTML = `${data.totalCrystalsEarned} <i class="ci-gem"></i>`;
             document.getElementById('stat-spent-crystals').innerHTML = `${data.totalCrystalsSpent} <i class="ci-gem"></i>`;
 
