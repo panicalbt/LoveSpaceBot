@@ -431,10 +431,6 @@
                     <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
                     <span>Таймлайн</span>
                 </div>
-                <div class="widget-item" onclick="nav('stats')">
-                    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                    <span>Статистика</span>
-                </div>
                 <div class="widget-item" onclick="nav('wheel')">
                     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10"></path><path d="M12 12L12 2"></path><path d="M12 12L21 17"></path><path d="M12 12L3 17"></path></svg>
                     <span>Колесо</span>
@@ -471,45 +467,6 @@
                 
                 <div class="days-footer">
                     <div id="days-milestone-text" style="opacity: 0.8;">До годовщины осталось <span>0</span> дней</div>
-                </div>
-            </div>
-
-            <!-- Balance and Level (Compact) -->
-            <div class="card" onclick="toggleStats()" style="cursor: pointer; padding: 16px; margin-bottom: 20px;">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <div style="flex: 1; padding-right: 16px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600;">
-                            <span>Уровни любви: <span id="love-level" class="text-accent">1</span> <span style="opacity: 0.5;">|</span> <span id="partner-level" class="text-accent">1</span></span>
-                            <div style="display: flex; gap: 8px; align-items: center; opacity: 0.9;" class="text-accent">
-                                <span style="display: flex; align-items: center;">Вы: <span id="user-balance" style="margin-left:4px;">0</span></span>
-                                <span style="opacity: 0.5;">|</span>
-                                <span style="display: flex; align-items: center;">П: <span id="partner-balance" style="margin-left:4px;">0</span> <i class="ci-gem" style="font-size:14px; margin-left:2px;"></i></span>
-                            </div>
-                        </div>
-                    </div>
-                    <svg id="stats-arrow" viewBox="0 0 24 24" style="width: 20px; height: 20px; opacity: 0.5; transition: transform 0.3s;"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </div>
-                
-                <div id="expanded-stats" style="max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); margin-top: 0;">
-                    <div style="padding-top: 20px; border-top: 1px solid var(--card-border); margin-top: 15px;">
-                        <!-- My Progress -->
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
-                            <span style="opacity: 0.8;">Ваш прогресс (Ур. <span id="my-level-val">1</span>):</span>
-                            <span style="font-weight: bold; color: var(--accent-color);"><span id="my-crystals-to-next">500</span> <i class="ci-gem" style="font-size:12px;"></i></span>
-                        </div>
-                        <div class="level-bar-bg" style="height: 8px; margin-bottom: 16px; background: rgba(0,0,0,0.3);">
-                            <div class="level-bar-fill" id="my-level-fill-expanded" style="width: 0%; box-shadow: 0 0 15px var(--accent-glow);"></div>
-                        </div>
-                        
-                        <!-- Partner Progress -->
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
-                            <span style="opacity: 0.8;">Прогресс партнера (Ур. <span id="p-level-val">1</span>):</span>
-                            <span style="font-weight: bold; color: var(--accent-color);"><span id="p-crystals-to-next">500</span> <i class="ci-gem" style="font-size:12px;"></i></span>
-                        </div>
-                        <div class="level-bar-bg" style="height: 8px; background: rgba(0,0,0,0.3);">
-                            <div class="level-bar-fill" id="p-level-fill-expanded" style="width: 0%; box-shadow: 0 0 15px var(--accent-glow); opacity: 0.8;"></div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -674,68 +631,6 @@
                 </button>
             </div>
         </div>
-        <!-- Stats Screen -->
-        <div id="screen-stats" class="screen">
-            <h2 style="font-size: 28px; display: flex; align-items: center; gap: 10px; margin-bottom: 24px;">
-                <svg viewBox="0 0 24 24" style="color: var(--accent-color)"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                Статистика
-            </h2>
-            
-            <div class="stat-grid">
-                <div class="stat-card" onclick="openModal('modal-start-date')" style="cursor: pointer;">
-                    <div class="stat-value" id="stat-days-together">0</div>
-                    <div class="stat-label">Дней вместе</div>
-                    <div style="font-size: 10px; opacity: 0.5; margin-top: 4px;">(Изменить дату 🗓)</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="stat-max-streak">0</div>
-                    <div class="stat-label">Лучший стрик</div>
-                </div>
-            </div>
-
-            <div class="card" style="padding: 20px;">
-                <h3 style="font-size: 16px; margin-bottom: 20px;">Активность за неделю</h3>
-                <div class="activity-heatmap" id="activity-heatmap">
-                    <!-- JS populated -->
-                </div>
-            </div>
-
-            <div class="card" style="padding: 20px;">
-                <h3 style="font-size: 16px; margin-bottom: 20px;">Прогресс заданий</h3>
-                <div class="stat-bar-row">
-                    <div class="stat-bar-label">Выполнено</div>
-                    <div class="stat-bar-track"><div class="stat-bar-fill" id="stat-tasks-fill" style="width: 0%"></div></div>
-                    <div class="stat-bar-val" id="stat-tasks-val">0%</div>
-                </div>
-                <div class="stat-bar-row">
-                    <div class="stat-bar-label">Желания</div>
-                    <div class="stat-bar-track"><div class="stat-bar-fill" id="stat-wishes-fill" style="width: 0%"></div></div>
-                    <div class="stat-bar-val" id="stat-wishes-val">0%</div>
-                </div>
-                <div class="stat-bar-row">
-                    <div class="stat-bar-label">Планы</div>
-                    <div class="stat-bar-track"><div class="stat-bar-fill" id="stat-plans-fill" style="width: 0%"></div></div>
-                    <div class="stat-bar-val" id="stat-plans-val">0%</div>
-                </div>
-            </div>
-
-            <div class="card" style="padding: 20px;">
-                <h3 style="font-size: 16px; margin-bottom: 20px;">Топ настроений</h3>
-                <div class="mood-chart" id="mood-stats-chart">
-                    <!-- JS populated -->
-                </div>
-            </div>
-            
-            <div class="stat-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="stat-total-crystals" style="font-size: 24px;">0 <i class="ci-gem"></i></div>
-                    <div class="stat-label">Всего добыто</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="stat-spent-crystals" style="font-size: 24px; color: #ef4444;">0 <i class="ci-gem"></i></div>
-                    <div class="stat-label">Потрачено</div>
-                </div>
-            </div>
         </div>
 
         <!-- Canvas Screen -->
@@ -838,21 +733,6 @@
                 document.getElementById('plan-date').value = now.toISOString().split('T')[0];
             }
         });
-
-        function toggleStats() {
-            const content = document.getElementById('expanded-stats');
-            const arrow = document.getElementById('stats-arrow');
-            const isExpanded = content.style.maxHeight !== '0px' && content.style.maxHeight !== '';
-            
-            if (isExpanded) {
-                content.style.maxHeight = '0px';
-                arrow.style.transform = 'rotate(0deg)';
-            } else {
-                content.style.maxHeight = content.scrollHeight + 'px';
-                arrow.style.transform = 'rotate(90deg)';
-            }
-            tg.HapticFeedback.impactOccurred('light');
-        }
 
         function toggleCard(el) {
             const wasExpanded = el.classList.contains('expanded');
@@ -1457,7 +1337,7 @@
 
         // --- UI & Nav ---
         let currentScreenIndex = 0;
-        const screenOrder = ['dashboard', 'plans', 'tasks', 'wishes', 'settings', 'timeline', 'canvas', 'stats', 'wheel'];
+        const screenOrder = ['dashboard', 'plans', 'tasks', 'wishes', 'settings', 'timeline', 'canvas', 'wheel'];
 
         function nav(screenId, navElement) {
             tg.HapticFeedback.impactOccurred('medium');
@@ -1483,7 +1363,6 @@
             if (screenId === 'plans') document.getElementById('fab-plan').classList.add('active');
             if (screenId === 'timeline') document.getElementById('fab-memory').classList.add('active');
             if (screenId === 'canvas') initCanvas();
-            if (screenId === 'stats') loadStats();
             
             if(screenId !== 'dashboard' && screenId !== 'settings') loadData();
         }
