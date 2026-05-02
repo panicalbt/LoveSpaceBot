@@ -469,6 +469,44 @@
                     <div id="days-milestone-text" style="opacity: 0.8;">До годовщины осталось <span>0</span> дней</div>
                 </div>
             </div>
+            <!-- Balance and Level (Compact) -->
+            <div class="card" onclick="toggleStats()" style="cursor: pointer; padding: 16px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="flex: 1; padding-right: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600;">
+                            <span>Уровни любви: <span id="love-level" class="text-accent">1</span> <span style="opacity: 0.5;">|</span> <span id="partner-level" class="text-accent">1</span></span>
+                            <div style="display: flex; gap: 8px; align-items: center; opacity: 0.9;" class="text-accent">
+                                <span style="display: flex; align-items: center;">Вы: <span id="user-balance" style="margin-left:4px;">0</span></span>
+                                <span style="opacity: 0.5;">|</span>
+                                <span style="display: flex; align-items: center;">П: <span id="partner-balance" style="margin-left:4px;">0</span> <i class="ci-gem" style="font-size:14px; margin-left:2px;"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <svg id="stats-arrow" viewBox="0 0 24 24" style="width: 20px; height: 20px; opacity: 0.5; transition: transform 0.3s;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </div>
+                
+                <div id="expanded-stats" style="max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); margin-top: 0;">
+                    <div style="padding-top: 20px; border-top: 1px solid var(--card-border); margin-top: 15px;">
+                        <!-- My Progress -->
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                            <span style="opacity: 0.8;">Ваш прогресс (Ур. <span id="my-level-val">1</span>):</span>
+                            <span style="font-weight: bold; color: var(--accent-color);"><span id="my-crystals-to-next">500</span> <i class="ci-gem" style="font-size:12px;"></i></span>
+                        </div>
+                        <div class="level-bar-bg" style="height: 8px; margin-bottom: 16px; background: rgba(0,0,0,0.3);">
+                            <div class="level-bar-fill" id="my-level-fill-expanded" style="width: 0%; box-shadow: 0 0 15px var(--accent-glow);"></div>
+                        </div>
+                        
+                        <!-- Partner Progress -->
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                            <span style="opacity: 0.8;">Прогресс партнера (Ур. <span id="p-level-val">1</span>):</span>
+                            <span style="font-weight: bold; color: var(--accent-color);"><span id="p-crystals-to-next">500</span> <i class="ci-gem" style="font-size:12px;"></i></span>
+                        </div>
+                        <div class="level-bar-bg" style="height: 8px; background: rgba(0,0,0,0.3);">
+                            <div class="level-bar-fill" id="p-level-fill-expanded" style="width: 0%; box-shadow: 0 0 15px var(--accent-glow); opacity: 0.8;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Daily Notes -->
             <div class="card" style="border-color: var(--accent-color); background: rgba(236, 72, 153, 0.05);">
@@ -733,6 +771,21 @@
                 document.getElementById('plan-date').value = now.toISOString().split('T')[0];
             }
         });
+
+        function toggleStats() {
+            const content = document.getElementById('expanded-stats');
+            const arrow = document.getElementById('stats-arrow');
+            const isExpanded = content.style.maxHeight !== '0px' && content.style.maxHeight !== '';
+            
+            if (isExpanded) {
+                content.style.maxHeight = '0px';
+                arrow.style.transform = 'rotate(0deg)';
+            } else {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                arrow.style.transform = 'rotate(90deg)';
+            }
+            tg.HapticFeedback.impactOccurred('light');
+        }
 
         function toggleCard(el) {
             const wasExpanded = el.classList.contains('expanded');
