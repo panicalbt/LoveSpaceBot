@@ -107,8 +107,14 @@
         
         .streak-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border-radius: 10px; padding: 2px 6px; font-size: 11px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 5; display: flex; align-items: center; gap: 2px;}
 
-        .heart-icon { width: 48px; height: 48px; color: var(--accent-color); animation: pulse 1.5s infinite; filter: drop-shadow(0 0 15px var(--accent-glow)); }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        .heart-icon { width: 52px; height: 52px; color: var(--accent-color); animation: heartBeat 2s ease-in-out infinite; cursor: pointer; z-index: 20; }
+        @keyframes heartBeat {
+            0% { transform: scale(1); filter: drop-shadow(0 0 10px var(--accent-glow)); }
+            15% { transform: scale(1.25); filter: drop-shadow(0 0 25px var(--accent-glow)); }
+            30% { transform: scale(1); filter: drop-shadow(0 0 10px var(--accent-glow)); }
+            45% { transform: scale(1.15); filter: drop-shadow(0 0 20px var(--accent-glow)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 10px var(--accent-glow)); }
+        }
         
         .level-bar-bg { width: 100%; height: 8px; background: rgba(0,0,0,0.2); border-radius: 4px; overflow: hidden; margin-top: 10px; }
         .level-bar-fill { height: 100%; background: var(--accent-color); box-shadow: 0 0 10px var(--accent-glow); transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -164,8 +170,8 @@
         .days-info h4 { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
         .days-info p { font-size: 12px; opacity: 0.6; font-weight: 500; }
         
-        .tree-container { height: 0; overflow: hidden; transition: height 0.4s; position: relative; background: rgba(0,0,0,0.2); }
-        .days-widget.expanded .tree-container { height: 400px; }
+        .tree-container { height: 0; overflow: hidden; transition: height 0.4s; position: relative; background: rgba(0,0,0,0.1); }
+        .days-widget.expanded .tree-container { height: 320px; }
         #tree-canvas { width: 100%; height: 100%; display: block; }
         
         .tree-toolbar { position: absolute; bottom: 16px; left: 16px; right: 16px; display: flex; gap: 8px; justify-content: center; z-index: 10; opacity: 0; transform: translateY(10px); transition: all 0.3s 0.2s; }
@@ -1761,12 +1767,15 @@
             ctx.shadowBlur = 0;
             ctx.globalAlpha = 1;
             
-            // Draw Decorations
+            // Draw Decorations (Pinned to crown center)
             if (state.couple.treeDecorations) {
                 ctx.font = '22px serif';
                 ctx.textAlign = 'center';
                 state.couple.treeDecorations.forEach(dec => {
-                    ctx.fillText(dec.emoji, dec.x * w, dec.y * h);
+                    // Offset the y coordinate to align with the tree crown center
+                    const crownCenterY = h / 2 - 20; 
+                    const dy = crownCenterY + (dec.y - 0.5) * (h * 0.6);
+                    ctx.fillText(dec.emoji, dec.x * w, dy);
                 });
             }
         }
@@ -1775,9 +1784,9 @@
             tg.HapticFeedback.impactOccurred('medium');
             const decs = state.couple.treeDecorations || [];
             
-            // Random position in foliage area
-            const x = 0.5 + (Math.random() - 0.5) * 0.6;
-            const y = 0.4 + (Math.random() - 0.5) * 0.4;
+            // Refined position to stay within the foliage area
+            const x = 0.5 + (Math.random() - 0.5) * 0.5;
+            const y = 0.5 + (Math.random() - 0.5) * 0.35; // Centered vertically in the crown
             
             decs.push({ emoji, x, y });
             
