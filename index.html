@@ -885,11 +885,7 @@
 
         async function apiCall(endpoint, data = null, method = 'POST') {
             const options = { method, headers: { 'Content-Type': 'application/json' } };
-            
-            let url = endpoint.startsWith('interactions_poll') ? `/api/${endpoint}` : `/api/${endpoint}`;
-            if (!['auth', 'cron', 'interactions_poll'].includes(endpoint)) {
-                url = `/api/data?type=${endpoint}`;
-            }
+            let url = `/api/${endpoint}`;
 
             if (data) {
                 if (method === 'GET') {
