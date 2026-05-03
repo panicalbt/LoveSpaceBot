@@ -1771,7 +1771,7 @@
             });
         }
 
-        function openMapModal() {
+        window.openMapModal = function() {
             showModal(`
                 <h3>Новое место 📍</h3>
                 <input type="text" id="map-title" placeholder="Название (напр. Наше кафе)">
@@ -1781,7 +1781,7 @@
             `);
         }
 
-        async function saveMapPin() {
+        window.saveMapPin = async function() {
             const title = document.getElementById('map-title').value;
             const desc = document.getElementById('map-desc').value;
             const emoji = document.getElementById('map-emoji').value || '📍';
@@ -1807,7 +1807,7 @@
             `).join('');
         }
 
-        function openChallengeModal() {
+        window.openChallengeModal = function() {
             showModal(`
                 <h3>Новый челлендж 🏆</h3>
                 <input type="text" id="challenge-title" placeholder="Название (напр. Неделя без сахара)">
@@ -1817,7 +1817,7 @@
             `);
         }
 
-        async function saveChallenge() {
+        window.saveChallenge = async function() {
             const title = document.getElementById('challenge-title').value;
             const desc = document.getElementById('challenge-desc').value;
             const xp = parseInt(document.getElementById('challenge-xp').value) || 100;
