@@ -24,12 +24,6 @@
     <div class="bottom-sheet" id="modal-status">
         <h3>Мой статус</h3>
         <p style="opacity: 0.7; font-size: 14px; margin-bottom: 16px;">Покажите партнеру, чем вы заняты или какое у вас настроение!</p>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;">
-            <button class="action-btn" onclick="setTheme('dark')">Тёмная</button>
-            <button class="action-btn" onclick="setTheme('light')">Светлая</button>
-            <button class="action-btn" onclick="setTheme('glass')">Стекло</button>
-            <button class="action-btn" onclick="setTheme('light-glass')">Светлое стекло 🤍</button>
-        </div>
         <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
             <button class="action-btn" onclick="setStatus('💻 Работаю')">💻 Работаю</button>
             <button class="action-btn" onclick="setStatus('😴 Сплю')">😴 Сплю</button>
@@ -52,12 +46,12 @@
         </div>
     </div>
 
-    <!-- Modal: Secret Note -->
-    <div class="bottom-sheet" id="modal-secret-note">
-        <h3>Секретная записка</h3>
-        <p style="opacity: 0.7; font-size: 14px; margin-bottom: 16px;">Напишите что-нибудь приятное. Партнер увидит это, только когда «сотрет» защитный слой!</p>
-        <input type="text" id="secret-note-text" placeholder="Текст записки... (напр. Люблю тебя!)" maxlength="50">
-        <button class="btn" onclick="sendSecretNote()">Отправить 🤫</button>
+    <!-- Modal: Daily Wish -->
+    <div class="bottom-sheet" id="modal-daily-wish">
+        <h3>Пожелание на день</h3>
+        <p style="opacity: 0.7; font-size: 14px; margin-bottom: 16px;">Напишите что-нибудь приятное на сегодня. Партнер получит это в виде лотерейного билета!</p>
+        <input type="text" id="daily-wish-text" placeholder="Ваше пожелание..." maxlength="100">
+        <button class="btn" onclick="sendDailyWish()">Отправить пожелание ✨</button>
     </div>
 
     <!-- Modal: Add Task -->
@@ -207,7 +201,6 @@
                 </div>
             </div>
 
-            
             <!-- Quick Widgets -->
             <div class="widget-row">
                 <div class="widget-item" onclick="nav('timeline')">
@@ -252,49 +245,44 @@
                     </div>
                 </div>
                 
+                <!-- Levels Section -->
+                <div id="levels-section" style="padding: 0 20px 20px; opacity: 0; transition: opacity 0.4s 0.3s; display: none;">
+                    <div style="border-top: 1px solid var(--card-border); margin-bottom: 16px; padding-top: 16px;">
+                        <h4 style="font-size: 14px; margin-bottom: 12px; opacity: 0.8;">Уровни близости</h4>
+                        
+                        <!-- My Level -->
+                        <div style="margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span style="font-size: 13px; font-weight: 600;">Вы (Ур. <span id="my-level-val">1</span>)</span>
+                                <span id="my-xp-val" style="font-size: 12px; opacity: 0.7;">0 / 100 XP</span>
+                            </div>
+                            <div class="level-bar-bg">
+                                <div id="my-level-bar" class="level-bar-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Partner Level -->
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span style="font-size: 13px; font-weight: 600;"><span id="partner-level-name">Партнер</span> (Ур. <span id="partner-level-val">1</span>)</span>
+                                <span id="partner-xp-val" style="font-size: 12px; opacity: 0.7;">0 / 100 XP</span>
+                            </div>
+                            <div class="level-bar-bg">
+                                <div id="partner-level-bar" class="level-bar-fill" style="width: 0%; opacity: 0.6;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="days-footer">
                     <div id="days-milestone-text" style="opacity: 0.8;">До годовщины осталось <span>0</span> дней</div>
                 </div>
             </div>
 
-            <!-- Balance and Level (Compact) -->
-            <div class="card" onclick="toggleStats()" style="cursor: pointer; padding: 16px; margin-bottom: 20px;">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <div style="flex: 1; padding-right: 16px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600;">
-                            <span>Уровни любви: <span id="love-level" class="text-accent">1</span> <span style="opacity: 0.5;">|</span> <span id="partner-level" class="text-accent">1</span></span>
-                            <div style="display: flex; gap: 8px; align-items: center; opacity: 0.9;" class="text-accent">
-                                <span style="display: flex; align-items: center;">Вы: <span id="user-balance" style="margin-left:4px;">0</span></span>
-                                <span style="opacity: 0.5;">|</span>
-                                <span style="display: flex; align-items: center;">П: <span id="partner-balance" style="margin-left:4px;">0</span> <i class="ci-gem" style="font-size:14px; margin-left:2px;"></i></span>
-                            </div>
-                        </div>
-                    </div>
-                    <svg id="stats-arrow" viewBox="0 0 24 24" style="width: 20px; height: 20px; opacity: 0.5; transition: transform 0.3s;"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </div>
-                
-                <div id="expanded-stats" style="max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); margin-top: 0;">
-                    <div style="padding-top: 20px; border-top: 1px solid var(--card-border); margin-top: 15px;">
-                        <!-- My Progress -->
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
-                            <span style="opacity: 0.8;">Ваш прогресс (Ур. <span id="my-level-val">1</span>):</span>
-                            <span style="font-weight: bold; color: var(--accent-color);"><span id="my-crystals-to-next">500</span> <i class="ci-gem" style="font-size:12px;"></i></span>
-                        </div>
-                        <div class="level-bar-bg" style="height: 8px; margin-bottom: 16px; background: rgba(0,0,0,0.3);">
-                            <div class="level-bar-fill" id="my-level-fill-expanded" style="width: 0%; box-shadow: 0 0 15px var(--accent-glow);"></div>
-                        </div>
-                        
-                        <!-- Partner Progress -->
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
-                            <span style="opacity: 0.8;">Прогресс партнера (Ур. <span id="p-level-val">1</span>):</span>
-                            <span style="font-weight: bold; color: var(--accent-color);"><span id="p-crystals-to-next">500</span> <i class="ci-gem" style="font-size:12px;"></i></span>
-                        </div>
-                        <div class="level-bar-bg" style="height: 8px; background: rgba(0,0,0,0.3);">
-                            <div class="level-bar-fill" id="p-level-fill-expanded" style="width: 0%; box-shadow: 0 0 15px var(--accent-glow); opacity: 0.8;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Daily Wish Widget -->
+            <div id="daily-wish-widget" style="margin-top: 16px;"></div>
+
+
 
             <!-- Daily Notes -->
             <div class="card" style="border-color: var(--accent-color); background: rgba(236, 72, 153, 0.05);">
@@ -341,9 +329,6 @@
                 </button>
             </div>
             <div id="timeline-list" class="timeline"></div>
-            <button class="btn" style="margin-top: 20px;" onclick="openModal('modal-secret-note')">
-                <i class="ci-edit"></i> Отправить секретную записку
-            </button>
         </div>
 
         <!-- Wheel Screen -->
@@ -418,10 +403,10 @@
                 <div style="margin: 20px 0;">
                     <p style="font-size: 14px; opacity: 0.7; margin-bottom: 12px;">Тема оформления:</p>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <button class="action-btn" style="margin-top:0;" onclick="setTheme('dark')">🌑 Тёмная</button>
-                        <button class="action-btn" style="margin-top:0;" onclick="setTheme('light')">☀️ Светлая</button>
-                        <button class="action-btn" style="margin-top:0;" onclick="setTheme('glass')">💎 Стекло</button>
-                        <button class="action-btn" style="margin-top:0;" onclick="setTheme('light-glass')">🤍 Светлое стекло</button>
+                        <button class="action-btn" style="margin-top:0;" onclick="setTheme('dark')">Тёмная</button>
+                        <button class="action-btn" style="margin-top:0;" onclick="setTheme('light')">Светлая</button>
+                        <button class="action-btn" style="margin-top:0;" onclick="setTheme('glass')">Стекло</button>
+                        <button class="action-btn" style="margin-top:0;" onclick="setTheme('light-glass')">Светлое стекло</button>
                     </div>
                 </div>
                 <div style="margin-top: 24px;">
@@ -1174,17 +1159,17 @@
                 const timeStr = new Date(e.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 const dateStr = new Date(e.createdAt).toLocaleDateString();
                 
-                if (e.type === 'secret-note') {
+                if (e.type === 'daily-wish') {
                     const isAuthor = String(e.authorId) === String(state.user.id);
                     return `
                         <div class="scratch-card">
-                            <h4 style="font-size:14px; margin-bottom:8px;">🤫 Секретное послание</h4>
+                            <h4 style="font-size:14px; margin-bottom:8px;">✨ Пожелание на день</h4>
                             <div class="scratch-container" id="scratch-container-${e.id}">
                                 <div class="scratch-text">${e.text}</div>
                                 ${!isAuthor ? `<canvas class="scratch-canvas" id="scratch-canvas-${e.id}"></canvas>` : ''}
                             </div>
                             <div class="scratch-hint">
-                                ${isAuthor ? 'Вы отправили эту записку' : 'Потри экран, чтобы прочитать! ✨'}
+                                ${isAuthor ? 'Вы отправили это пожелание' : 'Сотри защитный слой, чтобы прочитать! ✨'}
                             </div>
                             <div class="event-time" style="margin-top:10px;">${timeStr} • ${dateStr}</div>
                         </div>
@@ -1207,7 +1192,7 @@
 
             // Initialize canvases
             events.forEach(e => {
-                if (e.type === 'secret-note' && String(e.authorId) !== String(state.user.id)) {
+                if (e.type === 'daily-wish' && String(e.authorId) !== String(state.user.id)) {
                     setTimeout(() => initScratchCanvas(e.id), 100);
                 }
             });
@@ -1451,6 +1436,24 @@
                 document.getElementById('user-balance').innerText = state.user.balance;
                 document.getElementById('love-level').innerText = level;
 
+                // Update Levels in Widget
+                const xpPerLevel = 100;
+                const myLvl = Math.floor((state.user.xp || 0) / xpPerLevel) + 1;
+                const myXp = (state.user.xp || 0) % xpPerLevel;
+                
+                document.getElementById('my-level-val').innerText = myLvl;
+                document.getElementById('my-xp-val').innerText = `${myXp} / ${xpPerLevel} XP`;
+                document.getElementById('my-level-bar').style.width = `${(myXp / xpPerLevel) * 100}%`;
+
+                if (state.partner) {
+                    const pLvl = Math.floor((state.partner.xp || 0) / xpPerLevel) + 1;
+                    const pXp = (state.partner.xp || 0) % xpPerLevel;
+                    document.getElementById('partner-level-name').innerText = state.partner.name || 'Партнер';
+                    document.getElementById('partner-level-val').innerText = pLvl;
+                    document.getElementById('partner-xp-val').innerText = `${pXp} / ${xpPerLevel} XP`;
+                    document.getElementById('partner-level-bar').style.width = `${(pXp / xpPerLevel) * 100}%`;
+                }
+
                 if (document.getElementById('my-level-fill-expanded')) {
                     document.getElementById('my-level-val').innerText = level;
                     document.getElementById('my-crystals-to-next').innerText = toNextLevel;
@@ -1541,12 +1544,12 @@
         }
         async function setAccent(color) { tg.HapticFeedback.impactOccurred('light'); state.user.accent = color; applyThemeSettings(); await apiCall('user', { telegramId: state.user.telegramId, updateData: { accent: state.user.accent } }); }
 
-        async function sendSecretNote() {
-            const text = document.getElementById('secret-note-text').value;
+        async function sendDailyWish() {
+            const text = document.getElementById('daily-wish-text').value;
             if (!text) return;
             tg.HapticFeedback.impactOccurred('medium');
-            await apiCall('events', { action: 'add', coupleId: state.couple.id, text, type: 'secret-note', authorId: state.user.id });
-            document.getElementById('secret-note-text').value = '';
+            await apiCall('events', { action: 'add', coupleId: state.couple.id, text, type: 'daily-wish', authorId: state.user.id });
+            document.getElementById('daily-wish-text').value = '';
             closeModal();
             loadData();
         }
@@ -1615,6 +1618,22 @@
         function initParticles() { particles = []; for (let i = 0; i < Math.min(window.innerWidth / 10, 80); i++) particles.push(new Particle()); }
         function animateParticles() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animateParticles); }
         window.addEventListener('deviceorientation', (e) => { if (e.beta && e.gamma) { gyroX = e.beta; gyroY = e.gamma; } });
+        
+        function toggleTree() {
+            const widget = document.getElementById('days-together-widget');
+            const levels = document.getElementById('levels-section');
+            const isExpanded = widget.classList.toggle('expanded');
+            
+            if (isExpanded) {
+                levels.style.display = 'block';
+                setTimeout(() => levels.style.opacity = '1', 50);
+                setTimeout(drawTree, 400);
+            } else {
+                levels.style.opacity = '0';
+                setTimeout(() => levels.style.display = 'none', 400);
+            }
+        }
+        
         function updateDaysTogether() {
             if (!state.couple || (!state.couple.startDate && !state.couple.createdAt)) return;
             const start = new Date(state.couple.startDate || state.couple.createdAt);
