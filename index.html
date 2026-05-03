@@ -62,7 +62,7 @@
         @keyframes slideInLeft { from { opacity: 0; transform: translateX(-60px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes slideInRight { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: translateX(0); } }
 
-        .card { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--card-border); border-radius: 20px; padding: 16px 20px; margin-bottom: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+        .card { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--card-border); border-radius: 20px; padding: 16px 20px; margin-bottom: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); position: relative; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
         .card:active { transform: scale(0.98); }
         .card-header { display: flex; justify-content: space-between; align-items: center; }
         .card-content { max-height: 0; overflow: hidden; transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -246,10 +246,10 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .card.pending-review { border-color: #f59e0b !important; background: rgba(245, 158, 11, 0.05) !important; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.1); }
-        .card.pending-partner { border-color: #06b6d4 !important; background: rgba(6, 182, 212, 0.05) !important; box-shadow: 0 4px 15px rgba(6, 182, 212, 0.1); }
+        .card.pending-partner { border-color: var(--accent-color) !important; background: var(--accent-glow) !important; box-shadow: 0 4px 15px var(--accent-glow); opacity: 1 !important; }
         .status-badge { position: absolute; top: -10px; right: 20px; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; z-index: 2; }
         .status-badge.review { background: #f59e0b; color: #fff; }
-        .status-badge.waiting { background: #06b6d4; color: #fff; }
+        .status-badge.waiting { background: var(--accent-color); color: #fff; box-shadow: 0 2px 8px var(--accent-glow); }
     </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/coolicons/coolicons.css">
 </head>
