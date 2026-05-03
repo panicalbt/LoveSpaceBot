@@ -1444,8 +1444,10 @@
                     document.getElementById('avatar-me').innerText = '';
                     document.getElementById('avatar-me').style.backgroundImage = `url(${state.user.photoUrl})`;
                 } else { document.getElementById('avatar-me').innerText = state.user.firstName.charAt(0).toUpperCase(); }
+                
                 if (state.user.status) document.getElementById('status-me').innerText = state.user.status;
                 if (state.user.dailyNote) document.getElementById('my-note-input').value = state.user.dailyNote;
+                
                 if (state.user.streak > 1) {
                     document.getElementById('streak-me').innerText = `🔥 ${state.user.streak}`;
                     document.getElementById('streak-me').style.display = 'flex';
@@ -1457,92 +1459,53 @@
                     document.getElementById('settings-start-date').value = state.couple.startDate;
                 }
 
-                // Level Progress
-                const level = Math.floor(state.user.balance / 500) + 1;
-                const crystalsInLevel = state.user.balance % 500;
-                const progress = (crystalsInLevel / 500) * 100;
-                const toNextLevel = 500 - crystalsInLevel;
-
-                // Modal Stats Update (Expanded Card)
-                document.getElementById('user-balance').innerText = state.user.balance;
-                document.getElementById('love-level').innerText = level;
-
                 // Update Levels in Widget
                 const xpPerLevel = 100;
                 const myLvl = Math.floor((state.user.xp || 0) / xpPerLevel) + 1;
                 const myXp = (state.user.xp || 0) % xpPerLevel;
                 
-                document.getElementById('my-level-val').innerText = myLvl;
-                document.getElementById('my-xp-val').innerText = `${myXp} / ${xpPerLevel} XP`;
-                document.getElementById('my-level-bar').style.width = `${(myXp / xpPerLevel) * 100}%`;
+                if (document.getElementById('my-level-val')) {
+                    document.getElementById('my-level-val').innerText = myLvl;
+                    document.getElementById('my-xp-val').innerText = `${myXp} / ${xpPerLevel} XP`;
+                    document.getElementById('my-level-bar').style.width = `${(myXp / xpPerLevel) * 100}%`;
+                }
 
                 if (state.partner) {
                     const pLvl = Math.floor((state.partner.xp || 0) / xpPerLevel) + 1;
                     const pXp = (state.partner.xp || 0) % xpPerLevel;
-                    document.getElementById('partner-level-name').innerText = state.partner.name || 'Партнер';
-                    document.getElementById('partner-level-val').innerText = pLvl;
-                    document.getElementById('partner-xp-val').innerText = `${pXp} / ${xpPerLevel} XP`;
-                    document.getElementById('partner-level-bar').style.width = `${(pXp / xpPerLevel) * 100}%`;
-                }
-
-                if (document.getElementById('my-level-fill-expanded')) {
-                    document.getElementById('my-level-val').innerText = level;
-                    document.getElementById('my-crystals-to-next').innerText = toNextLevel;
-                    document.getElementById('my-level-fill-expanded').style.width = `${progress}%`;
-                }
-
-                // Partner Info
-                let partnerData = null;
-                if (state.couple.partnerData) {
-                    const keys = Object.keys(state.couple.partnerData);
-                    const partnerId = keys.find(k => k !== state.user.id);
-                    if (partnerId) partnerData = state.couple.partnerData[partnerId];
-                }
-
-                if (partnerData) {
-                    const pBalance = partnerData.balance || 0;
-                    const pLevel = Math.floor(pBalance / 500) + 1;
-                    const pCrystalsInLevel = pBalance % 500;
-                    const pProgress = (pCrystalsInLevel / 500) * 100;
-                    const pToNext = 500 - pCrystalsInLevel;
-
-                    document.getElementById('partner-balance').innerText = pBalance;
-                    document.getElementById('partner-level').innerText = pLevel;
                     
-                    if (document.getElementById('p-level-fill-expanded')) {
-                        document.getElementById('p-level-val').innerText = pLevel;
-                        document.getElementById('p-crystals-to-next').innerText = pToNext;
-                        document.getElementById('p-level-fill-expanded').style.width = `${pProgress}%`;
+                    if (document.getElementById('partner-level-name')) {
+                        document.getElementById('partner-level-name').innerText = state.partner.name || 'Партнер';
                     }
-                    if (partnerData.dailyNote) { 
-                        document.getElementById('partner-note').innerText = partnerData.dailyNote; 
-                        document.getElementById('partner-note').style.opacity = '1'; 
-                        document.getElementById('partner-note').style.fontStyle = 'normal'; 
-                    }
-                    if (partnerData.streak && partnerData.streak > 1) {
-                        document.getElementById('streak-partner').innerText = `🔥 ${partnerData.streak}`;
-                        document.getElementById('streak-partner').style.display = 'flex';
+                    if (document.getElementById('partner-level-val')) {
+                        document.getElementById('partner-level-val').innerText = pLvl;
+                        document.getElementById('partner-xp-val').innerText = `${pXp} / ${xpPerLevel} XP`;
+                        document.getElementById('partner-level-bar').style.width = `${(pXp / xpPerLevel) * 100}%`;
                     }
 
                     // Avatar & Status
                     const pAvatar = document.getElementById('avatar-partner');
                     const pStatus = document.getElementById('status-partner');
                     
-                    if (partnerData.photoUrl) {
-                        pAvatar.innerText = '';
-                        pAvatar.style.backgroundImage = `url(${partnerData.photoUrl})`;
-                        pAvatar.style.backgroundSize = 'cover';
-                    } else {
-                        pAvatar.innerText = (partnerData.firstName || 'П').charAt(0).toUpperCase();
-                        pAvatar.style.backgroundImage = 'none';
+                    if (pAvatar) {
+                        if (state.partner.photoUrl) {
+                            pAvatar.innerText = '';
+                            pAvatar.style.backgroundImage = `url(${state.partner.photoUrl})`;
+                            pAvatar.style.backgroundSize = 'cover';
+                        } else {
+                            pAvatar.innerText = (state.partner.firstName || 'П').charAt(0).toUpperCase();
+                            pAvatar.style.backgroundImage = 'none';
+                        }
                     }
                     
-                    if (partnerData.status) {
-                        pStatus.innerHTML = partnerData.status;
-                        pStatus.style.opacity = '1';
-                    } else {
-                        pStatus.innerHTML = '<i class="ci-moon"></i> Офлайн';
-                        pStatus.style.opacity = '0.6';
+                    if (pStatus) {
+                        if (state.partner.status) {
+                            pStatus.innerHTML = `<i class="ci-chat-bubble"></i> ${state.partner.status}`;
+                            pStatus.style.opacity = '1';
+                        } else {
+                            pStatus.innerHTML = '<i class="ci-moon"></i> Офлайн';
+                            pStatus.style.opacity = '0.6';
+                        }
                     }
                 }
             } else {
