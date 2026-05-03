@@ -1269,11 +1269,19 @@
                 if (currentTaskTab === 'partner') { 
                     if (t.status === 'active') actionHTML = `<button class="action-btn done" style="width:100%" onclick="event.stopPropagation(); taskAction('${t.id}', 'submit_for_review')">Выполнить (На проверку)</button>`;
                     else if (t.status === 'review') actionHTML = `<div style="text-align:center; opacity:0.6; padding:10px 0; border: 1px dashed var(--card-border); border-radius: 10px;">Ожидает проверки партнером <i class="ci-clock"></i></div>`;
-                    else actionHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;"><i class="ci-checkbox-check"></i> Одобрено</div>`;
+                    else actionHTML = `
+                        <div style="display:flex; flex-direction:column; gap:10px;">
+                            <div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;"><i class="ci-checkbox-check"></i> Одобрено</div>
+                            <button class="action-btn del" style="width:100%" onclick="event.stopPropagation(); delItem('tasks', 'taskId', '${t.id}')">Удалить из истории</button>
+                        </div>`;
                 } else { 
                     if (t.status === 'active') actionHTML = `<div style="display:flex; flex-direction:column; gap:10px;"><span style="opacity:0.6; text-align:center; font-size:14px;">Ожидаем выполнения...</span><button class="action-btn del" style="width:100%" onclick="event.stopPropagation(); delItem('tasks', 'taskId', '${t.id}')">Удалить задание</button></div>`;
                     else if (t.status === 'review') actionHTML = `<div style="display:flex; flex-direction:column; gap:10px;"><button class="action-btn done" onclick="event.stopPropagation(); taskAction('${t.id}', 'approve')">Принять выполнение <i class="ci-checkbox-check"></i></button><button class="action-btn del" onclick="event.stopPropagation(); taskAction('${t.id}', 'reject')">Отклонить</button></div>`;
-                    else actionHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;"><i class="ci-checkbox-check"></i> Завершено</div>`;
+                    else actionHTML = `
+                        <div style="display:flex; flex-direction:column; gap:10px;">
+                            <div style="display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.6; font-weight:500;"><i class="ci-checkbox-check"></i> Завершено</div>
+                            <button class="action-btn del" style="width:100%" onclick="event.stopPropagation(); delItem('tasks', 'taskId', '${t.id}')">Удалить из истории</button>
+                        </div>`;
                 }
 
                 let cardClass = 'card';
@@ -1361,7 +1369,11 @@
             list.innerHTML = filtered.map(p => {
                 const iCompleted = p.completedBy && p.completedBy.includes(state.user.id);
                 let actionHTML = '';
-                if (p.isDone) actionHTML = `<div style="text-align:center; opacity:0.6; font-weight:500;"><i class="ci-checkbox-check"></i> Выполнено обоими</div>`;
+                if (p.isDone) actionHTML = `
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div style="text-align:center; opacity:0.6; font-weight:500;"><i class="ci-checkbox-check"></i> Выполнено обоими</div>
+                        <button class="action-btn del" style="width:100%" onclick="event.stopPropagation(); delItem('plans', 'planId', '${p.id}')">Удалить план</button>
+                    </div>`;
                 else if (iCompleted) actionHTML = `<div style="text-align:center; opacity:0.6; padding:10px 0; border: 1px dashed var(--card-border); border-radius: 10px;">Ожидаем партнера <i class="ci-clock"></i></div>`;
                 else actionHTML = `<div style="display:flex; flex-direction:column; gap:10px;"><button class="action-btn done" style="width:100%" onclick="event.stopPropagation(); completePlan('${p.id}')">Я выполнил(а) <i class="ci-checkbox-check"></i></button><button class="action-btn del" style="width:100%" onclick="event.stopPropagation(); delItem('plans', 'planId', '${p.id}')">Удалить план</button></div>`;
                 
@@ -1443,9 +1455,10 @@
                 if(state.user.photoUrl) {
                     document.getElementById('avatar-me').innerText = '';
                     document.getElementById('avatar-me').style.backgroundImage = `url(${state.user.photoUrl})`;
+                    document.getElementById('avatar-me').style.backgroundSize = 'cover';
                 } else { document.getElementById('avatar-me').innerText = state.user.firstName.charAt(0).toUpperCase(); }
                 
-                if (state.user.status) document.getElementById('status-me').innerText = state.user.status;
+                if (state.user.status) document.getElementById('status-me').innerHTML = `<i class="ci-chat-bubble"></i> ${state.user.status}`;
                 if (state.user.dailyNote) document.getElementById('my-note-input').value = state.user.dailyNote;
                 
                 if (state.user.streak > 1) {
@@ -1470,12 +1483,20 @@
                     document.getElementById('my-level-bar').style.width = `${(myXp / xpPerLevel) * 100}%`;
                 }
 
-                if (state.partner) {
-                    const pLvl = Math.floor((state.partner.xp || 0) / xpPerLevel) + 1;
-                    const pXp = (state.partner.xp || 0) % xpPerLevel;
+                // Partner Info from couple data
+                let partnerData = null;
+                if (state.couple.partnerData) {
+                    const keys = Object.keys(state.couple.partnerData);
+                    const partnerId = keys.find(k => k !== state.user.id);
+                    if (partnerId) partnerData = state.couple.partnerData[partnerId];
+                }
+
+                if (partnerData) {
+                    const pLvl = Math.floor((partnerData.xp || 0) / xpPerLevel) + 1;
+                    const pXp = (partnerData.xp || 0) % xpPerLevel;
                     
                     if (document.getElementById('partner-level-name')) {
-                        document.getElementById('partner-level-name').innerText = state.partner.name || 'Партнер';
+                        document.getElementById('partner-level-name').innerText = partnerData.firstName || 'Партнер';
                     }
                     if (document.getElementById('partner-level-val')) {
                         document.getElementById('partner-level-val').innerText = pLvl;
@@ -1488,24 +1509,35 @@
                     const pStatus = document.getElementById('status-partner');
                     
                     if (pAvatar) {
-                        if (state.partner.photoUrl) {
+                        if (partnerData.photoUrl) {
                             pAvatar.innerText = '';
-                            pAvatar.style.backgroundImage = `url(${state.partner.photoUrl})`;
+                            pAvatar.style.backgroundImage = `url(${partnerData.photoUrl})`;
                             pAvatar.style.backgroundSize = 'cover';
                         } else {
-                            pAvatar.innerText = (state.partner.firstName || 'П').charAt(0).toUpperCase();
+                            pAvatar.innerText = (partnerData.firstName || 'П').charAt(0).toUpperCase();
                             pAvatar.style.backgroundImage = 'none';
                         }
                     }
                     
                     if (pStatus) {
-                        if (state.partner.status) {
-                            pStatus.innerHTML = `<i class="ci-chat-bubble"></i> ${state.partner.status}`;
+                        if (partnerData.status) {
+                            pStatus.innerHTML = `<i class="ci-chat-bubble"></i> ${partnerData.status}`;
                             pStatus.style.opacity = '1';
                         } else {
                             pStatus.innerHTML = '<i class="ci-moon"></i> Офлайн';
                             pStatus.style.opacity = '0.6';
                         }
+                    }
+
+                    if (partnerData.dailyNote) {
+                        document.getElementById('partner-note').innerText = partnerData.dailyNote;
+                        document.getElementById('partner-note').style.fontStyle = 'normal';
+                        document.getElementById('partner-note').style.opacity = '1';
+                    }
+
+                    if (partnerData.streak > 1) {
+                        document.getElementById('streak-partner').innerText = `🔥 ${partnerData.streak}`;
+                        document.getElementById('streak-partner').style.display = 'flex';
                     }
                 }
             } else {
@@ -1630,20 +1662,7 @@
         function animateParticles() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animateParticles); }
         window.addEventListener('deviceorientation', (e) => { if (e.beta && e.gamma) { gyroX = e.beta; gyroY = e.gamma; } });
         
-        function toggleTree() {
-            const widget = document.getElementById('days-together-widget');
-            const levels = document.getElementById('levels-section');
-            const isExpanded = widget.classList.toggle('expanded');
-            
-            if (isExpanded) {
-                levels.style.display = 'block';
-                setTimeout(() => levels.style.opacity = '1', 50);
-                setTimeout(drawTree, 400);
-            } else {
-                levels.style.opacity = '0';
-                setTimeout(() => levels.style.display = 'none', 400);
-            }
-        }
+
         
         function updateDaysTogether() {
             if (!state.couple || (!state.couple.startDate && !state.couple.createdAt)) return;
@@ -1692,12 +1711,18 @@
         function toggleTree() {
             isTreeExpanded = !isTreeExpanded;
             const widget = document.getElementById('days-together-widget');
+            const levels = document.getElementById('levels-section');
             const arrow = document.getElementById('tree-arrow');
             
             if (isTreeExpanded) {
                 widget.classList.add('expanded');
                 arrow.style.transform = 'rotate(180deg)';
                 tg.HapticFeedback.impactOccurred('light');
+                
+                // Show levels
+                levels.style.display = 'block';
+                setTimeout(() => levels.style.opacity = '1', 50);
+
                 setTimeout(() => {
                     const start = new Date(state.couple.startDate || state.couple.createdAt);
                     const now = new Date();
@@ -1707,6 +1732,8 @@
             } else {
                 widget.classList.remove('expanded');
                 arrow.style.transform = 'rotate(0deg)';
+                levels.style.opacity = '0';
+                setTimeout(() => levels.style.display = 'none', 400);
             }
         }
 
