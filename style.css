@@ -386,4 +386,30 @@ svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width:
     justify-content: center;
     gap: 4px;
 }
+/* Virtual Pet Styles */
+#love-pet-container { position: fixed; bottom: 100px; right: 20px; z-index: 100; cursor: pointer; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+#love-pet-container:active { transform: scale(0.9); }
+#love-pet { width: 60px; height: 60px; filter: drop-shadow(0 5px 15px var(--accent-glow)); animation: floatPet 3s ease-in-out infinite; }
+#pet-bubble { position: absolute; bottom: 70px; right: 0; background: white; color: #333; padding: 8px 12px; border-radius: 15px; font-size: 12px; font-weight: 600; white-space: nowrap; box-shadow: 0 5px 15px rgba(0,0,0,0.1); opacity: 0; transition: opacity 0.3s; pointer-events: none; border: 2px solid var(--accent-color); }
+#pet-bubble::after { content: ''; position: absolute; bottom: -8px; right: 20px; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid var(--accent-color); }
 
+.pet-stats { width: 60px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; margin-top: 5px; overflow: hidden; }
+.pet-bar { height: 100%; width: 100%; }
+.pet-fill { height: 100%; background: var(--accent-color); transition: width 0.5s ease; }
+
+@keyframes floatPet { 
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+/* Heartbeat FX */
+.heartbeat-fx { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 150px; z-index: 9999; pointer-events: none; opacity: 0; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.heartbeat-fx.active { transform: translate(-50%, -50%) scale(1.5); opacity: 0.8; animation: pulseHeart 1s infinite; }
+
+@keyframes pulseHeart {
+    0% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+    50% { transform: translate(-50%, -50%) scale(1.8); opacity: 0.4; }
+    100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+}
+
+/* Deep Talk Button Styling inside cards is already handled by generic classes */

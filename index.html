@@ -201,7 +201,7 @@
                 </div>
             </div>
 
-            <!-- Quick Widgets -->
+            <!-- Quick Widgets Row 1 -->
             <div class="widget-row">
                 <div class="widget-item" onclick="nav('timeline')">
                     <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
@@ -214,6 +214,22 @@
                 <div class="widget-item" onclick="nav('wheel')">
                     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10"></path><path d="M12 12L12 2"></path><path d="M12 12L21 17"></path><path d="M12 12L3 17"></path></svg>
                     <span>Колесо</span>
+                </div>
+            </div>
+
+            <!-- Quick Widgets Row 2 -->
+            <div class="widget-row" style="margin-top: 10px;">
+                <div class="widget-item" onclick="nav('challenges')" style="background: rgba(139, 92, 246, 0.1);">
+                    <svg viewBox="0 0 24 24" style="color: #8b5cf6;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                    <span>Челленджи</span>
+                </div>
+                <div class="widget-item" onclick="nav('map')" style="background: rgba(16, 185, 129, 0.1);">
+                    <svg viewBox="0 0 24 24" style="color: #10b981;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <span>Карта мест</span>
+                </div>
+                <div class="widget-item" onclick="nav('stats')" style="background: rgba(245, 158, 11, 0.1);">
+                    <svg viewBox="0 0 24 24" style="color: #f59e0b;"><path d="M18 20V10M12 20V4M6 20v-6"></path></svg>
+                    <span>Статистика</span>
                 </div>
             </div>
 
@@ -264,7 +280,27 @@
                             </div>
                         </div>
 
-                        <!-- Partner Level -->
+                        <!-- Virtual Pet & Heartbeat Notification -->
+            <div id="heartbeat-overlay" class="heartbeat-fx">❤️</div>
+            
+            <div id="love-pet-container" onclick="interactWithPet()">
+                <div id="pet-bubble">Привет! Покорми меня баллами? 🍎</div>
+                <div id="love-pet">
+                    <!-- SVG for a cute pet (simplified) -->
+                    <svg viewBox="0 0 100 100" id="pet-svg">
+                        <circle cx="50" cy="60" r="35" fill="var(--accent-color)" opacity="0.8" />
+                        <circle cx="40" cy="50" r="5" fill="white" />
+                        <circle cx="60" cy="50" r="5" fill="white" />
+                        <path d="M45 70 Q50 75 55 70" stroke="white" stroke-width="3" fill="none" />
+                        <path id="pet-ears" d="M30 35 L40 45 M70 35 L60 45" stroke="var(--accent-color)" stroke-width="8" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="pet-stats">
+                    <div class="pet-bar"><div id="pet-happiness" class="pet-fill" style="width: 80%"></div></div>
+                </div>
+            </div>
+
+            <!-- Avatars & Heart -->
                         <div>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                                 <span style="font-size: 13px; font-weight: 600;"><span id="partner-level-name">Партнер</span> (Ур. <span id="partner-level-val">1</span>)</span>
@@ -318,7 +354,16 @@
                     Вопрос дня
                 </h3>
                 <p id="qotd-text" style="font-size: 16px; font-weight: 500; margin-top: 10px; margin-bottom: 15px;">Загрузка вопроса...</p>
-                <div id="qotd-action"></div>
+                <div id="qotd-action">
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="qotd-answer" placeholder="Ваш ответ..." style="margin-bottom:0; padding:12px;">
+                        <button class="btn" style="width:auto; margin-bottom:0;" onclick="submitQotd()">Ответить</button>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 12px;">
+                        <button class="action-btn done" style="flex: 1;" onclick="nextQotd()">Следующий вопрос</button>
+                        <button class="action-btn" style="flex: 1; background: var(--card-border); color: var(--text-color);" onclick="showDeepTalk()">Deep Talk 💬</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -335,6 +380,66 @@
                 </button>
             </div>
             <div id="timeline-list" class="timeline"></div>
+        </div>
+
+        <!-- Challenges Screen -->
+        <div id="screen-challenges" class="screen">
+            <h2 style="font-size: 28px; display: flex; align-items: center; gap: 10px;">
+                <svg viewBox="0 0 24 24" style="color: #8b5cf6;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                Челленджи
+            </h2>
+            <p style="opacity: 0.7; margin-bottom: 24px;">Проходите совместные марафоны и получайте уникальные награды!</p>
+            
+            <div class="card" style="border-left: 4px solid #8b5cf6;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <div>
+                        <h3 style="margin-bottom: 4px;">7 дней благодарности</h3>
+                        <p style="font-size: 14px; opacity: 0.6;">Пишите по одному комплименту или благодарности в день</p>
+                    </div>
+                    <div style="background: rgba(139, 92, 246, 0.2); color: #8b5cf6; padding: 4px 8px; border-radius: 8px; font-size: 12px; font-weight: 700;">+250 XP</div>
+                </div>
+                <div class="pet-bar" style="height: 8px; background: rgba(0,0,0,0.1);"><div style="width: 30%; height: 100%; background: #8b5cf6;"></div></div>
+                <p style="font-size: 12px; opacity: 0.5; margin-top: 8px;">Прогресс: 2/7 дней</p>
+                <button class="action-btn done" style="width: 100%; margin-top: 15px; background: #8b5cf6;">Продолжить</button>
+            </div>
+
+            <div class="card" style="opacity: 0.6;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <h3 style="margin-bottom: 4px;">Марафон свиданий</h3>
+                        <p style="font-size: 14px; opacity: 0.6;">3 необычных свидания за месяц</p>
+                    </div>
+                </div>
+                <button class="action-btn" style="width: 100%; margin-top: 15px;">Начать (50 баллов)</button>
+            </div>
+        </div>
+
+        <!-- Map Screen -->
+        <div id="screen-map" class="screen">
+            <h2 style="font-size: 28px; display: flex; align-items: center; gap: 10px;">
+                <svg viewBox="0 0 24 24" style="color: #10b981;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                Карта мест
+            </h2>
+            <div id="map-container" style="height: 300px; background: var(--card-bg); border-radius: 20px; border: 1px solid var(--card-border); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; position: relative; overflow: hidden;">
+                <div style="text-align: center; opacity: 0.5;">
+                    <i class="ci-location" style="font-size: 40px; display: block; margin-bottom: 10px;"></i>
+                    Здесь будет интерактивная карта ваших приключений
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin-bottom: 0;">Ваши отметки</h3>
+                <button class="btn" style="width: auto; padding: 8px 16px; font-size: 14px;" onclick="addMapPin()">+ Добавить</button>
+            </div>
+            
+            <div class="card" style="padding: 12px; display: flex; align-items: center; gap: 12px;">
+                <div style="width: 50px; height: 50px; background: #10b98122; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #10b981;">☕️</div>
+                <div style="flex: 1;">
+                    <h4 style="margin-bottom: 2px;">Та самая кофейня</h4>
+                    <p style="font-size: 12px; opacity: 0.6;">Тут было наше первое свидание</p>
+                </div>
+                <i class="ci-chevron-right" style="opacity: 0.3;"></i>
+            </div>
         </div>
 
         <!-- Wheel Screen -->
@@ -387,7 +492,7 @@
         <!-- Wishes Screen -->
         <div id="screen-wishes" class="screen">
             <h2 style="font-size: 28px; display: flex; align-items: center; gap: 10px;">
-                <svg viewBox="0 0 24 24" style="color: var(--accent-color)"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+                <svg viewBox="0 0 24 24" style="color: var(--accent-color)"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="6"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
                 Магазин Желаний
             </h2>
             <div class="tab-group">
@@ -1201,6 +1306,15 @@
                 if (fullList) fullList.innerHTML = emptyMsg;
                 return; 
             }
+            
+            // Pulse check
+            const lastEvent = events[0];
+            if (lastEvent && lastEvent.type === 'pulse' && lastEvent.authorId !== state.user.id) {
+                // If it's a new pulse event (within last 10 seconds)
+                if (Date.now() - lastEvent.createdAt < 10000) {
+                    triggerHeartbeatUI();
+                }
+            }
 
             const html = events.map(e => {
                 const timeStr = new Date(e.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
@@ -1260,6 +1374,10 @@
                     <div style="display:flex; gap:10px;">
                         <input type="text" id="qotd-answer" placeholder="Ваш ответ..." style="margin-bottom:0; padding:12px;">
                         <button class="btn" style="width:auto; margin-bottom:0;" onclick="submitQotd()">Ответить</button>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 12px;">
+                        <button class="action-btn done" style="flex: 1;" onclick="nextQotd()">Следующий вопрос</button>
+                        <button class="action-btn" style="flex: 1; background: var(--card-border); color: var(--text-color);" onclick="showDeepTalk()">Deep Talk 💬</button>
                     </div>
                 `;
             } else if (myAnswer && !partnerAnswer) {
@@ -1432,7 +1550,7 @@
 
         // --- UI & Nav ---
         let currentScreenIndex = 0;
-        const screenOrder = ['dashboard', 'plans', 'tasks', 'wishes', 'settings', 'timeline', 'canvas', 'events', 'wheel', 'stats'];
+        const screenOrder = ['dashboard', 'plans', 'tasks', 'wishes', 'settings', 'timeline', 'canvas', 'events', 'wheel', 'stats', 'challenges', 'map'];
 
         function nav(screenId, navElement) {
             tg.HapticFeedback.impactOccurred('medium');
@@ -1480,11 +1598,14 @@
                 
                 // My Info
                 document.getElementById('user-name').innerText = state.user.firstName;
+                const myAvatar = document.getElementById('avatar-me');
                 if(state.user.photoUrl) {
-                    document.getElementById('avatar-me').innerText = '';
-                    document.getElementById('avatar-me').style.backgroundImage = `url(${state.user.photoUrl})`;
-                    document.getElementById('avatar-me').style.backgroundSize = 'cover';
-                } else { document.getElementById('avatar-me').innerText = state.user.firstName.charAt(0).toUpperCase(); }
+                    myAvatar.innerText = '';
+                    myAvatar.style.backgroundImage = `url(${state.user.photoUrl})`;
+                    myAvatar.style.backgroundSize = 'cover';
+                } else { myAvatar.innerText = state.user.firstName.charAt(0).toUpperCase(); }
+                
+                // Pulse Logic: Long Press on ME sends to partner? No, usually you long press partner.
                 
                 if (state.user.status) document.getElementById('status-me').innerHTML = `<i class="ci-chat-bubble"></i> ${state.user.status}`;
                 if (state.user.dailyNote) document.getElementById('my-note-input').value = state.user.dailyNote;
@@ -1551,6 +1672,16 @@
                             pAvatar.innerText = (partnerData.firstName || 'П').charAt(0).toUpperCase();
                             pAvatar.style.backgroundImage = 'none';
                         }
+
+                        // HEARTBEAT LONG PRESS
+                        let pressTimer;
+                        pAvatar.onmousedown = pAvatar.ontouchstart = () => {
+                            pressTimer = setTimeout(() => {
+                                sendHeartbeat();
+                                tg.HapticFeedback.notificationOccurred('success');
+                            }, 800);
+                        };
+                        pAvatar.onmouseup = pAvatar.ontouchend = () => clearTimeout(pressTimer);
                     }
                     
                     if (pStatus) {
@@ -1604,6 +1735,53 @@
         }
         async function setAccent(color) { tg.HapticFeedback.impactOccurred('light'); state.user.accent = color; applyThemeSettings(); await apiCall('user', { telegramId: state.user.telegramId, updateData: { accent: state.user.accent } }); }
 
+        // Phase 1 New Features Logic
+        async function sendHeartbeat() {
+            tg.showPopup({ message: 'Сердцебиение отправлено партнеру! ❤️' });
+            await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'отправил(а) тебе свое сердцебиение...', icon: '💓', type: 'pulse', authorId: state.user.id });
+        }
+
+        function triggerHeartbeatUI() {
+            const overlay = document.getElementById('heartbeat-overlay');
+            overlay.classList.add('active');
+            tg.HapticFeedback.impactOccurred('heavy');
+            setTimeout(() => tg.HapticFeedback.impactOccurred('heavy'), 300);
+            setTimeout(() => tg.HapticFeedback.impactOccurred('heavy'), 600);
+            setTimeout(() => overlay.classList.remove('active'), 2000);
+        }
+
+        function interactWithPet() {
+            const bubble = document.getElementById('pet-bubble');
+            const pet = document.getElementById('pet-svg');
+            pet.style.transform = 'scale(1.2) translateY(-10px)';
+            bubble.innerText = "Мур! Обожаю тебя! 🥰";
+            bubble.style.opacity = '1';
+            tg.HapticFeedback.impactOccurred('light');
+            setTimeout(() => {
+                pet.style.transform = 'scale(1)';
+                setTimeout(() => bubble.style.opacity = '0', 2000);
+            }, 500);
+        }
+
+        const deepQuestions = [
+            "Какое твоё самое яркое воспоминание о нас?",
+            "Что во мне заставило тебя влюбиться?",
+            "Какую черту моего характера ты ценишь больше всего?",
+            "Где бы ты хотел(а) оказаться с нами через 5 лет?",
+            "Какое свидание из нашего прошлого ты бы хотел(а) повторить?",
+            "Что делает тебя по-настоящему счастливым(ой)?",
+            "Если бы мы могли отправиться в путешествие прямо сейчас, куда бы мы поехали?"
+        ];
+
+        function showDeepTalk() {
+            const q = deepQuestions[Math.floor(Math.random() * deepQuestions.length)];
+            tg.showPopup({
+                title: 'Deep Talk 💬',
+                message: q,
+                buttons: [{text: 'Класс!', type: 'default'}]
+            });
+        }
+
         function autoCleanup(tasks, plans) {
             const now = Date.now();
             const dayMs = 86400000;
@@ -1618,6 +1796,14 @@
                 if (p.isDone && p.updatedAt && (now - p.updatedAt > dayMs)) {
                     apiCall('plans', { action: 'delete', coupleId: state.couple.id, planId: p.id });
                 }
+            });
+        }
+
+        function addMapPin() {
+            tg.showPopup({
+                title: 'Новое место 📍',
+                message: 'Эта функция будет доступна в следующем обновлении базы данных. Пока вы можете просматривать существующие отметки!',
+                buttons: [{text: 'Понятно', type: 'default'}]
             });
         }
 
