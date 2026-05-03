@@ -247,7 +247,7 @@ svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width:
 
 /* Days Together Widget & Love Tree */
 .days-widget { display: flex; flex-direction: column; gap: 0; margin: 10px 0 20px; padding: 0; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; backdrop-filter: blur(20px); overflow: hidden; text-align: left; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); max-height: 115px; }
-.days-widget.expanded { max-height: 600px; }
+.days-widget.expanded { max-height: 800px; }
 
 .days-header { display: flex; align-items: center; gap: 20px; padding: 16px 20px; width: 100%; cursor: pointer; }
 .days-ring { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
@@ -260,7 +260,7 @@ svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width:
 .days-info p { font-size: 12px; opacity: 0.6; font-weight: 500; }
 
 .tree-container { height: 0; overflow: hidden; transition: height 0.4s; position: relative; background: rgba(0,0,0,0.1); }
-.days-widget.expanded .tree-container { height: 320px; }
+.days-widget.expanded .tree-container { height: 400px; }
 #tree-canvas { width: 100%; height: 100%; display: block; }
 
 .tree-toolbar { position: absolute; bottom: 16px; left: 16px; right: 16px; display: flex; gap: 8px; justify-content: center; z-index: 10; opacity: 0; transform: translateY(10px); transition: all 0.3s 0.2s; }
