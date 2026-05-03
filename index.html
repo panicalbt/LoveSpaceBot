@@ -41,18 +41,23 @@
             -webkit-backdrop-filter: blur(30px);
         }
         
-        [data-accent="red"] { --accent-color: var(--accent-red); --accent-glow: rgba(239, 68, 68, 0.5); }
-        [data-accent="blue"] { --accent-color: var(--accent-blue); --accent-glow: rgba(59, 130, 246, 0.5); }
-        [data-accent="green"] { --accent-color: var(--accent-green); --accent-glow: rgba(16, 185, 129, 0.5); }
-        [data-accent="pink"] { --accent-color: var(--accent-pink); --accent-glow: rgba(236, 72, 153, 0.5); }
-        [data-accent="purple"] { --accent-color: var(--accent-purple); --accent-glow: rgba(168, 85, 247, 0.5); }
-        [data-accent="orange"] { --accent-color: var(--accent-orange); --accent-glow: rgba(249, 115, 22, 0.5); }
+        [data-accent="red"] { --accent-color: #ef4444; --accent-glow: rgba(239, 68, 68, 0.35); }
+        [data-accent="blue"] { --accent-color: #3b82f6; --accent-glow: rgba(59, 130, 246, 0.35); }
+        [data-accent="green"] { --accent-color: #10b981; --accent-glow: rgba(16, 185, 129, 0.35); }
+        [data-accent="pink"] { --accent-color: #ec4899; --accent-glow: rgba(236, 72, 153, 0.35); }
+        [data-accent="purple"] { --accent-color: #a855f7; --accent-glow: rgba(168, 85, 247, 0.35); }
+        [data-accent="orange"] { --accent-color: #f97316; --accent-glow: rgba(249, 115, 22, 0.35); }
         
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
-        html { background-color: var(--bg-color); min-height: 100%; }
-        body { background-color: transparent; color: var(--text-color); overflow-x: hidden; transition: background-color 0.4s ease, color 0.4s ease; -webkit-tap-highlight-color: transparent; min-height: 100vh; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Outfit', sans-serif; }
+        
+        body { background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; min-height: 100vh; position: relative; transition: background-color 0.4s ease, color 0.4s ease; }
 
-        .ambient-glow { position: fixed; top: 50%; left: 50%; width: 80vw; height: 80vw; background: var(--accent-color); filter: blur(120px); opacity: 0.15; transform: translate(-50%, -50%); border-radius: 50%; z-index: -2; pointer-events: none; transition: background 0.4s ease; }
+        /* Animated Background Blobs */
+        .bg-blob { position: fixed; width: 300px; height: 300px; background: var(--accent-color); filter: blur(120px); opacity: 0.15; border-radius: 50%; z-index: -1; animation: blobFloat 20s infinite alternate; }
+        .bg-blob-1 { top: -100px; left: -100px; background: var(--accent-color); }
+        .bg-blob-2 { bottom: -100px; right: -100px; background: #6366f1; }
+        @keyframes blobFloat { from { transform: translate(0,0) scale(1); } to { transform: translate(50px, 50px) scale(1.2); } }
+
         #particles-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
 
         .app-container { min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 90px; }
@@ -62,15 +67,60 @@
         @keyframes slideInLeft { from { opacity: 0; transform: translateX(-60px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes slideInRight { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: translateX(0); } }
 
-        .card { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--card-border); border-radius: 20px; padding: 16px 20px; margin-bottom: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); position: relative; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
-        .card:active { transform: scale(0.98); }
+        .card { 
+            background: var(--card-bg); 
+            backdrop-filter: blur(var(--glass-blur)); 
+            -webkit-backdrop-filter: blur(var(--glass-blur)); 
+            border: 1px solid var(--card-border); 
+            border-radius: 24px; 
+            padding: 20px; 
+            margin-bottom: 16px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); 
+            position: relative; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            cursor: pointer; 
+        }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2); border-color: rgba(255, 255, 255, 0.15); }
+        .card:active { transform: scale(0.97); }
         .card-header { display: flex; justify-content: space-between; align-items: center; }
         .card-content { max-height: 0; overflow: hidden; transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .card.expanded .card-content { max-height: 200px; margin-top: 16px; border-top: 1px solid var(--card-border); padding-top: 16px; }
         .card-arrow { width: 18px; height: 18px; opacity: 0.3; transition: transform 0.3s; }
         .card.expanded .card-arrow { transform: rotate(90deg); opacity: 0.8; }
-        .btn { background: var(--accent-color); color: white; border: none; padding: 14px 24px; border-radius: 14px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 20px var(--accent-glow); margin-bottom: 12px; display: flex; justify-content: center; align-items: center; gap: 8px; }
-        .btn:active { transform: scale(0.96); box-shadow: 0 2px 10px var(--accent-glow); }
+        .btn { 
+            background: linear-gradient(135deg, var(--accent-color), #f43f5e); 
+            color: white; 
+            border: none; 
+            padding: 16px 24px; 
+            border-radius: 16px; 
+            font-size: 16px; 
+            font-weight: 700; 
+            width: 100%; 
+            cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            box-shadow: 0 8px 25px var(--accent-glow); 
+            margin-bottom: 12px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 10px; 
+            position: relative;
+            overflow: hidden;
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(45deg);
+            transition: 0.5s;
+            pointer-events: none;
+        }
+        .btn:hover::after { left: 100%; }
+        .btn:active { transform: scale(0.96); box-shadow: 0 4px 15px var(--accent-glow); }
         
         .action-btn { background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 10px 14px; border-radius: 10px; margin-top: 12px; cursor: pointer; transition: 0.2s; font-weight: 600; font-size: 14px; display: flex; justify-content: center; align-items: center; }
         .action-btn.done { background: var(--accent-color); color: white; box-shadow: 0 4px 15px var(--accent-glow); }
@@ -90,7 +140,14 @@
         input[type="text"], input[type="number"], input[type="date"], select { width: 100%; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-color); padding: 16px; border-radius: 14px; font-size: 16px; margin-bottom: 16px; outline: none; appearance: none; transition: border-color 0.2s, box-shadow 0.2s; }
         input:focus, select:focus { border-color: var(--accent-color); box-shadow: 0 0 0 3px var(--accent-glow); }
         
-        h1, h2, h3 { margin-bottom: 16px; font-weight: 700; }
+        h1, h2, h3 { 
+            margin-bottom: 16px; 
+            font-weight: 800; 
+            background: linear-gradient(to right, #fff, var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
         p { line-height: 1.5; }
         .text-accent { color: var(--accent-color); }
         .text-glow { text-shadow: 0 0 20px var(--accent-glow); }
@@ -254,11 +311,12 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/coolicons/coolicons.css">
 </head>
 <body>
+    <div class="bg-blob bg-blob-1"></div>
+    <div class="bg-blob bg-blob-2"></div>
     <div id="loading-screen">
         <div class="spinner"></div>
         <p style="opacity: 0.7; font-weight: 500;">LoveSpace</p>
     </div>
-    <div class="ambient-glow"></div>
     <canvas id="particles-canvas"></canvas>
     
     <div class="overlay" id="overlay" onclick="closeModal()"></div>
