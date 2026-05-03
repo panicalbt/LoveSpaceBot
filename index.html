@@ -254,7 +254,10 @@
                         <div style="margin-bottom: 16px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                                 <span style="font-size: 13px; font-weight: 600;">Вы (Ур. <span id="my-level-val">1</span>)</span>
-                                <span id="my-xp-val" style="font-size: 12px; opacity: 0.7;">0 / 100 XP</span>
+                                <span style="font-size: 12px; opacity: 0.9; color: var(--accent-color); font-weight: 700;"><span id="my-balance-val">0</span> <i class="ci-gem"></i></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <span id="my-xp-val" style="font-size: 11px; opacity: 0.7;">0 / 100 XP</span>
                             </div>
                             <div class="level-bar-bg">
                                 <div id="my-level-bar" class="level-bar-fill" style="width: 0%;"></div>
@@ -265,7 +268,10 @@
                         <div>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                                 <span style="font-size: 13px; font-weight: 600;"><span id="partner-level-name">Партнер</span> (Ур. <span id="partner-level-val">1</span>)</span>
-                                <span id="partner-xp-val" style="font-size: 12px; opacity: 0.7;">0 / 100 XP</span>
+                                <span style="font-size: 12px; opacity: 0.9; color: var(--accent-color); font-weight: 700;"><span id="partner-balance-val">0</span> <i class="ci-gem"></i></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <span id="partner-xp-val" style="font-size: 11px; opacity: 0.7;">0 / 100 XP</span>
                             </div>
                             <div class="level-bar-bg">
                                 <div id="partner-level-bar" class="level-bar-fill" style="width: 0%; opacity: 0.6;"></div>
@@ -847,17 +853,39 @@
             if (!state.user || !state.couple) return;
             tg.HapticFeedback.impactOccurred('medium');
             try {
+                if (action === 'approve') {
+                    const task = window.cachedTasks.find(t => t.id === id);
+                    if (task) {
+                        // Performer is NOT the one who is approving (creators approve)
+                        const isPartnerPerformer = task.creatorId === state.user.id;
+                        const partnerId = Object.keys(state.couple.partnerData || {}).find(k => k !== String(state.user.id));
+                        const performerTelegramId = isPartnerPerformer ? partnerId : state.user.telegramId;
+
+                        if (performerTelegramId) {
+                            const pData = isPartnerPerformer ? state.couple.partnerData[performerTelegramId] : state.user;
+                            if (pData) {
+                                await apiCall('user', { 
+                                    telegramId: performerTelegramId, 
+                                    updateData: { 
+                                        xp: (pData.xp || 0) + 25, 
+                                        balance: (pData.balance || 0) + (task.points || 0) 
+                                    } 
+                                });
+                            }
+                        }
+                        shootConfetti();
+                        await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Одобрил(а) выполнение задания! ⭐️', icon: '⭐️', authorId: state.user.id });
+                    }
+                }
+
                 await apiCall('tasks', { action, coupleId: state.couple.id, taskId: id, telegramId: String(state.user.telegramId) });
+                
                 if (action === 'submit_for_review') {
                     tg.showPopup({message: "Задание отправлено партнеру на проверку ⏳"});
                     await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Выполнил(а) задание и ждет проверки!', icon: '⏳', authorId: state.user.id });
                 }
-                if (action === 'approve') {
-                    shootConfetti();
-                    await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Подтвердил(а) выполнение задания!', icon: '✅', authorId: state.user.id });
-                }
                 loadData();
-            } catch (e) {}
+            } catch (e) { console.error(e); }
         }
 
         function switchTaskTab(tab) {
@@ -950,13 +978,13 @@
 
             // If partner already completed, then it's a joint completion
             if (partnerCompleted) {
-                // Award 25 pts to me
-                await apiCall('user', { telegramId: state.user.telegramId, updateData: { xp: (state.user.xp || 0) + 25, balance: (state.user.balance || 0) + 25 } });
-                // Award 25 pts to partner
+                // Award 10 pts to me
+                await apiCall('user', { telegramId: state.user.telegramId, updateData: { xp: (state.user.xp || 0) + 10, balance: (state.user.balance || 0) + 10 } });
+                // Award 10 pts to partner
                 if (state.partner) {
-                    await apiCall('user', { telegramId: state.partner.telegramId, updateData: { xp: (state.partner.xp || 0) + 25, balance: (state.partner.balance || 0) + 25 } });
+                    await apiCall('user', { telegramId: partnerData.telegramId, updateData: { xp: (partnerData.xp || 0) + 10, balance: (partnerData.balance || 0) + 10 } });
                 }
-                tg.showAlert('План выполнен совместно! Вам обоим начислено по 25 баллов! 🎉');
+                tg.showAlert('План выполнен совместно! Вам обоим начислено по 10 баллов! 🎉');
                 shootConfetti();
             }
             
@@ -1481,6 +1509,9 @@
                     document.getElementById('my-level-val').innerText = myLvl;
                     document.getElementById('my-xp-val').innerText = `${myXp} / ${xpPerLevel} XP`;
                     document.getElementById('my-level-bar').style.width = `${(myXp / xpPerLevel) * 100}%`;
+                    if (document.getElementById('my-balance-val')) {
+                        document.getElementById('my-balance-val').innerText = state.user.balance || 0;
+                    }
                 }
 
                 // Partner Info from couple data
@@ -1502,6 +1533,9 @@
                         document.getElementById('partner-level-val').innerText = pLvl;
                         document.getElementById('partner-xp-val').innerText = `${pXp} / ${xpPerLevel} XP`;
                         document.getElementById('partner-level-bar').style.width = `${(pXp / xpPerLevel) * 100}%`;
+                        if (document.getElementById('partner-balance-val')) {
+                            document.getElementById('partner-balance-val').innerText = partnerData.balance || 0;
+                        }
                     }
 
                     // Avatar & Status
