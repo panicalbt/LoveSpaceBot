@@ -817,6 +817,9 @@
                 fetch(`/api/data?type=wheel&coupleId=${cid}`).then(r => r.json()),
                 fetch(`/api/data?type=events`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'get', coupleId: cid }) }).then(r => r.json())
             ]);
+            // Auto-cleanup old done tasks and plans (24h)
+            autoCleanup(tasks, plans);
+
             renderTasks(tasks); renderWishes(wishes); renderPlans(plans); renderQotd(qotd);
             renderTimeline(memories); renderWheelItems(wheel); renderEvents(events);
         }
@@ -939,9 +942,25 @@
 
         async function completePlan(id) {
             tg.HapticFeedback.impactOccurred('medium');
+            const plan = window.cachedPlans.find(p => p.id === id);
+            const partnerCompleted = plan && plan.completedBy && plan.completedBy.length > 0 && !plan.completedBy.includes(state.user.id);
+
             await apiCall('plans', { action: 'complete', coupleId: state.couple.id, planId: id, telegramId: state.user.telegramId });
             await apiCall('events', { action: 'add', coupleId: state.couple.id, text: 'Выполнил(а) план!', icon: '🏆', authorId: state.user.id });
-            shootConfetti(); loadData();
+
+            // If partner already completed, then it's a joint completion
+            if (partnerCompleted) {
+                // Award 25 pts to me
+                await apiCall('user', { telegramId: state.user.telegramId, updateData: { xp: (state.user.xp || 0) + 25, balance: (state.user.balance || 0) + 25 } });
+                // Award 25 pts to partner
+                if (state.partner) {
+                    await apiCall('user', { telegramId: state.partner.telegramId, updateData: { xp: (state.partner.xp || 0) + 25, balance: (state.partner.balance || 0) + 25 } });
+                }
+                tg.showAlert('План выполнен совместно! Вам обоим начислено по 25 баллов! 🎉');
+                shootConfetti();
+            }
+            
+            loadData();
         }
 
         async function delItem(endpoint, idField, id) {
@@ -1234,7 +1253,14 @@
         function renderTasks(tasks) {
             window.cachedTasks = tasks; const list = document.getElementById('tasks-list');
             const sorted = tasks.sort((a,b) => { if (a.status === 'done' && b.status !== 'done') return 1; if (a.status !== 'done' && b.status === 'done') return -1; return b.createdAt - a.createdAt; });
-            const filtered = sorted.filter(t => { if (currentTaskTab === 'mine') return t.creatorId === state.user.id; return t.creatorId !== state.user.id; });
+            const now = Date.now();
+            const filtered = sorted.filter(t => {
+                // Filter out done tasks older than 24h
+                if (t.status === 'done' && t.updatedAt && (now - t.updatedAt > 86400000)) return false;
+                
+                if (currentTaskTab === 'mine') return t.creatorId === state.user.id;
+                return t.creatorId !== state.user.id;
+            });
 
             if(!filtered || filtered.length === 0) { list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:40px;"><p style="font-size:16px;">В этой категории пока пусто</p></div>'; return; }
             
@@ -1304,17 +1330,22 @@
         }
 
         function renderPlans(plans) {
-            window.cachedPlans = plans; const list = document.getElementById('plans-list');
+            window.cachedPlans = plans; 
+            const list = document.getElementById('plans-list');
             const sorted = plans.sort((a,b) => { if (a.isDone && !b.isDone) return 1; if (!a.isDone && b.isDone) return -1; return b.createdAt - a.createdAt; });
             
-            const now = new Date();
-            now.setHours(0,0,0,0);
+            const now = Date.now();
+            const nowDays = new Date();
+            nowDays.setHours(0,0,0,0);
 
             const filtered = sorted.filter(p => {
+                // Filter out done plans older than 24h
+                if (p.isDone && p.updatedAt && (now - p.updatedAt > 86400000)) return false;
+
                 if (!p.date) return currentPlanTab === 'month'; // No date goes to Month/Other
                 const pDate = new Date(p.date);
                 pDate.setHours(0,0,0,0);
-                const diffDays = Math.ceil((pDate - now) / (1000 * 60 * 60 * 24));
+                const diffDays = Math.ceil((pDate - nowDays) / (1000 * 60 * 60 * 24));
 
                 if (currentPlanTab === 'day') return diffDays <= 0;
                 if (currentPlanTab === 'week') return diffDays > 0 && diffDays <= 7;
@@ -1543,6 +1574,23 @@
             setTheme(themes[(currentIdx + 1) % themes.length]);
         }
         async function setAccent(color) { tg.HapticFeedback.impactOccurred('light'); state.user.accent = color; applyThemeSettings(); await apiCall('user', { telegramId: state.user.telegramId, updateData: { accent: state.user.accent } }); }
+
+        function autoCleanup(tasks, plans) {
+            const now = Date.now();
+            const dayMs = 86400000;
+
+            tasks.forEach(t => {
+                if (t.status === 'done' && t.updatedAt && (now - t.updatedAt > dayMs)) {
+                    apiCall('tasks', { action: 'delete', coupleId: state.couple.id, taskId: t.id });
+                }
+            });
+
+            plans.forEach(p => {
+                if (p.isDone && p.updatedAt && (now - p.updatedAt > dayMs)) {
+                    apiCall('plans', { action: 'delete', coupleId: state.couple.id, planId: p.id });
+                }
+            });
+        }
 
         async function sendDailyWish() {
             const text = document.getElementById('daily-wish-text').value;
